@@ -1,0 +1,190 @@
+# 🎲 Improv D&D — Random Generator Suite
+
+A mobile-friendly web app for live improv Dungeons & Dragons shows. Players scan a QR code and instantly roll a random character. Built as a static GitHub Pages site with Google Sheets as a live editable data backend.
+
+---
+
+## Project Status
+
+| Generator       | Status      | File            |
+|----------------|-------------|-----------------|
+| Character       | ✅ Complete  | `index.html`    |
+| Scenario        | 🔜 Planned  | `scenario.html` |
+| Quest / Hook    | 🔜 Planned  | `quest.html`    |
+| Item / Loot     | 🔜 Planned  | `item.html`     |
+
+---
+
+## How It Works
+
+Players scan a QR code at the show. The page loads, fetches the latest variable data from a Google Sheet, and generates a random character. Players get **3 mulligans** shared across all fields — they can spend them rerolling individual fields or the entire character, but once they're gone, the dice have spoken.
+
+If the Google Sheet is unreachable for any reason, the page falls back silently to built-in hardcoded data so players never see a broken screen.
+
+---
+
+## File Structure
+
+```
+/
+├── index.html          — Character generator (live)
+├── scenario.html       — Scenario generator (planned)
+├── quest.html          — Quest hook generator (planned)
+├── item.html           — Item/loot generator (planned)
+├── design-system.css   — Visual design reference (not linked, docs only)
+├── character-data.csv  — Starter data for Google Sheets import
+└── README.md           — This file
+```
+
+---
+
+## Character Generator Fields
+
+Each generated character has six fields:
+
+| Field            | Description                              |
+|-----------------|------------------------------------------|
+| Name             | Ridiculous first + last name combo       |
+| Race / Species   | D&D race with a comedic twist            |
+| Class            | Standard class with a silly caveat       |
+| Backstory        | One-line absurd origin story             |
+| Personality Quirk| A behavioural trait to play into         |
+| Secret / Flaw    | Something they'd rather you didn't know  |
+
+---
+
+## Mulligan System
+
+- Players start with **3 mulligans** shared across all fields
+- Each mulligan can be spent on any field reroll, or on "Roll New Character" (rerolls everything)
+- The first roll on page load is always free
+- Once all 3 are spent, all reroll buttons disable — fate is sealed
+- The pip counter (gold dots) shows remaining mulligans at a glance
+
+---
+
+## Google Sheets Setup
+
+### One-time setup
+
+1. Create a new Google Sheet
+2. Create 7 tabs along the bottom named **exactly**:
+   - `First Names`
+   - `Last Names`
+   - `Races`
+   - `Classes`
+   - `Backstories`
+   - `Quirks`
+   - `Secrets`
+3. Import `character-data.csv` to populate starter data (File → Import → Insert new sheet(s))
+4. Set sharing to **Anyone with the link can view**
+
+### Google Sheets API key
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a project → Enable the **Google Sheets API**
+3. Credentials → Create → **API Key**
+4. Restrict the key to: Google Sheets API only
+5. Add your GitHub Pages URL as a website restriction (e.g. `https://yourusername.github.io/*`)
+
+### Wire it up
+
+Open `index.html` and fill in the `CONFIG` block near the top of the `<script>`:
+
+```js
+const CONFIG = {
+  SHEET_ID: 'paste-your-sheet-id-here',
+  API_KEY:  'paste-your-api-key-here',
+  ...
+}
+```
+
+The Sheet ID is the long string in your Google Sheet URL between `/d/` and `/edit`.
+
+### Editing variables
+
+Just open the Google Sheet and edit any tab. Add rows, delete rows, change wording — changes are live immediately. No code edits required.
+
+---
+
+## GitHub Pages Deployment
+
+1. Push all files to a GitHub repo (e.g. `improv-dnd`)
+2. Go to Settings → Pages
+3. Set source to `main` branch, root folder
+4. Your URL will be `https://yourusername.github.io/improv-dnd`
+5. Generate a QR code pointing at that URL and display it at the show
+
+---
+
+## Design System
+
+Full reference lives in `design-system.css`. Summary:
+
+**Fonts**
+- `Cinzel` — headings, field labels, buttons (D&D serif flavour)
+- `Lato 300/400` — body text and generated values (clean, phone-readable)
+
+**Colour tokens**
+```css
+--ink:       #1a1a2e   /* text, dark buttons */
+--parchment: #faf7f2   /* page background */
+--gold:      #c9a84c   /* accent — labels, pips, hover states */
+--card-bg:   #ffffff   /* field card background */
+--border:    #e8e2d9   /* all borders */
+--muted:     #6b6676   /* secondary text */
+```
+
+**Design principles**
+- Mobile-first, max content width 480px
+- Cards animate in with a staggered slide-up on each roll
+- Die icon spins on reroll, field value fades out/in
+- Source badge shows green (live sheet) or amber (fallback data)
+- No external JS dependencies — vanilla HTML/CSS/JS only
+
+---
+
+## Building Future Generators
+
+Each new generator (scenario, quest, item) follows the same pattern:
+
+1. Copy `index.html` as your starting point
+2. Update `CONFIG.TABS` to point at the new sheet's tab names
+3. Update `FIELDS` with the new category keys and labels
+4. Update `FALLBACK` with starter data for the new generator
+5. Change `<title>`, `<h1>`, and `.subtitle` text
+6. Optionally override `--gold` and `--gold-bg` in a `<style>` block for a different accent colour per generator:
+
+```css
+/* Example: blue accent for a quest generator */
+:root {
+  --gold:    #2e6da4;
+  --gold-bg: #f0f6ff;
+}
+```
+
+The mulligan system, Google Sheets wiring, source badge, animations, and fallback behaviour all carry over unchanged.
+
+---
+
+## Resuming Work With Claude
+
+When starting a new Claude conversation to continue this project, paste this at the top:
+
+> *I'm building an improv D&D random generator suite on GitHub Pages. It pulls variable data from Google Sheets (one tab per category), has a 3-mulligan shared reroll system, and uses a Cinzel/Lato design system with a parchment colour palette. The character generator is complete in `index.html`. The design reference is in `design-system.css`. I'd like to continue building [describe what you need].*
+
+Then paste in the relevant file(s) for context.
+
+---
+
+## Show Night Checklist
+
+- [ ] Google Sheet is up to date with any new variables
+- [ ] GitHub Pages site is live and loading correctly
+- [ ] QR code tested on at least one phone
+- [ ] Fallback data is current (matches sheet content roughly)
+- [ ] API key restrictions include the live GitHub Pages URL
+
+---
+
+*Built with Claude · Improv D&D · Your hometown, probably*
