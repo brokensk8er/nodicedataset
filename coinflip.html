@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>No Dice — Fate's Flip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Design tokens (matching character generator) ── */
+    :root {
+      --ink:       #1a1a2e;
+      --parchment: #faf7f2;
+      --gold:      #c9a84c;
+      --gold-dim:  #a07c2e;
+      --card-bg:   #ffffff;
+      --border:    #e8e2d9;
+      --fail-red:  #c0392b;
+      --fail-rim:  #922b21;
+      --pass-grn:  #27ae60;
+      --pass-rim:  #1e8449;
+      --shadow:    rgba(26,26,46,.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      background-color: var(--parchment);
+      color: var(--ink);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* parchment texture via repeating grain */
+      background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem 1.5rem 1rem;
+      text-align: center;
+    }
+
+    .site-label {
+      font-family: 'Cinzel', serif;
+      font-size: .7rem;
+      font-weight: 400;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: .5rem;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.15;
+      letter-spacing: .04em;
+    }
+
+    h1 span {
+      color: var(--gold);
+    }
+
+    .subtitle {
+      margin-top: .5rem;
+      font-size: .85rem;
+      font-weight: 300;
+      color: #666;
+      letter-spacing: .03em;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      margin: 1rem auto;
+    }
+
+    /* ── Main card ── */
+    main {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .card {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 1.5rem;
+      box-shadow: 0 4px 24px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* ── Coin stage ── */
+    .coin-stage {
+      perspective: 900px;
+      width: 180px;
+      height: 180px;
+      position: relative;
+    }
+
+    .coin {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0s; /* overridden by JS */
+      cursor: default;
+    }
+
+    /* Faces */
+    .face {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* FAIL — black with red framing circle + d20 + slash */
+    .face-fail {
+      background: radial-gradient(circle at 38% 32%, #2a2a2a, #0d0d0d 65%, #000);
+      box-shadow:
+        inset 0 0 0 6px #000,
+        inset 0 0 8px rgba(0,0,0,.5),
+        0 6px 32px rgba(192,57,43,.5);
+      transform: rotateY(0deg);
+    }
+
+    /* PASS — green with checkmark */
+    .face-pass {
+      background: radial-gradient(circle at 35% 35%, #2ecc71, var(--pass-grn) 60%, var(--pass-rim));
+      box-shadow:
+        inset 0 0 0 6px rgba(255,255,255,.15),
+        inset 0 -8px 20px rgba(0,0,0,.25),
+        0 6px 28px rgba(39,174,96,.45);
+      transform: rotateY(180deg);
+    }
+
+    /* Shared metallic rim */
+    .face::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.22);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Face SVGs sit in the centre */
+    .face svg {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Spin animation ── */
+    @keyframes coinSpin {
+      0%   { transform: rotateY(0deg); }
+      100% { transform: rotateY(var(--end-rotation)); }
+    }
+
+    .coin.spinning {
+      animation: coinSpin var(--spin-duration, 1.4s) cubic-bezier(.33,0,.25,1) forwards;
+    }
+
+    /* Landing wobble */
+    @keyframes wobble {
+      0%   { transform: rotateY(var(--end-rotation)) rotateZ(0deg); }
+      20%  { transform: rotateY(var(--end-rotation)) rotateZ(2deg); }
+      40%  { transform: rotateY(var(--end-rotation)) rotateZ(-1.5deg); }
+      60%  { transform: rotateY(var(--end-rotation)) rotateZ(1deg); }
+      80%  { transform: rotateY(var(--end-rotation)) rotateZ(-.5deg); }
+      100% { transform: rotateY(var(--end-rotation)) rotateZ(0deg); }
+    }
+
+    .coin.wobbling {
+      animation: wobble .5s ease-out forwards;
+    }
+
+    /* ── Result banner ── */
+    .result-banner {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .35s ease, transform .35s ease;
+      min-height: 2rem;
+      text-align: center;
+    }
+
+    .result-banner.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-banner.fail { color: var(--fail-red); }
+    .result-banner.pass { color: var(--pass-grn); }
+
+    .result-sub {
+      font-size: .78rem;
+      font-weight: 300;
+      font-family: 'Lato', sans-serif;
+      letter-spacing: .08em;
+      color: #888;
+      margin-top: .2rem;
+      min-height: 1.1rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .35s .15s ease;
+    }
+
+    .result-sub.visible { opacity: 1; }
+
+    /* ── Roll button ── */
+    .btn-roll {
+      font-family: 'Cinzel', serif;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+      border: none;
+      border-radius: 8px;
+      padding: .85rem 2.4rem;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 3px 12px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.4);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .2s;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .btn-roll::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .btn-roll:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(201,168,76,.45), inset 0 1px 0 rgba(255,255,255,.4);
+    }
+
+    .btn-roll:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(201,168,76,.3);
+    }
+
+    .btn-roll:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+
+
+    /* ── Nav link ── */
+    .nav-link {
+      font-family: 'Cinzel', serif;
+      font-size: .65rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color .2s, color .2s;
+    }
+    .nav-link:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    footer {
+      padding-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* ── Slide-in card on load ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      animation: slideUp .55s cubic-bezier(.22,1,.36,1) both;
+      animation-delay: .1s;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <p class="site-label">No Dice &mdash; Improv D&D</p>
+    <h1>Fate's <span>Flip</span></h1>
+    <p class="subtitle">One flip. Pass or fail. No negotiating with the dice.</p>
+    <div class="divider"></div>
+  </header>
+
+  <main>
+    <div class="card">
+
+      <!-- Coin -->
+      <div class="coin-stage" aria-live="polite" aria-label="Coin result">
+        <div class="coin" id="coin">
+
+          <!-- FAIL face (front, rotateY 0) -->
+          <div class="face face-fail" aria-hidden="true">
+            <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="vignette" cx="50%" cy="50%" r="50%">
+                  <stop offset="82%" stop-color="transparent"/>
+                  <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
+                </radialGradient>
+              </defs>
+              <!-- d20 outline — same scale as pass side -->
+              <polygon
+                points="55,22 86,39 86,71 55,88 24,71 24,39"
+                stroke="rgba(255,255,255,0.30)" stroke-width="2" fill="none"
+              />
+              <!-- d20 internal facet lines -->
+              <line x1="55" y1="22" x2="55"  y2="46" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="24" y1="39" x2="55"  y2="46" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="86" y1="39" x2="55"  y2="46" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="24" y1="71" x2="55"  y2="64" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="86" y1="71" x2="55"  y2="64" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="55" y1="88" x2="55"  y2="64" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="55" y1="46"  x2="55" y2="64" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <!-- Red framing circle — pulled in so stroke doesn't clip -->
+              <circle cx="55" cy="55" r="47" stroke="#e02020" stroke-width="9" fill="none"/>
+              <!-- Diagonal slash crossing the full coin -->
+              <line x1="17" y1="93" x2="93" y2="17" stroke="#e02020" stroke-width="9" stroke-linecap="round"/>
+              <!-- Vignette overlay — darkens toward the rim -->
+              <circle cx="55" cy="55" r="55" fill="url(#vignette)"/>
+            </svg>
+          </div>
+
+          <div class="face face-pass" aria-hidden="true">
+            <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- d20 outline — smaller, sits behind checkmark -->
+              <polygon
+                points="55,22 86,39 86,71 55,88 24,71 24,39"
+                stroke="rgba(255,255,255,0.30)" stroke-width="2" fill="none"
+              />
+              <!-- d20 internal facet lines at smaller scale -->
+              <line x1="55" y1="22" x2="55"  y2="46" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="24" y1="39" x2="55"  y2="46" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="86" y1="39" x2="55"  y2="46" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="24" y1="71" x2="55"  y2="64" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="86" y1="71" x2="55"  y2="64" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="55" y1="88" x2="55"  y2="64" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+              <line x1="55" y1="46"  x2="55" y2="64" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <!-- Bold pop-art checkmark -->
+              <polyline
+                points="14,58 42,86 96,22"
+                stroke="rgba(0,0,0,0.25)" stroke-width="14"
+                stroke-linecap="round" stroke-linejoin="round"
+                fill="none" transform="translate(2,3)"
+              />
+              <polyline
+                points="14,58 42,86 96,22"
+                stroke="rgba(255,255,255,0.97)" stroke-width="13"
+                stroke-linecap="round" stroke-linejoin="round"
+                fill="none"
+              />
+            </svg>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Result text -->
+      <div>
+        <p class="result-banner" id="resultBanner">&nbsp;</p>
+        <p class="result-sub"   id="resultSub">&nbsp;</p>
+      </div>
+
+      <!-- Roll button -->
+      <button class="btn-roll" id="btnRoll">⚔ Flip the Coin</button>
+
+    </div><!-- .card -->
+
+    <footer>
+      <a class="nav-link" href="index.html">← Character Generator</a>
+    </footer>
+
+  </main>
+
+  <!-- Full-screen confetti canvas, pointer-events off so it doesn't block UI -->
+  <canvas id="confettiCanvas" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  "></canvas>
+
+  <script>
+    const coin       = document.getElementById('coin');
+    const btnRoll    = document.getElementById('btnRoll');
+    const banner     = document.getElementById('resultBanner');
+    const sub        = document.getElementById('resultSub');
+
+    // Sassy flavour lines
+    const PASS_LINES = [
+      "The fates smile upon thee.",
+      "Fortune favours the bold.",
+      "Against all odds, glory.",
+      "The dice gods are pleased.",
+      "A hero's moment — take it.",
+      "Even the bards saw that coming.",
+    ];
+
+    const FAIL_LINES = [
+      "The fates are unmoved.",
+      "Even heroes stumble.",
+      "The dice gods demand drama.",
+      "Not today, adventurer.",
+      "A bold attempt, poorly executed.",
+      "The tavern will hear of this.",
+    ];
+
+    let totalRotation = 0;
+    let isSpinning   = false;
+
+    function rand(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function flip() {
+      if (isSpinning) return;
+      isSpinning = true;
+      btnRoll.disabled = true;
+
+      // Hide previous result
+      banner.className = 'result-banner';
+      sub.className    = 'result-sub';
+      banner.textContent = '\u00a0';
+      sub.textContent    = '\u00a0';
+
+      // Random result
+      const pass = Math.random() < 0.5;
+
+      /*
+        CSS 3D coin trick:
+        - face-fail is at rotateY(0)   → visible when total rotation is even×360°
+        - face-pass is at rotateY(180) → visible when total rotation is odd×180°
+
+        So: a PASS result needs the final angle to land on an ODD multiple of 180
+            a FAIL result needs the final angle to land on an EVEN multiple of 180
+
+        We spin at least 4 full rotations (1440°) then add the face offset.
+      */
+      const spins      = 4 + Math.floor(Math.random() * 3); // 4-6 full spins
+      const faceTarget = pass ? 180 : 0; // local face offset
+
+      // Round totalRotation to the nearest 360, then add spins
+      const base = Math.ceil(totalRotation / 360) * 360 + spins * 360;
+      const endRotation = base + faceTarget;
+
+      // Randomise duration slightly for feel
+      const dur = 1.3 + Math.random() * 0.3;
+
+      coin.style.setProperty('--end-rotation', endRotation + 'deg');
+      coin.style.setProperty('--spin-duration', dur + 's');
+
+      // Remove old classes first
+      coin.classList.remove('spinning', 'wobbling');
+
+      // Force reflow so animation re-triggers
+      void coin.offsetWidth;
+      coin.classList.add('spinning');
+
+      setTimeout(() => {
+        // Land and hold
+        coin.classList.remove('spinning');
+        coin.style.transform = `rotateY(${endRotation}deg)`;
+        totalRotation = endRotation;
+
+        // Wobble
+        coin.classList.add('wobbling');
+
+        // Show result
+        banner.textContent = pass ? 'Pass' : 'Fail';
+        banner.className   = 'result-banner visible ' + (pass ? 'pass' : 'fail');
+        sub.textContent    = rand(pass ? PASS_LINES : FAIL_LINES);
+        sub.className      = 'result-sub visible';
+
+        if (pass) { launchConfetti(); playCoinSound(); }
+        else      { playWompWomp(); }
+
+        setTimeout(() => {
+          coin.classList.remove('wobbling');
+          isSpinning = false;
+          btnRoll.disabled = false;
+        }, 520);
+
+      }, dur * 1000);
+    }
+
+    btnRoll.addEventListener('click', flip);
+
+    /* ── Confetti ───────────────────────────────────────────── */
+    const canvas  = document.getElementById('confettiCanvas');
+    const ctx     = canvas.getContext('2d');
+    let particles = [];
+    let rafId     = null;
+
+    const COLORS = ['#c9a84c','#e2bc6a','#27ae60','#2ecc71','#ffffff','#faf7f2','#a0d8a0','#f0c040'];
+
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function makeParticle(side) {
+      // Angle in degrees from horizontal: left cannon fans 20°–80° upward-right,
+      // right cannon fans 100°–160° upward-left (both measured from positive X axis)
+      const angleDeg = side === 'left'
+        ? 20 + Math.random() * 60    // 20° to 80°
+        : 100 + Math.random() * 60;  // 100° to 160°
+      const angleRad = angleDeg * Math.PI / 180;
+      const speed    = 10 + Math.random() * 9;
+      return {
+        x: side === 'left' ? 0 : canvas.width,
+        y: canvas.height,
+        vx: Math.cos(angleRad) * speed,
+        vy: -Math.sin(angleRad) * speed,   // negative = upward in canvas coords
+        w:  6 + Math.random() * 6,
+        h:  3 + Math.random() * 4,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        rot:   Math.random() * 360,
+        rotV:  (Math.random() - 0.5) * 9,
+        gravity: 0.28 + Math.random() * 0.14,
+        life: 1,
+        decay: 0.007 + Math.random() * 0.005,
+      };
+    }
+
+    function launchConfetti() {
+      resizeCanvas();
+      particles = [];
+      // burst from both corners
+      for (let i = 0; i < 80; i++) {
+        particles.push(makeParticle('left'));
+        particles.push(makeParticle('right'));
+      }
+      if (rafId) cancelAnimationFrame(rafId);
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.life > 0);
+
+      for (const p of particles) {
+        p.x   += p.vx;
+        p.y   += p.vy;
+        p.vy  += p.gravity;
+        p.rot += p.rotV;
+        p.life -= p.decay;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+
+      if (particles.length > 0) {
+        rafId = requestAnimationFrame(animateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    /* ── Mario-ish coin sound (Web Audio synthesis) ─────────── */
+    function playCoinSound() {
+      const ac  = new (window.AudioContext || window.webkitAudioContext)();
+      const vol = ac.createGain();
+      vol.gain.setValueAtTime(0.042, ac.currentTime);
+      vol.connect(ac.destination);
+
+      // Two-tone chirp: quick attack square wave, first note then a higher bounce
+      const notes = [
+        { freq: 988,  start: 0,    dur: 0.08 },   // B5 — the "tick"
+        { freq: 1319, start: 0.07, dur: 0.18 },   // E6 — the bright ring
+      ];
+
+      notes.forEach(({ freq, start, dur }) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, ac.currentTime + start);
+        // tiny upward pitch bend for that bouncy feel
+        osc.frequency.linearRampToValueAtTime(freq * 1.06, ac.currentTime + start + dur);
+
+        gain.gain.setValueAtTime(0, ac.currentTime + start);
+        gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + 0.01);
+        gain.gain.setValueAtTime(1,  ac.currentTime + start + dur * 0.6);
+        gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + start + dur);
+
+        osc.connect(gain);
+        gain.connect(vol);
+        osc.start(ac.currentTime + start);
+        osc.stop(ac.currentTime + start + dur + 0.02);
+      });
+
+      setTimeout(() => ac.close(), 600);
+    }
+
+    /* ── Womp womp (Web Audio synthesis) ───────────────────── */
+    function playWompWomp() {
+      const ac  = new (window.AudioContext || window.webkitAudioContext)();
+      const vol = ac.createGain();
+      vol.gain.setValueAtTime(0.042, ac.currentTime);
+      vol.connect(ac.destination);
+
+      // Two descending trombone-ish blats
+      const blats = [
+        { start: 0,    freqStart: 440, freqEnd: 220, dur: 0.55 },
+        { start: 0.45, freqStart: 330, freqEnd: 110, dur: 0.75 },
+      ];
+
+      blats.forEach(({ start, freqStart, freqEnd, dur }) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freqStart, ac.currentTime + start);
+        osc.frequency.exponentialRampToValueAtTime(freqEnd, ac.currentTime + start + dur);
+
+        // slight vibrato via a second oscillator modulating frequency
+        const lfo  = ac.createOscillator();
+        const lfoG = ac.createGain();
+        lfo.frequency.value  = 5.5;
+        lfoG.gain.value      = 8;
+        lfo.connect(lfoG);
+        lfoG.connect(osc.frequency);
+        lfo.start(ac.currentTime + start);
+        lfo.stop(ac.currentTime + start + dur);
+
+        gain.gain.setValueAtTime(0, ac.currentTime + start);
+        gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + 0.04);
+        gain.gain.setValueAtTime(1, ac.currentTime + start + dur - 0.12);
+        gain.gain.linearRampToValueAtTime(0, ac.currentTime + start + dur);
+
+        osc.connect(gain);
+        gain.connect(vol);
+        osc.start(ac.currentTime + start);
+        osc.stop(ac.currentTime + start + dur + 0.05);
+      });
+
+      // close context after sounds finish
+      setTimeout(() => ac.close(), 1600);
+    }
+  </script>
+
+</body>
+</html>
