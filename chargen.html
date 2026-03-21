@@ -5,19 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>No Dice — Character Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #1a1a2e;
+    --ink:       #1a1a2e;
     --parchment: #faf7f2;
-    --gold: #c9a84c;
-    --muted: #6b6676;
-    --card-bg: #ffffff;
-    --border: #e8e2d9;
-    --shadow: 0 1px 8px rgba(26,26,46,0.07);
+    --gold:      #c9a84c;
+    --gold-dim:  #a07c2e;
+    --gold-bg:   #fffdf5;
+    --card-bg:   #ffffff;
+    --border:    #e8e2d9;
+    --muted:     #6b6676;
+    --shadow:    rgba(26,26,46,.12);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body {
     height: 100%;
@@ -25,15 +28,20 @@
   }
 
   body {
-    background: var(--parchment);
-    color: var(--ink);
     font-family: 'Lato', sans-serif;
     font-weight: 300;
+    background-color: var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--ink);
     display: flex;
     flex-direction: column;
     height: 100dvh;
   }
 
+  /* ── Header ── */
   header {
     text-align: center;
     padding: 10px 16px 6px;
@@ -42,13 +50,26 @@
     position: relative;
   }
 
+  .site-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 400;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 2px;
+  }
+
   header h1 {
     font-family: 'Cinzel', serif;
     font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: .04em;
     line-height: 1.2;
   }
+
+  header h1 span { color: var(--gold); }
 
   header .subtitle {
     font-size: 0.68rem;
@@ -58,37 +79,14 @@
     margin-top: 2px;
   }
 
-  .source-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.68rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2px 8px;
-    margin-top: 4px;
-  }
-
-  .source-badge .dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .source-badge.live .dot      { background: #2d7a5e; }
-  .source-badge.fallback .dot  { background: #b8860b; }
-
+  /* ── Mulligan bar ── */
   .mulligan-bar {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     padding: 5px 0 3px;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     color: var(--muted);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -104,9 +102,9 @@
     background: var(--gold);
     transition: background 0.3s, transform 0.2s;
   }
-
   .pip.spent { background: var(--border); transform: scale(0.85); }
 
+  /* ── Main scrollable area ── */
   #app {
     flex: 1;
     display: flex;
@@ -116,6 +114,7 @@
     min-height: 0;
   }
 
+  /* Loading state */
   .loading {
     text-align: center;
     padding: 40px 24px;
@@ -123,7 +122,6 @@
     font-size: 0.9rem;
     letter-spacing: 0.05em;
   }
-
   .loading .spinner {
     font-size: 2rem;
     margin-bottom: 12px;
@@ -131,54 +129,68 @@
     animation: spin 1.2s linear infinite;
   }
 
-  .container {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    flex: 1;
-    min-height: 0;
-  }
-
-  .field-card {
+  /* ── Single white card that holds everything ── */
+  .character-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 6px 10px 5px;
-    box-shadow: var(--shadow);
-    position: relative;
-    flex: 1;
-    min-height: 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px var(--shadow);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    animation: slideUp 0.3s ease both;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    animation: cardIn .45s cubic-bezier(.22,1,.36,1) both;
   }
 
-  .field-card:nth-child(1) { animation-delay: 0.03s; }
-  .field-card:nth-child(2) { animation-delay: 0.06s; }
-  .field-card:nth-child(3) { animation-delay: 0.09s; }
-  .field-card:nth-child(4) { animation-delay: 0.12s; }
-  .field-card:nth-child(5) { animation-delay: 0.15s; }
-  .field-card:nth-child(6) { animation-delay: 0.18s; }
+  /* ── Each field row inside the card ── */
+  .field-row {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    /* subtle alternating tint */
+  }
+
+  .field-row:nth-child(even) {
+    background: rgba(201,168,76,.03);
+  }
+
+  /* Gold divider between rows */
+  .field-row + .field-row::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 14px; right: 14px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+
+  .field-text {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 0;
+  }
 
   .field-label {
     font-family: 'Cinzel', serif;
-    font-size: 0.6rem;
+    font-size: 0.56rem;
     font-weight: 600;
     color: var(--gold);
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    margin-bottom: 2px;
     line-height: 1;
+    margin-bottom: 3px;
   }
 
   .field-value {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-weight: 400;
-    line-height: 1.35;
+    line-height: 1.3;
     color: var(--ink);
-    padding-right: 62px;
     transition: opacity 0.15s;
+    /* clamp to 2 lines */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -187,17 +199,16 @@
 
   .field-value.fading { opacity: 0; }
 
+  /* ── Reroll button — sits right-aligned inside each row ── */
   .reroll-btn {
-    position: absolute;
-    top: 50%;
-    right: 8px;
-    transform: translateY(-50%);
+    flex-shrink: 0;
+    margin-left: 10px;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 4px 8px;
     font-family: 'Lato', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     font-weight: 700;
     color: var(--muted);
     cursor: pointer;
@@ -213,19 +224,22 @@
   .reroll-btn:hover:not(:disabled) {
     border-color: var(--gold);
     color: var(--gold);
-    background: #fffdf5;
+    background: var(--gold-bg);
   }
 
   .reroll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .reroll-btn .die { font-size: 0.85rem; }
+  .reroll-btn .die { font-size: 0.82rem; }
 
-  .cta-area {
+  /* ── Bottom strip inside the card: roll button + source badge ── */
+  .card-footer {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    padding: 9px 14px 10px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 7px;
     align-items: center;
-    padding-top: 4px;
-    flex-shrink: 0;
+    background: rgba(201,168,76,.02);
   }
 
   .roll-btn {
@@ -236,7 +250,7 @@
     border-radius: 8px;
     padding: 11px;
     font-family: 'Cinzel', serif;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     cursor: pointer;
@@ -247,35 +261,13 @@
   .roll-btn:active { transform: scale(0.98); }
   .roll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  footer {
-    text-align: center;
-    padding: 4px 0 6px;
-    flex-shrink: 0;
-  }
-
-  .nav-link {
-    font-family: 'Cinzel', serif;
-    font-size: 0.58rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--gold);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color .2s, color .2s;
-    opacity: 0.8;
-  }
-  .nav-link:hover {
-    color: var(--gold);
-    border-color: var(--gold);
-    opacity: 1;
-  }
-
+  /* ── Lock notice (replaces roll button when locked) ── */
   .lock-notice {
     width: 100%;
     background: var(--border);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 11px 14px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -301,18 +293,53 @@
     flex-shrink: 0;
   }
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  /* ── Source badge ── */
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
   }
 
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+  .source-badge .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
-  .die.spinning { animation: spin 0.35s ease; }
+  .source-badge.live .dot     { background: #2d7a5e; }
+  .source-badge.fallback .dot { background: #b8860b; }
 
+  /* ── Footer nav — outside the card ── */
+  footer {
+    text-align: center;
+    padding: 5px 0 7px;
+    flex-shrink: 0;
+  }
+
+  .nav-link {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s, color .2s;
+  }
+  .nav-link:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* ── Dev reset button ── */
   .reset-btn {
     position: absolute;
     top: 50%;
@@ -333,13 +360,27 @@
     transition: opacity 0.2s;
   }
   .reset-btn:hover { opacity: 1; }
+
+  /* ── Animations ── */
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  .die.spinning { animation: spin 0.35s ease; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Roll Your Character</h1>
-  <div class="subtitle">Improv D&amp;D · Fate is waiting</div>
+  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+  <h1>Roll Your <span>Character</span></h1>
+  <p class="subtitle">Fate is waiting</p>
 </header>
 
 <div id="app">
@@ -354,6 +395,9 @@
 </footer>
 
 <script>
+// ============================================================
+//  CONFIGURATION
+// ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
   API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
@@ -369,6 +413,9 @@ const CONFIG = {
   ]
 };
 
+// ============================================================
+//  FALLBACK DATA
+// ============================================================
 const FALLBACK = {
   firstNames: [
     "Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert",
@@ -474,24 +521,30 @@ const FALLBACK = {
   ]
 };
 
+// ============================================================
+//  FIELD CONFIG
+// ============================================================
 const FIELDS = [
-  { key: 'name',       label: 'Name',              pool: null          },
-  { key: 'race',       label: 'Race / Species',    pool: 'races'       },
-  { key: 'class',      label: 'Class',             pool: 'classes'     },
-  { key: 'backstory',  label: 'Backstory',         pool: 'backstories' },
-  { key: 'quirk',      label: 'Personality Quirk', pool: 'quirks'      },
-  { key: 'secret',     label: 'Secret / Flaw',     pool: 'secrets'     },
+  { key: 'name',      label: 'Name',              pool: null          },
+  { key: 'race',      label: 'Race / Species',    pool: 'races'       },
+  { key: 'class',     label: 'Class',             pool: 'classes'     },
+  { key: 'backstory', label: 'Backstory',         pool: 'backstories' },
+  { key: 'quirk',     label: 'Personality Quirk', pool: 'quirks'      },
+  { key: 'secret',    label: 'Secret / Flaw',     pool: 'secrets'     },
 ];
 
-const MAX_MULLIGANS  = 3;
-const LOCK_DURATION  = 60 * 60 * 1000;
-const STORAGE_KEY    = 'nodice_chargen_session';
+const MAX_MULLIGANS = 3;
+const LOCK_DURATION = 60 * 60 * 1000;
+const STORAGE_KEY   = 'nodice_chargen_session';
 
 let DATA       = null;
 let dataSource = 'fallback';
 let state      = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
 let countdownInterval = null;
 
+// ============================================================
+//  SESSION PERSISTENCE
+// ============================================================
 function saveSession() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
 }
@@ -503,8 +556,7 @@ function loadSession() {
     const saved = JSON.parse(raw);
     if (!saved.values || typeof saved.mulligans !== 'number') return false;
     if (saved.lockedAt) {
-      const elapsed = Date.now() - saved.lockedAt;
-      if (elapsed >= LOCK_DURATION) {
+      if (Date.now() - saved.lockedAt >= LOCK_DURATION) {
         localStorage.removeItem(STORAGE_KEY);
         return false;
       }
@@ -518,6 +570,9 @@ function clearSession() {
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
 }
 
+// ============================================================
+//  DATA LOADING
+// ============================================================
 function isConfigured() {
   return CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
          CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
@@ -534,9 +589,7 @@ async function fetchTab(tabName) {
 
 async function loadData() {
   if (!isConfigured()) {
-    DATA = FALLBACK;
-    dataSource = 'fallback';
-    return;
+    DATA = FALLBACK; dataSource = 'fallback'; return;
   }
   try {
     const results = await Promise.all(CONFIG.TABS.map(t => fetchTab(t.sheetTab)));
@@ -545,11 +598,13 @@ async function loadData() {
     dataSource = 'live';
   } catch (err) {
     console.warn('Sheets fetch failed — using fallback data.', err);
-    DATA = FALLBACK;
-    dataSource = 'fallback';
+    DATA = FALLBACK; dataSource = 'fallback';
   }
 }
 
+// ============================================================
+//  HELPERS
+// ============================================================
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function generateName() { return pick(DATA.firstNames) + ' ' + pick(DATA.lastNames); }
 
@@ -571,12 +626,13 @@ function isLocked() { return state.lockedAt !== null; }
 
 function formatCountdown(ms) {
   if (ms <= 0) return '00:00';
-  const totalSec = Math.ceil(ms / 1000);
-  const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
-  const secs = (totalSec % 60).toString().padStart(2, '0');
-  return `${mins}:${secs}`;
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
+// ============================================================
+//  COUNTDOWN
+// ============================================================
 function startCountdown() {
   if (countdownInterval) clearInterval(countdownInterval);
   countdownInterval = setInterval(() => {
@@ -594,20 +650,25 @@ function startCountdown() {
   }, 1000);
 }
 
+// ============================================================
+//  RENDER
+// ============================================================
 function render() {
-  const app = document.getElementById('app');
+  const app    = document.getElementById('app');
   const locked = isLocked();
 
   const pips = Array.from({length: MAX_MULLIGANS}, (_, i) =>
     `<div class="pip${i >= state.mulligans ? ' spent' : ''}"></div>`
   ).join('');
 
-  const cards = FIELDS.map(f => {
+  const rows = FIELDS.map(f => {
     const canReroll = state.mulligans > 0 && !locked;
     return `
-      <div class="field-card" id="card-${f.key}">
-        <div class="field-label">${f.label}</div>
-        <div class="field-value" id="val-${f.key}">${state.values[f.key] || ''}</div>
+      <div class="field-row">
+        <div class="field-text">
+          <div class="field-label">${f.label}</div>
+          <div class="field-value" id="val-${f.key}">${state.values[f.key] || ''}</div>
+        </div>
         <button class="reroll-btn" onclick="rerollField('${f.key}')"
           ${canReroll ? '' : 'disabled'} id="btn-${f.key}">
           <span class="die" id="die-${f.key}">⚄</span> Reroll
@@ -626,12 +687,11 @@ function render() {
 
   app.innerHTML = `
     <div class="mulligan-bar">
-      Mulligans &nbsp;
-      <div class="pip-row">${pips}</div>
+      Mulligans &nbsp;<div class="pip-row">${pips}</div>
     </div>
-    <div class="container">
-      ${cards}
-      <div class="cta-area">
+    <div class="character-card">
+      ${rows}
+      <div class="card-footer">
         ${ctaBtn}
         ${sourceBadgeHTML()}
       </div>
@@ -653,12 +713,15 @@ function render() {
   }
 }
 
+// ============================================================
+//  ACTIONS
+// ============================================================
 function doRoll() {
   if (isLocked()) return;
   if (state.rolled && state.mulligans <= 0) return;
   if (state.rolled) state.mulligans--;
-  state.rolled = true;
-  state.values = generateAll();
+  state.rolled  = true;
+  state.values  = generateAll();
   if (state.mulligans === 0) state.lockedAt = Date.now();
   saveSession();
   render();
@@ -683,7 +746,6 @@ function rerollField(key) {
     dieEl.classList.remove('spinning');
 
     if (state.mulligans === 0) state.lockedAt = Date.now();
-
     saveSession();
 
     if (isLocked()) {
@@ -706,6 +768,9 @@ function devReset() {
   doRoll();
 }
 
+// ============================================================
+//  BOOT
+// ============================================================
 loadData().then(() => {
   const restored = loadSession();
   if (restored) { render(); } else { doRoll(); }
