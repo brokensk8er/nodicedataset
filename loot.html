@@ -314,15 +314,14 @@
 // ============================================================
 //  CONFIGURATION
 //  Same Sheet ID and API key as chargen.html.
-//  Add a tab called "Magic Items" to your Google Sheet with
-//  two columns:
+//  The data lives in a tab called "Loot" with two columns:
 //    Column A: Item Name
 //    Column B: Flavour Text / Description
 // ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
   API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
-  TAB:      'Magic Items',
+  TAB:      'Loot',
 };
 
 // ============================================================
@@ -379,11 +378,10 @@ let isAnimating = false;
 //  Format: "item_" + 8 hex characters
 // ============================================================
 function itemHash(name) {
-  // Simple djb2-style hash, converted to 8 hex chars
   let h = 5381;
   for (let i = 0; i < name.length; i++) {
     h = ((h << 5) + h) ^ name.charCodeAt(i);
-    h = h >>> 0; // keep unsigned 32-bit
+    h = h >>> 0;
   }
   return 'item_' + h.toString(16).padStart(8, '0');
 }
@@ -403,7 +401,6 @@ async function loadData() {
     return;
   }
   try {
-    // Fetch two columns: A (name) and B (flavour)
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
               + `/values/${encodeURIComponent(CONFIG.TAB)}!A:B?key=${CONFIG.API_KEY}`;
     const res = await fetch(url);
@@ -418,7 +415,7 @@ async function loadData() {
     }));
     dataSource = 'live';
   } catch (err) {
-    console.warn('Magic Items sheet fetch failed — using fallback data.', err);
+    console.warn('Loot sheet fetch failed — using fallback data.', err);
     buildItemsFromFallback();
     dataSource = 'fallback';
   }
@@ -434,20 +431,17 @@ function buildItemsFromFallback() {
 
 // ============================================================
 //  PICK — never repeat until all items have been seen
-//  Uses a simple shuffle-bag approach stored in memory.
 // ============================================================
 let bag = [];
 
 function pickItem() {
   if (bag.length === 0) {
-    // Refill and shuffle
     bag = ITEMS.map((_, i) => i);
     for (let i = bag.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [bag[i], bag[j]] = [bag[j], bag[i]];
     }
   }
-  // Avoid immediately repeating the last item shown
   if (current && bag.length > 1 && ITEMS[bag[bag.length - 1]] === current) {
     const idx = bag.pop();
     bag.unshift(idx);
@@ -505,7 +499,6 @@ function doPull() {
   const btn      = document.getElementById('pull-btn');
   btn.disabled   = true;
 
-  // Fade out
   nameEl.classList.add('fading');
   flavEl.classList.add('fading');
 
@@ -516,12 +509,10 @@ function doPull() {
     nameEl.textContent = next.name;
     flavEl.textContent = next.flavour;
 
-    // Update image slot hash
     imgSlot.innerHTML = `
       <span class="slot-icon">✨</span>
       <span class="slot-hash">${next.hash}</span>`;
 
-    // Fade back in
     nameEl.classList.remove('fading');
     flavEl.classList.remove('fading');
 
