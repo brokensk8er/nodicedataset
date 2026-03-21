@@ -3,583 +3,310 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roll Your Character</title>
+<title>No Dice — Improv D&D Tools</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #1a1a2e;
+    --ink:       #1a1a2e;
     --parchment: #faf7f2;
-    --gold: #c9a84c;
-    --muted: #6b6676;
-    --card-bg: #ffffff;
-    --border: #e8e2d9;
-    --shadow: 0 2px 16px rgba(26,26,46,0.07);
+    --gold:      #c9a84c;
+    --gold-dim:  #a07c2e;
+    --gold-bg:   #fffdf5;
+    --card-bg:   #ffffff;
+    --border:    #e8e2d9;
+    --muted:     #6b6676;
+    --shadow:    rgba(26,26,46,.10);
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: var(--parchment);
-    color: var(--ink);
     font-family: 'Lato', sans-serif;
     font-weight: 300;
-    min-height: 100vh;
-    padding: 0 0 48px;
-  }
-
-  header {
-    text-align: center;
-    padding: 36px 24px 20px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 28px;
-  }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(1.5rem, 5vw, 2.2rem);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    line-height: 1.2;
-  }
-
-  header .subtitle {
-    margin-top: 6px;
-    font-size: 0.85rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--muted);
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-  }
-
-  .loading .spinner {
-    font-size: 2.5rem;
-    margin-bottom: 16px;
-    display: inline-block;
-    animation: spin 1.2s linear infinite;
-  }
-
-  .source-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 3px 10px;
-    margin-top: 10px;
-  }
-
-  .source-badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
-
-  .source-badge.live .dot      { background: #2d7a5e; }
-  .source-badge.fallback .dot  { background: #b8860b; }
-
-  .mulligan-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 0 auto 28px;
-    font-size: 0.82rem;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .pip-row { display: flex; gap: 6px; }
-
-  .pip {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--gold);
-    transition: background 0.3s, transform 0.2s;
-  }
-
-  .pip.spent { background: var(--border); transform: scale(0.85); }
-
-  .container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .field-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px 20px 16px;
-    box-shadow: var(--shadow);
-    position: relative;
-  }
-
-  .field-label {
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--gold);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .field-value {
-    font-size: 1.05rem;
-    font-weight: 400;
-    line-height: 1.45;
+    background-color: var(--parchment);
     color: var(--ink);
-    min-height: 1.5em;
-    padding-right: 72px;
-    transition: opacity 0.15s;
-  }
-
-  .field-value.fading { opacity: 0; }
-
-  .reroll-btn {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-family: 'Lato', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--muted);
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: border-color 0.2s, color 0.2s, background 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .reroll-btn:hover:not(:disabled) {
-    border-color: var(--gold);
-    color: var(--gold);
-    background: #fffdf5;
-  }
-
-  .reroll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .reroll-btn .die { font-size: 0.9rem; }
-
-  .cta-area {
-    margin-top: 8px;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    gap: 10px;
     align-items: center;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
-  .roll-btn {
+  /* ── Header ── */
+  header {
     width: 100%;
-    background: var(--ink);
-    color: var(--parchment);
-    border: none;
-    border-radius: 12px;
-    padding: 16px;
-    font-family: 'Cinzel', serif;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .roll-btn:hover:not(:disabled) { background: #2e2e4a; }
-  .roll-btn:active { transform: scale(0.98); }
-  .roll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  .pre-roll {
+    max-width: 520px;
+    padding: 2.5rem 1.5rem 1rem;
     text-align: center;
-    padding: 60px 24px;
   }
 
-  .pre-roll h2 {
+  .site-label {
     font-family: 'Cinzel', serif;
-    font-size: clamp(1.3rem, 4vw, 1.8rem);
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-size: .65rem;
+    font-weight: 400;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: .5rem;
   }
 
-  .pre-roll p {
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 6vw, 2.8rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    letter-spacing: .04em;
+  }
+
+  h1 span { color: var(--gold); }
+
+  .tagline {
+    margin-top: .55rem;
+    font-size: .82rem;
+    font-weight: 300;
     color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 32px;
+    letter-spacing: .06em;
     line-height: 1.6;
   }
 
-  .big-roll-btn {
-    background: var(--ink);
-    color: var(--parchment);
-    border: none;
-    border-radius: 14px;
-    padding: 18px 48px;
-    font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1.1rem auto 0;
   }
 
-  .big-roll-btn:hover { background: #2e2e4a; }
-  .big-roll-btn:active { transform: scale(0.97); }
-  .d20-icon { font-size: 3.5rem; margin-bottom: 16px; display: block; }
+  /* ── Main grid ── */
+  main {
+    width: 100%;
+    max-width: 520px;
+    padding: 2rem 1.25rem 3rem;
+  }
 
+  .tools-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* ── Tool card ── */
+  .tool-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.6rem 1.2rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    text-decoration: none;
+    color: var(--ink);
+    box-shadow: 0 3px 18px var(--shadow);
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  .tool-card:hover::before { opacity: 1; }
+
+  .tool-card.active:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(201,168,76,.22), 0 3px 18px var(--shadow);
+    border-color: rgba(201,168,76,.45);
+  }
+
+  .tool-card.coming-soon {
+    cursor: default;
+    opacity: .6;
+  }
+
+  .tool-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(26,26,46,.15));
+  }
+
+  .tool-name {
+    font-family: 'Cinzel', serif;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .tool-desc {
+    font-size: .72rem;
+    font-weight: 300;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+    letter-spacing: .02em;
+  }
+
+  .tool-badge {
+    font-family: 'Cinzel', serif;
+    font-size: .55rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: .1rem;
+  }
+
+  .badge-ready {
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,.4);
+    background: rgba(201,168,76,.08);
+  }
+
+  .badge-soon {
+    color: var(--muted);
+    border: 1px solid var(--border);
+    background: transparent;
+  }
+
+  /* Wide card spans full width */
+  .tool-card.wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 1.1rem;
+    padding: 1.3rem 1.6rem;
+    align-items: center;
+    text-align: left;
+  }
+
+  .tool-card.wide .tool-name { text-align: left; }
+  .tool-card.wide .tool-desc { text-align: left; }
+
+  .tool-card.wide .tool-text {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    flex: 1;
+  }
+
+  .tool-card.wide .tool-icon {
+    font-size: 2.8rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Slide-in animation ── */
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .field-card { animation: slideUp 0.35s ease both; }
-  .field-card:nth-child(1) { animation-delay: 0.05s; }
-  .field-card:nth-child(2) { animation-delay: 0.10s; }
-  .field-card:nth-child(3) { animation-delay: 0.15s; }
-  .field-card:nth-child(4) { animation-delay: 0.20s; }
-  .field-card:nth-child(5) { animation-delay: 0.25s; }
-  .field-card:nth-child(6) { animation-delay: 0.30s; }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
+  .tool-card {
+    animation: slideUp .45s cubic-bezier(.22,1,.36,1) both;
   }
 
-  .die.spinning { animation: spin 0.35s ease; }
+  .tool-card:nth-child(1) { animation-delay: .08s; }
+  .tool-card:nth-child(2) { animation-delay: .14s; }
+  .tool-card:nth-child(3) { animation-delay: .20s; }
+  .tool-card:nth-child(4) { animation-delay: .26s; }
+  .tool-card:nth-child(5) { animation-delay: .32s; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding-bottom: 1.5rem;
+    font-size: .65rem;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Roll Your Character</h1>
-  <div class="subtitle">Improv D&amp;D · Fate is waiting</div>
+  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+  <h1>The <span>Vault</span></h1>
+  <p class="tagline">Tools for when the dice aren't doing their job.<br>Pick your poison.</p>
+  <div class="divider"></div>
 </header>
 
-<div id="app">
-  <div class="loading">
-    <span class="spinner">🎲</span><br>
-    Consulting the dice gods…
-  </div>
-</div>
+<main>
+  <p class="tools-label">Choose a tool</p>
+  <div class="tools-grid">
 
-<script>
-// ============================================================
-//  CONFIGURATION
-//  Fill in SHEET_ID and API_KEY before deploying.
-//  Tab names must match your Google Sheet tabs exactly.
-// ============================================================
-const CONFIG = {
-  SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
-  API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+    <!-- Coin Flip — ACTIVE -->
+    <a class="tool-card active" href="coinflip.html">
+      <div class="tool-icon">🪙</div>
+      <div class="tool-name">Fate's Flip</div>
+      <div class="tool-desc">Pass or fail. One coin. No appeal.</div>
+      <span class="tool-badge badge-ready">Ready</span>
+    </a>
 
-  TABS: [
-    { key: 'firstNames',  sheetTab: 'First Names'  },
-    { key: 'lastNames',   sheetTab: 'Last Names'   },
-    { key: 'races',       sheetTab: 'Races'        },
-    { key: 'classes',     sheetTab: 'Classes'      },
-    { key: 'backstories', sheetTab: 'Backstories'  },
-    { key: 'quirks',      sheetTab: 'Quirks'       },
-    { key: 'secrets',     sheetTab: 'Secrets'      },
-  ]
-};
+    <!-- Character Generator — ACTIVE -->
+    <a class="tool-card active" href="chargen.html">
+      <div class="tool-icon">🎲</div>
+      <div class="tool-name">Character Gen</div>
+      <div class="tool-desc">Roll a whole person in seconds.</div>
+      <span class="tool-badge badge-ready">Ready</span>
+    </a>
 
-// ============================================================
-//  FALLBACK DATA
-//  Used when sheet credentials aren't set or fetch fails.
-// ============================================================
-const FALLBACK = {
-  firstNames: [
-    "Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert",
-    "Pambula","Gornak","Smitch","Quibble","Florp","Nutwig","Dravox","Grumblina",
-    "Zorp","Weeble","Crunchy","Pflop","Thumdar","Snibbly","Ruckus","Blorfen",
-    "Twonk","Gundula","Snazzle","Murphbert","Clobba","Flibnor"
-  ],
-  lastNames: [
-    "Puddlesnort","the Adequate","Bonesworth","McFlumps","of the Bog","Cracklefingers",
-    "Thunderbutt","Noodlearm","Spigotface","the Slightly Heroic","Wobbleheim",
-    "Crumblewick","Snorkleson","Dinglebottom","of Questionable Origin","Fumblegrip",
-    "the Unready","Blunderpants","Gnarlytoe","Wobblechin","the Forgettable",
-    "Toadsworth","Bumbleshire","Flapjaw","of Nowhere in Particular"
-  ],
-  races: [
-    "A Halfling who insists they're actually a Gnome",
-    "A very small Dragon in a trenchcoat",
-    "An Elf who has never once been on time",
-    "A Dwarf with a surprisingly lovely singing voice",
-    "A Tiefling who keeps getting mistaken for the villain",
-    "A Human who is absolutely convinced they have magic powers (they don't)",
-    "A Goblin with an extensive collection of spoons",
-    "An Orc who trained as a pastry chef",
-    "A Gnome who is 400 years old and still described as 'gifted'",
-    "A Skeleton who hasn't told anyone yet",
-    "A Centaur who refuses to go anywhere that has stairs",
-    "A Merfolk out of water, extremely inconvenienced",
-    "A Were-Accountant (transforms at quarter-end, not full moon)",
-    "A Vampire who is very lactose intolerant",
-    "A Rock Golem who has recently discovered feelings",
-    "A Cloud Giant who has shrunk in the wash",
-    "A Fairy who lost their wings in a card game"
-  ],
-  classes: [
-    "Barbarian (specialises in strongly-worded letters)",
-    "Bard (knows three chords, extremely confident)",
-    "Cleric of a god they've never actually met",
-    "Druid who mostly just turns into a slightly larger dog",
-    "Fighter who brings a clipboard to every battle",
-    "Monk whose vow of silence only applies to Tuesdays",
-    "Paladin who is really into morally grey areas actually",
-    "Ranger who gets lost indoors",
-    "Rogue who is an absolutely terrible liar",
-    "Sorcerer who got their powers from a particularly weird sneeze",
-    "Warlock in a very awkward contractual situation",
-    "Wizard who still hasn't returned their library books",
-    "Artificer who insists everything is 'in beta'",
-    "Blood Hunter who just found out what that means",
-    "Necromancer with excellent customer service skills",
-    "Illusionist who can't turn it off when nervous",
-    "Cavalier who lost their horse in a bet"
-  ],
-  backstories: [
-    "Fled their hometown after accidentally winning a yodeling competition and the expectations became too much",
-    "Was raised by wolves, but normal wolves — they were very supportive and helped with homework",
-    "Worked for ten years as a professional adventurer reviewer; decided to try it themselves",
-    "Left a promising career in cheese-making after a prophetic dream that was almost certainly just indigestion",
-    "Was turned into a frog for three years. Won't say by whom. Still angry",
-    "Inherited a map to treasure, but the treasure turned out to be 'self-belief' and they are furious",
-    "Joined the adventure after losing a bet to a seagull. Long story",
-    "Spent seven years as an apprentice to a wizard who turned out to be a raccoon in a hat",
-    "Former town crier who got tired of only reporting bad news",
-    "Accidentally married royalty during a festival, quietly left before breakfast",
-    "Was a professional monster bait for three seasons — looking to try a different role now",
-    "Woke up one day knowing sword skills with no memory of learning them. Went with it",
-    "Started adventuring to return a borrowed book; it escalated",
-    "Exiled from their village for consistently giving unsolicited quest advice",
-    "Has been chasing the same cart for six years. Nobody knows why"
-  ],
-  quirks: [
-    "Narrates their own actions in third person at dramatic moments",
-    "Cannot resist correcting people's grammar mid-combat",
-    "Insists on taking meeting minutes during every dungeon encounter",
-    "Has given a nickname to every door they've ever opened",
-    "Always speaks in rhyme when they lie, completely unaware of it",
-    "Refuses to be surprised. Will loudly claim they 'knew about this'",
-    "Applauds after every spell, including enemies'",
-    "Has never once walked into a room without pausing for effect",
-    "Keeps a journal but only writes the boring parts",
-    "Maintains extremely strong opinions about inn ratings",
-    "Asks 'but what's their motivation?' about every monster",
-    "Dramatically misremembers every adventure they've been on",
-    "Refers to all taverns as 'the office'",
-    "Cannot physically leave a room without saying goodbye to furniture",
-    "Insists on a brief debrief after every combat"
-  ],
-  secrets: [
-    "Has never actually read the spell they claim is their signature move",
-    "Secretly fluent in three additional languages but finds it easier to pretend otherwise",
-    "The legendary sword was found in a bin. The bin was outside a blacksmith's. It had a 'free' sign on it",
-    "Is on the run from a bakers' guild for reasons they decline to specify",
-    "Secretly writes a serialised adventure novel featuring a thinly-veiled version of the party",
-    "Has a wanted poster — looks nothing like them, but they're still worried",
-    "Owes money to a god. Not a lot of money. Still very inconvenient",
-    "Was once a villain. Briefly. Didn't care for it",
-    "Their impressive backstory was purchased from a retired bard for 40 gold",
-    "Cannot actually read maps. Has been winging it the entire time",
-    "Adopted by mistake — was handed to their family at a festival, chaos ensued, nobody corrected it",
-    "Their mortal enemy is a duck. They don't want to talk about it",
-    "Has a whole other name they use in different towns. Keeping them apart is getting complicated",
-    "Once accidentally became mayor of a small village and just... never resigned",
-    "Their weapon has a name. The weapon does not like the name they gave it"
-  ]
-};
-
-// ============================================================
-//  FIELD DISPLAY CONFIG
-// ============================================================
-const FIELDS = [
-  { key: 'name',       label: 'Name',              pool: null          },
-  { key: 'race',       label: 'Race / Species',    pool: 'races'       },
-  { key: 'class',      label: 'Class',             pool: 'classes'     },
-  { key: 'backstory',  label: 'Backstory',         pool: 'backstories' },
-  { key: 'quirk',      label: 'Personality Quirk', pool: 'quirks'      },
-  { key: 'secret',     label: 'Secret / Flaw',     pool: 'secrets'     },
-];
-
-const MAX_MULLIGANS = 3;
-
-let DATA       = null;
-let dataSource = 'fallback';
-
-let state = { rolled: false, mulligans: MAX_MULLIGANS, values: {} };
-
-// ============================================================
-//  DATA LOADING
-// ============================================================
-function isConfigured() {
-  return CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
-         CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
-}
-
-async function fetchTab(tabName) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
-            + `/values/${encodeURIComponent(tabName)}!A:A?key=${CONFIG.API_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Tab "${tabName}" returned HTTP ${res.status}`);
-  const json = await res.json();
-  return (json.values || []).flat().map(v => v.trim()).filter(Boolean);
-}
-
-async function loadData() {
-  if (!isConfigured()) {
-    DATA = FALLBACK;
-    dataSource = 'fallback';
-    return;
-  }
-  try {
-    const results = await Promise.all(CONFIG.TABS.map(t => fetchTab(t.sheetTab)));
-    DATA = {};
-    CONFIG.TABS.forEach((t, i) => { DATA[t.key] = results[i]; });
-    dataSource = 'live';
-  } catch (err) {
-    console.warn('Sheets fetch failed — using fallback data.', err);
-    DATA = FALLBACK;
-    dataSource = 'fallback';
-  }
-}
-
-// ============================================================
-//  HELPERS
-// ============================================================
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function generateName() { return pick(DATA.firstNames) + ' ' + pick(DATA.lastNames); }
-
-function generateAll() {
-  const v = { name: generateName() };
-  FIELDS.forEach(f => { if (f.pool) v[f.key] = pick(DATA[f.pool]); });
-  return v;
-}
-
-function sourceBadgeHTML() {
-  const cls  = dataSource === 'live' ? 'live' : 'fallback';
-  const text = dataSource === 'live'
-    ? 'Live from Google Sheets'
-    : isConfigured() ? 'Sheet unreachable — using built-in data' : 'Using built-in data';
-  return `<div class="source-badge ${cls}"><span class="dot"></span>${text}</div>`;
-}
-
-// ============================================================
-//  RENDER
-// ============================================================
-function render() {
-  const app = document.getElementById('app');
-
-  if (!state.rolled) {
-    app.innerHTML = `
-      <div class="pre-roll">
-        <span class="d20-icon">🎲</span>
-        <h2>Your fate awaits</h2>
-        <p>Tap below and the dice will decide<br>who you are tonight.</p>
-        <button class="big-roll-btn" onclick="doRoll()">Roll My Character</button>
-        ${sourceBadgeHTML()}
-      </div>`;
-    return;
-  }
-
-  const pips = Array.from({length: MAX_MULLIGANS}, (_, i) =>
-    `<div class="pip${i >= state.mulligans ? ' spent' : ''}"></div>`
-  ).join('');
-
-  const cards = FIELDS.map(f => {
-    const canReroll = state.mulligans > 0;
-    return `
-      <div class="field-card" id="card-${f.key}">
-        <div class="field-label">${f.label}</div>
-        <div class="field-value" id="val-${f.key}">${state.values[f.key]}</div>
-        <button class="reroll-btn" onclick="rerollField('${f.key}')"
-          ${canReroll ? '' : 'disabled'} id="btn-${f.key}">
-          <span class="die" id="die-${f.key}">⚄</span> Reroll
-        </button>
-      </div>`;
-  }).join('');
-
-  app.innerHTML = `
-    <div class="mulligan-bar">
-      Mulligans left &nbsp;
-      <div class="pip-row">${pips}</div>
-    </div>
-    <div class="container">
-      ${cards}
-      <div class="cta-area">
-        <button class="roll-btn" onclick="doRoll()"
-          ${state.mulligans > 0 ? '' : 'disabled'}>🎲 Roll New Character</button>
-        ${sourceBadgeHTML()}
+    <!-- Scenario Generator — COMING SOON (wide) -->
+    <div class="tool-card coming-soon wide">
+      <div class="tool-icon">🗺️</div>
+      <div class="tool-text">
+        <div class="tool-name">Scenario Gen</div>
+        <div class="tool-desc">Drop-in quest hooks, locations, and inciting incidents for when the GM blanks.</div>
+        <span class="tool-badge badge-soon">Coming Soon</span>
       </div>
-    </div>`;
-}
+    </div>
 
-// ============================================================
-//  ACTIONS
-// ============================================================
-function doRoll() {
-  if (state.rolled && state.mulligans <= 0) return;
-  if (state.rolled) state.mulligans--;
-  state.rolled = true;
-  state.values = generateAll();
-  render();
-}
+    <!-- NPC Generator — COMING SOON -->
+    <div class="tool-card coming-soon">
+      <div class="tool-icon">🧙</div>
+      <div class="tool-name">NPC Gen</div>
+      <div class="tool-desc">Instant strangers with agendas.</div>
+      <span class="tool-badge badge-soon">Coming Soon</span>
+    </div>
 
-function rerollField(key) {
-  if (state.mulligans <= 0) return;
-  state.mulligans--;
+    <!-- Loot Table — COMING SOON -->
+    <div class="tool-card coming-soon">
+      <div class="tool-icon">💰</div>
+      <div class="tool-name">Loot Table</div>
+      <div class="tool-desc">Treasure that raises more questions.</div>
+      <span class="tool-badge badge-soon">Coming Soon</span>
+    </div>
 
-  const valEl = document.getElementById('val-' + key);
-  const dieEl = document.getElementById('die-' + key);
-  valEl.classList.add('fading');
-  dieEl.classList.add('spinning');
+  </div>
+</main>
 
-  setTimeout(() => {
-    state.values[key] = (key === 'name')
-      ? generateName()
-      : pick(DATA[FIELDS.find(f => f.key === key).pool]);
+<footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
 
-    valEl.textContent = state.values[key];
-    valEl.classList.remove('fading');
-    dieEl.classList.remove('spinning');
-
-    document.querySelectorAll('.pip')
-      .forEach((p, i) => p.classList.toggle('spent', i >= state.mulligans));
-
-    if (state.mulligans === 0) {
-      document.querySelectorAll('.reroll-btn, .roll-btn')
-        .forEach(b => { b.disabled = true; });
-    }
-  }, 160);
-}
-
-// ============================================================
-//  BOOT
-// ============================================================
-loadData().then(render);
-</script>
 </body>
 </html>

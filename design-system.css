@@ -1,0 +1,343 @@
+/* ============================================================
+   NO DICE — IMPROV D&D DESIGN SYSTEM
+   v2 — Updated to align with coinflip.html as primary reference
+   ============================================================
+   This file is the single source of truth for the visual
+   language across all No Dice tools:
+
+     index.html    — Tool hub / vault
+     chargen.html  — Character generator
+     coinflip.html — Coin flip (Fate's Flip)
+     [future]      — Scenario gen, NPC gen, Loot table, etc.
+
+   When building a new tool, copy the closest existing page
+   and update CONFIG/FIELDS/FALLBACK. All visual tokens live
+   here — never hardcode a hex value inside a component.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   FONTS
+   Load these in the <head> of every page.
+   Both weights and both families are required.
+
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
+   Cinzel 400 / 600 / 700  — headings, labels, buttons, nav
+   Lato 300 / 400           — body text, generated values
+   (Lato 700 used for reroll button labels)
+------------------------------------------------------------ */
+
+
+/* ------------------------------------------------------------
+   COLOUR TOKENS
+   Primary reference: coinflip.html (most recently updated).
+   All tools must use these exact values.
+------------------------------------------------------------ */
+
+:root {
+  /* ── Core palette ── */
+  --ink:          #1a1a2e;   /* Primary text; dark fills */
+  --ink-hover:    #2e2e4a;   /* Button / interactive hover */
+  --parchment:    #faf7f2;   /* Page background */
+
+  /* ── Gold accent (primary brand colour) ── */
+  --gold:         #c9a84c;   /* Labels, active states, borders on hover */
+  --gold-dim:     #a07c2e;   /* Subdued gold: site-label, back-links */
+  --gold-bg:      #fffdf5;   /* Tinted surface on hover */
+
+  /* NOTE: coinflip.html also uses #e2bc6a as a lighter gold
+     highlight inside gradients. Treat as a secondary gold only
+     in gradient contexts — use --gold for flat UI elements. */
+
+  /* ── Coin result colours (coinflip.html only) ── */
+  --fail-red:     #c0392b;
+  --fail-rim:     #922b21;
+  --pass-grn:     #27ae60;
+  --pass-rim:     #1e8449;
+
+  /* ── UI surfaces ── */
+  --card-bg:      #ffffff;
+  --border:       #e8e2d9;
+  --muted:        #6b6676;   /* Secondary text, badges, subtitles */
+
+  /* ── Semantic colours ── */
+  --success:      #2d7a5e;   /* Live data source dot */
+  --warning:      #b8860b;   /* Fallback data source dot */
+
+  /* ── Elevation ── */
+  --shadow:       rgba(26, 26, 46, .10);   /* Standard card shadow colour */
+  --shadow-gold:  rgba(201, 168, 76, .22); /* Active card / hover glow */
+}
+
+
+/* ------------------------------------------------------------
+   PAGE BACKGROUND
+   Every tool page uses this background treatment.
+   Apply to <body>; keep min-height: 100dvh.
+------------------------------------------------------------ */
+
+/*
+  background-color: var(--parchment);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
+    url("data:image/svg+xml, ... fractalNoise opacity 0.04 ... ");
+
+  The noise overlay is a lightweight SVG data URI — no external
+  image requests needed. Opacity 0.04 keeps it invisible on
+  casual inspection but adds warmth and texture.
+*/
+
+
+/* ------------------------------------------------------------
+   TYPOGRAPHY SCALE
+------------------------------------------------------------ */
+
+/*
+  SITE LABEL (above h1, e.g. "No Dice — Improv D&D")
+  font-family: 'Cinzel', serif
+  font-size:   .65rem – .70rem
+  font-weight: 400
+  letter-spacing: .25em – .28em
+  text-transform: uppercase
+  color: var(--gold-dim)
+
+  PAGE TITLE (h1)
+  font-family: 'Cinzel', serif
+  font-size:   clamp(1.75rem, 5vw, 2.8rem)
+  font-weight: 700
+  letter-spacing: .04em
+  color: var(--ink)
+  Accent word: color: var(--gold)
+
+  SECTION HEADING (h2, e.g. pre-roll screen)
+  font-family: 'Cinzel', serif
+  font-size:   clamp(1.3rem, 4vw, 1.8rem)
+  font-weight: 600
+
+  FIELD / CARD LABEL (category name above each value)
+  font-family: 'Cinzel', serif
+  font-size:   .65rem
+  font-weight: 600
+  color: var(--gold)
+  letter-spacing: .14em
+  text-transform: uppercase
+
+  BODY / FIELD VALUE (generated text inside cards)
+  font-family: 'Lato', sans-serif
+  font-size:   1.05rem
+  font-weight: 400
+  line-height: 1.45
+  color: var(--ink)
+  padding-right: 72px  (avoid overlap with reroll btn)
+
+  SUBTITLE / TAGLINE
+  font-family: 'Lato', sans-serif
+  font-size:   .82rem – .85rem
+  font-weight: 300
+  color: var(--muted)
+  letter-spacing: .06em – .08em
+
+  NAVIGATION LINKS (back-links, footer nav)
+  font-family: 'Cinzel', serif
+  font-size:   .65rem
+  letter-spacing: .18em
+  text-transform: uppercase
+  color: var(--gold-dim)
+
+  PRIMARY BUTTON
+  font-family: 'Cinzel', serif
+  font-size:   .85rem – 1.1rem
+  font-weight: 600
+  letter-spacing: .08em – .14em
+  text-transform: uppercase
+
+  SECONDARY / REROLL BUTTON
+  font-family: 'Lato', sans-serif
+  font-size:   .72rem
+  font-weight: 700
+  letter-spacing: .05em
+  text-transform: uppercase
+*/
+
+
+/* ------------------------------------------------------------
+   DIVIDER
+   Gold gradient rule used as a visual separator below headers.
+------------------------------------------------------------ */
+
+/*
+  width: 60px – 80px
+  height: 2px
+  background: linear-gradient(90deg, transparent, var(--gold), transparent)
+  margin: 0.9rem auto
+*/
+
+
+/* ------------------------------------------------------------
+   LAYOUT
+   Max content width 420px–520px, centred, 16px side padding.
+   Tools use flex-column or a 2-column grid depending on type.
+
+   Hub (index.html):    520px max, 2-col tool grid
+   Card tools (chargen): 480px max, flex-column card stack
+   Focused tools (coinflip): 420px max, single-card centre
+------------------------------------------------------------ */
+
+
+/* ------------------------------------------------------------
+   COMPONENTS
+------------------------------------------------------------ */
+
+/* -- Field card (chargen.html) ---------------------------- */
+/*
+  White rounded card, subtle shadow, position: relative so
+  the reroll button can sit absolute top-right.
+
+  border-radius: 14px
+  padding: 18px 20px 16px
+  box-shadow: 0 2px 16px var(--shadow)
+  animation: slideUp .35s ease both (staggered)
+*/
+
+/* -- Tool card (index.html hub) --------------------------- */
+/*
+  Larger rounded card used on the hub page.
+  Active cards are <a> tags; coming-soon are <div>.
+
+  border-radius: 18px
+  padding: 1.6rem 1.2rem 1.4rem
+  Active hover: translateY(-4px), gold border glow
+  Coming soon: opacity .6, cursor: default
+
+  Wide variant (grid-column: 1 / -1):
+    flex-direction: row, icon left, text right
+*/
+
+/* -- Primary button --------------------------------------- */
+/*
+  background: var(--ink)
+  color: var(--parchment)
+  border-radius: 8px – 14px
+  Hover: background: var(--ink-hover)
+  Active: transform scale(.97–.98)
+  Disabled: opacity .35
+
+  coinflip.html uses a gold gradient variant:
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%)
+    color: var(--ink)
+    box-shadow: 0 3px 12px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.4)
+*/
+
+/* -- Reroll button --------------------------------------- */
+/*
+  position: absolute; top: 14px; right: 16px
+  background: none
+  border: 1px solid var(--border)
+  border-radius: 8px
+  Hover: border-color var(--gold), color var(--gold), background var(--gold-bg)
+  Disabled: opacity .35
+*/
+
+/* -- Mulligan pips --------------------------------------- */
+/*
+  Filled gold circles that shrink and grey-out as spent.
+  width/height: 10px; border-radius: 50%
+  Active: background var(--gold)
+  Spent:  background var(--border); transform scale(.85)
+*/
+
+/* -- Source badge ---------------------------------------- */
+/*
+  Pill indicating live vs fallback data.
+  .live .dot:     background var(--success)
+  .fallback .dot: background var(--warning)
+*/
+
+/* -- Nav / back-link ------------------------------------- */
+/*
+  font-family: 'Cinzel', serif
+  font-size: .65rem; letter-spacing: .18em
+  color: var(--gold-dim)
+  text-decoration: none
+  border-bottom: 1px solid transparent
+  Hover: border-color var(--gold), color var(--gold)
+*/
+
+/* -- Result banner (coinflip.html) ----------------------- */
+/*
+  font-family: 'Cinzel', serif
+  font-size: 1.4rem; font-weight: 700
+  letter-spacing: .12em; text-transform: uppercase
+  .pass: color var(--pass-grn)
+  .fail: color var(--fail-red)
+  Appears via opacity + translateY transition.
+*/
+
+
+/* ------------------------------------------------------------
+   ANIMATIONS
+   All transitions use cubic-bezier(.22,1,.36,1) or ease.
+   Keep durations short — this is a phone-first UI.
+------------------------------------------------------------ */
+
+/*
+  slideUp — cards entering the DOM
+  from: opacity 0, translateY 14px–20px
+  to:   opacity 1, translateY 0
+  duration: .35s – .45s
+  Stagger: nth-child delays of .05s each
+
+  spin — die icon on reroll; loading spinner
+  0→360deg; linear 1.2s (spinner), ease .35s (die icon)
+
+  coinFlip — coin squish animation (coinflip.html)
+  0%: scaleX(1)  50%: scaleX(0)  100%: scaleX(1)
+  Repeats ~4.5–7.5 times; face is swapped at scaleX(0)
+
+  wobble — coin landing settle
+  Quick rotateZ oscillation, .5s ease-out
+
+  fadeIn on result banner
+  opacity 0 → 1, translateY 8px → 0, .35s ease
+*/
+
+
+/* ------------------------------------------------------------
+   FUTURE TOOLS — USAGE NOTES
+
+   For each new tool page:
+
+   1. Copy chargen.html (card-based) or coinflip.html (focused)
+      as your starting point depending on UI shape.
+
+   2. Update <title>, <h1>, and .subtitle / tagline.
+
+   3. Add the back-link pointing to index.html in the header.
+
+   4. Update CONFIG.TABS, FIELDS, and FALLBACK in the <script>.
+
+   5. Update index.html: change the tool card from
+      class="coming-soon" to class="active" and wrap
+      the <div> in an <a href="yourtool.html">.
+
+   ACCENT COLOUR OVERRIDE
+   To give a tool a distinct flavour while staying on-brand,
+   override just the gold tokens in a <style> block:
+
+   :root {
+     --gold:    #2d7a5e;   /* e.g. emerald for scenario gen */
+     --gold-dim: #1e5a44;
+     --gold-bg: #f0fff8;
+   }
+
+   All other tokens inherit unchanged.
+
+   BREAKPOINTS
+   No explicit breakpoints are required — layouts use
+   clamp() for type and a max-width container for content.
+   The 2-col hub grid collapses gracefully on narrow screens.
+   ============================================================ */
