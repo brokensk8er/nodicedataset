@@ -41,6 +41,7 @@
     padding: 10px 16px 6px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
+    position: relative; /* needed for reset button positioning */
   }
 
   header h1 {
@@ -324,6 +325,32 @@
   }
 
   .die.spinning { animation: spin 0.35s ease; }
+
+  /* ============================================================
+     !! TESTING ONLY — RESET BUTTON STYLES
+     To remove: delete from this comment to the matching END comment
+     ============================================================ */
+  .reset-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid #c0392b;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c0392b;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .reset-btn:hover { opacity: 1; }
+  /* !! TESTING ONLY — RESET BUTTON STYLES — END ============= */
 </style>
 </head>
 <body>
@@ -662,7 +689,26 @@ function render() {
       </div>
     </div>`;
 
-  if (locked) startCountdown();
+  if (locked) {
+    startCountdown();
+    /* ============================================================
+       !! TESTING ONLY — inject reset button into header
+       To remove: delete from this comment to the matching END comment
+       ============================================================ */
+    const hdr = document.querySelector('header');
+    if (hdr && !hdr.querySelector('.reset-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'reset-btn';
+      btn.textContent = 'Reset';
+      btn.onclick = devReset;
+      hdr.appendChild(btn);
+    }
+    /* !! TESTING ONLY — inject reset button into header — END === */
+  } else {
+    // Remove reset button if lock has cleared
+    const existing = document.querySelector('.reset-btn');
+    if (existing) existing.remove();
+  }
 }
 
 // ============================================================
@@ -717,6 +763,22 @@ function rerollField(key) {
     }
   }, 160);
 }
+
+/* ============================================================
+   !! TESTING ONLY — RESET FUNCTION
+   To remove: delete from this comment to the matching END comment
+   (also remove the reset-btn CSS block and the header injection
+   block in render() — both marked with matching comments)
+   ============================================================ */
+function devReset() {
+  clearInterval(countdownInterval);
+  clearSession();
+  state = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+  const existing = document.querySelector('.reset-btn');
+  if (existing) existing.remove();
+  doRoll();
+}
+/* !! TESTING ONLY — RESET FUNCTION — END =================== */
 
 // ============================================================
 //  BOOT
