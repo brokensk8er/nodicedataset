@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+
   <style>
     :root {
       --ink:       #1a1a2e;
@@ -21,7 +22,9 @@
       --pass-rim:  #1e8449;
       --shadow:    rgba(26,26,46,.18);
     }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Lato', sans-serif;
       font-weight: 300;
@@ -36,12 +39,14 @@
         radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
     }
+
     header {
       width: 100%;
       max-width: 420px;
       padding: 2rem 1.5rem .75rem;
       text-align: center;
     }
+
     .site-label {
       font-family: 'Cinzel', serif;
       font-size: .7rem;
@@ -51,6 +56,7 @@
       color: var(--gold-dim);
       margin-bottom: .4rem;
     }
+
     h1 {
       font-family: 'Cinzel', serif;
       font-size: 1.75rem;
@@ -59,7 +65,9 @@
       line-height: 1.15;
       letter-spacing: .04em;
     }
+
     h1 span { color: var(--gold); }
+
     .subtitle {
       margin-top: .4rem;
       font-size: .85rem;
@@ -67,12 +75,14 @@
       color: #666;
       letter-spacing: .03em;
     }
+
     .divider {
       width: 80px;
       height: 2px;
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
       margin: .9rem auto;
     }
+
     main {
       width: 100%;
       max-width: 420px;
@@ -82,6 +92,7 @@
       align-items: center;
       gap: 1.25rem;
     }
+
     .card {
       width: 100%;
       background: var(--card-bg);
@@ -96,17 +107,20 @@
       animation: slideUp .55s cubic-bezier(.22,1,.36,1) both;
       animation-delay: .1s;
     }
+
     .coin-stage {
       width: 260px;
       height: 260px;
       position: relative;
     }
+
     .coin {
       width: 100%;
       height: 100%;
       position: relative;
       cursor: default;
     }
+
     .face {
       position: absolute;
       inset: 0;
@@ -117,14 +131,17 @@
       overflow: hidden;
       transition: none;
     }
+
     .face-fail {
       background: #000;
       box-shadow: 0 6px 32px rgba(192,57,43,.45);
     }
+
     .face-pass {
       background: #000;
       box-shadow: 0 6px 28px rgba(39,174,96,.45);
     }
+
     .face-mystery {
       background: radial-gradient(circle at 38% 32%, #e2bc6a, var(--gold) 55%, var(--gold-dim));
       box-shadow:
@@ -132,6 +149,7 @@
         inset 0 -8px 24px rgba(0,0,0,.3),
         0 6px 28px rgba(201,168,76,.5);
     }
+
     .face::before {
       content: '';
       position: absolute;
@@ -141,6 +159,7 @@
       pointer-events: none;
       z-index: 1;
     }
+
     .face img {
       width: 100%;
       height: 100%;
@@ -149,20 +168,24 @@
       position: relative;
       z-index: 2;
     }
+
     .face-mystery svg {
       width: 100%;
       height: 100%;
       position: relative;
       z-index: 2;
     }
+
     @keyframes coinFlip {
       0%   { transform: scaleX(1); }
       50%  { transform: scaleX(0); }
       100% { transform: scaleX(1); }
     }
+
     .coin.spinning {
       animation: coinFlip var(--half-duration, 0.2s) ease-in-out var(--flip-count, 8) forwards;
     }
+
     @keyframes wobble {
       0%   { transform: scaleX(1) rotateZ(0deg); }
       20%  { transform: scaleX(1) rotateZ(2deg); }
@@ -171,7 +194,11 @@
       80%  { transform: scaleX(1) rotateZ(-.5deg); }
       100% { transform: scaleX(1) rotateZ(0deg); }
     }
-    .coin.wobbling { animation: wobble .5s ease-out forwards; }
+
+    .coin.wobbling {
+      animation: wobble .5s ease-out forwards;
+    }
+
     .result-banner {
       font-family: 'Cinzel', serif;
       font-size: 1.4rem;
@@ -184,9 +211,15 @@
       min-height: 2rem;
       text-align: center;
     }
-    .result-banner.visible { opacity: 1; transform: translateY(0); }
+
+    .result-banner.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .result-banner.fail { color: var(--fail-red); }
     .result-banner.pass { color: var(--pass-grn); }
+
     .result-sub {
       font-size: .78rem;
       font-weight: 300;
@@ -199,7 +232,9 @@
       opacity: 0;
       transition: opacity .35s .15s ease;
     }
+
     .result-sub.visible { opacity: 1; }
+
     .btn-roll {
       font-family: 'Cinzel', serif;
       font-size: .85rem;
@@ -221,6 +256,7 @@
       min-height: 48px;
       touch-action: manipulation;
     }
+
     .btn-roll::after {
       content: '';
       position: absolute;
@@ -228,15 +264,22 @@
       background: linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 60%);
       pointer-events: none;
     }
+
     .btn-roll:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(201,168,76,.45), inset 0 1px 0 rgba(255,255,255,.4);
     }
+
     .btn-roll:active:not(:disabled) {
       transform: translateY(0);
       box-shadow: 0 2px 8px rgba(201,168,76,.3);
     }
-    .btn-roll:disabled { opacity: .55; cursor: not-allowed; }
+
+    .btn-roll:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
     .nav-link {
       font-family: 'Cinzel', serif;
       font-size: .65rem;
@@ -247,8 +290,16 @@
       border-bottom: 1px solid transparent;
       transition: border-color .2s, color .2s;
     }
-    .nav-link:hover { color: var(--gold); border-color: var(--gold); }
-    footer { padding-bottom: 1.5rem; text-align: center; }
+    .nav-link:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    footer {
+      padding-bottom: 1.5rem;
+      text-align: center;
+    }
+
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(28px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -256,14 +307,17 @@
   </style>
 </head>
 <body>
+
   <header>
     <p class="site-label">No Dice &mdash; Improv D&D</p>
     <h1>Fate's <span>Flip</span></h1>
     <p class="subtitle">One flip. Pass or fail. No negotiating with the dice.</p>
     <div class="divider"></div>
   </header>
+
   <main>
     <div class="card">
+
       <div class="coin-stage" aria-live="polite" aria-label="Coin result">
         <div class="coin" id="coin">
           <div class="face face-mystery" id="coinFace" aria-hidden="true">
@@ -277,85 +331,151 @@
           </div>
         </div>
       </div>
+
       <div>
         <p class="result-banner" id="resultBanner">&nbsp;</p>
         <p class="result-sub"   id="resultSub">&nbsp;</p>
       </div>
+
       <button class="btn-roll" id="btnRoll">⚔ Flip the Coin</button>
+
     </div>
   </main>
-  <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+
+  <footer>
+    <a class="nav-link" href="index.html">← Back to the Vault</a>
+  </footer>
+
+  <canvas id="confettiCanvas" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  "></canvas>
+
   <script>
-    const coin     = document.getElementById('coin');
-    const coinFace = document.getElementById('coinFace');
-    const btnRoll  = document.getElementById('btnRoll');
-    const banner   = document.getElementById('resultBanner');
-    const sub      = document.getElementById('resultSub');
+    const coin       = document.getElementById('coin');
+    const coinFace   = document.getElementById('coinFace');
+    const btnRoll    = document.getElementById('btnRoll');
+    const banner     = document.getElementById('resultBanner');
+    const sub        = document.getElementById('resultSub');
 
     const PASS_LINES = [
-      "The fates smile upon thee.","Fortune favours the bold.",
-      "Against all odds, glory.","The dice gods are pleased.",
-      "A hero's moment — take it.","Even the bards saw that coming.",
-      "The stars aligned for you.","Destiny bends to your will.",
-      "The realm rejoices in your name.","Boldness rewarded. Press on.",
-      "The fates have spoken — loudly.","Victory tastes sweet today.",
-      "Not luck. Greatness.","The gods nod in your favour.",
-      "Written in the stars, apparently.","Your legend grows.",
-    ];
-    const FAIL_LINES = [
-      "The fates are unmoved.","Even heroes stumble.",
-      "The dice gods demand drama.","Not today, adventurer.",
-      "A bold attempt, poorly executed.","The tavern will hear of this.",
-      "The stars were otherwise engaged.","Destiny had other plans.",
-      "The realm weeps. Briefly.","Boldness penalised. Regroup.",
-      "The fates have spoken — curtly.","Defeat tastes bitter today.",
-      "Not greatness. Not yet.","The gods look away.",
-      "Perhaps next time, adventurer.","Your legend… continues building.",
+      "The fates smile upon thee.",
+      "Fortune favours the bold.",
+      "Against all odds, glory.",
+      "The dice gods are pleased.",
+      "A hero's moment — take it.",
+      "Even the bards saw that coming.",
+      "The stars aligned for you.",
+      "Destiny bends to your will.",
+      "The realm rejoices in your name.",
+      "Boldness rewarded. Press on.",
+      "The fates have spoken — loudly.",
+      "Victory tastes sweet today.",
+      "Not luck. Greatness.",
+      "The gods nod in your favour.",
+      "Written in the stars, apparently.",
+      "Your legend grows.",
     ];
 
+    const FAIL_LINES = [
+      "The fates are unmoved.",
+      "Even heroes stumble.",
+      "The dice gods demand drama.",
+      "Not today, adventurer.",
+      "A bold attempt, poorly executed.",
+      "The tavern will hear of this.",
+      "The stars were otherwise engaged.",
+      "Destiny had other plans.",
+      "The realm weeps. Briefly.",
+      "Boldness penalised. Regroup.",
+      "The fates have spoken — curtly.",
+      "Defeat tastes bitter today.",
+      "Not greatness. Not yet.",
+      "The gods look away.",
+      "Perhaps next time, adventurer.",
+      "Your legend… continues building.",
+    ];
+
+    // Full-resolution coin face images
     const FAIL_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAAXEYAAFxGARSUQ0EAAAAHdElNRQfqAxQXIBR15212AAAAz3pUWHRSYXcgcHJvZmlsZSB0eXBlIDhiaW0AACiRjZJBDsMgDATvvKJPsI0x8JwQE6mH/v9aI1QgVdRmDom8eBec4FJ5vtyjQZmdT0ycWSEqAAcQjCwJOghsT4EbuAstXWi/oBmEX0ujJmQtx7JuJqZc4qKJr9lXN4UUGmfTJjvKPrU9kSY/a932bH04RzNTVeGEo+nfG3rAh+vRQGshXgXbqPSNBrkddtQWFLfG2RRs6rwk+ajUfutoCV6OunosCPvHu8m4LqXERRa33h33BkbWe5YC0+FdAACAAElEQVR42uz9ebgtWVnfi3/eMfs5V7v7/jRVdaqoDiigCgoQSiCAyBUE1KigghqMIRCDGu81MclNTPx5fzExrZLE2ORnfiZEY0iMMSK2KE2hIFAUVWf33erX2quZa675xu/c5/dHVlVToJJKZuacff7+PK+nqvKZefYnc++1vo/vEhERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERQ==';
     const PASS_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAAXEYAAFxGARSUQ0EAAAAHdElNRQfqAxQXIAv472CDAAAAz3pUWHRSYXcgcHJvZmlsZSB0eXBlIDhiaW0AACiRjZJBDsMgDATvvKJPsI0x8JwQE6mH/v9aI1QgVdRmDom8eBec4FJ5vtyjQZmdT0ycWSEqAAcQjCwJOghsT4EbuAstXWi/oBmEX0ujJmQtx7JuJqZc4qKJr9lXN4UUGmfTJjvKPrU9kSY/a932bH04RzNTVeGEo+nfG3rAh+vRQGshXgXbqPSNBrkddtQWFLfG2RRs6rwk+ajUfutoCV6OunosCPvHu8m4LqXERRa33h33BkbWe5YC0+FdAACAAElEQVR42uy9d5gk13Xe/avqnPNM9+SNWCywiMSCBEgEIlOkCEukRJMiYZKWRX0WSSU/oiVZtmQ90mdZNCmJkkWJlhU+2xJlCRJFKpAAI8AgBIJhERYbZmcnh57OXaG76vvj3Fk0QIQNM9Mzs/U+T+9sV986dbq66pb3fU4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4QRERE5JdZvV4Q==';
+
     const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="55,22 86,39 86,71 55,88 24,71 24,39" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
-      <text x="55" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="rgba(26,26,46,0.75)">?</text>
-    </svg>`;
+              <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+                stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+              <text x="55" y="70" text-anchor="middle"
+                font-family="Georgia, serif" font-size="52" font-weight="bold"
+                fill="rgba(26,26,46,0.75)">?</text>
+            </svg>`;
 
-    function setFaceMystery() { coinFace.className='face face-mystery'; coinFace.innerHTML=MYSTERY_SVG; }
-    function setFaceFail()    { coinFace.className='face face-fail';    coinFace.innerHTML=`<img src="${FAIL_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`; }
-    function setFacePass()    { coinFace.className='face face-pass';    coinFace.innerHTML=`<img src="${PASS_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`; }
+    function setFaceMystery() {
+      coinFace.className = 'face face-mystery';
+      coinFace.innerHTML = MYSTERY_SVG;
+    }
+    function setFaceFail() {
+      coinFace.className = 'face face-fail';
+      coinFace.innerHTML = `<img src="${FAIL_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    }
+    function setFacePass() {
+      coinFace.className = 'face face-pass';
+      coinFace.innerHTML = `<img src="${PASS_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    }
 
-    function pickResult() { return Math.random() < 0.5 ? 'pass' : 'fail'; }
+    function pickResult() {
+      return Math.random() < 0.5 ? 'pass' : 'fail';
+    }
+
     let isSpinning = false;
-    function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function rand(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
     function flip() {
       if (isSpinning) return;
       isSpinning = true;
       btnRoll.disabled = true;
+
       banner.className = 'result-banner';
       sub.className    = 'result-sub';
       banner.textContent = '\u00a0';
       sub.textContent    = '\u00a0';
+
       const result = pickResult();
+
       playFlipSound();
+
       setFaceMystery();
+
       const flips   = 5 + Math.floor(Math.random() * 4);
       const halfDur = 0.13 + Math.random() * 0.04;
       const iters   = flips - 0.5;
+
       coin.style.setProperty('--half-duration', halfDur + 's');
       coin.style.setProperty('--flip-count', iters);
+
       coin.classList.remove('spinning', 'wobbling');
       void coin.offsetWidth;
       coin.classList.add('spinning');
+
       coin.addEventListener('animationend', function onSpinEnd() {
         coin.removeEventListener('animationend', onSpinEnd);
         coin.classList.remove('spinning');
-        if (result === 'fail') setFaceFail(); else setFacePass();
+
+        if (result === 'fail') setFaceFail();
+        else                   setFacePass();
+
         coin.style.transition = `transform ${halfDur}s ease-in-out`;
         coin.style.transform  = 'scaleX(1)';
+
         setTimeout(() => {
           coin.style.transition = '';
           coin.classList.add('wobbling');
+
           if (result === 'pass') {
             banner.textContent = 'Go Time';
             banner.className   = 'result-banner visible pass';
@@ -370,24 +490,31 @@
             sub.className      = 'result-sub visible';
             playWompWomp();
           }
+
           setTimeout(() => {
             coin.classList.remove('wobbling');
             isSpinning = false;
             btnRoll.disabled = false;
           }, 520);
+
         }, halfDur * 1000);
       });
     }
 
     btnRoll.addEventListener('click', flip);
 
+    /* ── Confetti ── */
     const canvas  = document.getElementById('confettiCanvas');
     const ctx     = canvas.getContext('2d');
     let particles = [];
     let rafId     = null;
-    const COLORS  = ['#c9a84c','#e2bc6a','#27ae60','#2ecc71','#ffffff','#faf7f2','#a0d8a0','#f0c040'];
 
-    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    const COLORS = ['#c9a84c','#e2bc6a','#27ae60','#2ecc71','#ffffff','#faf7f2','#a0d8a0','#f0c040'];
+
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
@@ -395,14 +522,18 @@
       const angleRad = angleDeg * Math.PI / 180;
       const speed    = 12 + Math.random() * 14;
       return {
-        x, y: canvas.height,
+        x,
+        y: canvas.height,
         vx: Math.cos(angleRad) * speed,
         vy: -Math.sin(angleRad) * speed,
-        w: 5 + Math.random() * 7, h: 3 + Math.random() * 4,
+        w:  5 + Math.random() * 7,
+        h:  3 + Math.random() * 4,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 10,
+        rot:   Math.random() * 360,
+        rotV:  (Math.random() - 0.5) * 10,
         gravity: 0.25 + Math.random() * 0.15,
-        life: 1, decay: 0.005 + Math.random() * 0.005,
+        life: 1,
+        decay: 0.005 + Math.random() * 0.005,
       };
     }
 
@@ -411,16 +542,16 @@
       particles = [];
       const W = canvas.width;
       const cannons = [
-        {x:0,      minAngle:20,  maxAngle:70 },
-        {x:W*0.25, minAngle:40,  maxAngle:85 },
-        {x:W*0.5,  minAngle:60,  maxAngle:120},
-        {x:W*0.75, minAngle:95,  maxAngle:140},
-        {x:W,      minAngle:110, maxAngle:160},
+        { x: 0,       minAngle: 20,  maxAngle: 70  },
+        { x: W * 0.25, minAngle: 40,  maxAngle: 85  },
+        { x: W * 0.5,  minAngle: 60,  maxAngle: 120 },
+        { x: W * 0.75, minAngle: 95,  maxAngle: 140 },
+        { x: W,        minAngle: 110, maxAngle: 160 },
       ];
       for (const cannon of cannons) {
         for (let i = 0; i < 60; i++) {
-          const a = cannon.minAngle + Math.random() * (cannon.maxAngle - cannon.minAngle);
-          particles.push(makeParticle(cannon.x, a));
+          const angleDeg = cannon.minAngle + Math.random() * (cannon.maxAngle - cannon.minAngle);
+          particles.push(makeParticle(cannon.x, angleDeg));
         }
       }
       if (rafId) cancelAnimationFrame(rafId);
@@ -430,107 +561,178 @@
     function animateConfetti() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles = particles.filter(p => p.life > 0);
+
       for (const p of particles) {
-        p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
-        p.rot += p.rotV; p.life -= p.decay;
+        p.x   += p.vx;
+        p.y   += p.vy;
+        p.vy  += p.gravity;
+        p.rot += p.rotV;
+        p.life -= p.decay;
+
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.life);
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot * Math.PI / 180);
         ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
         ctx.restore();
       }
-      if (particles.length > 0) { rafId = requestAnimationFrame(animateConfetti); }
-      else { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+      if (particles.length > 0) {
+        rafId = requestAnimationFrame(animateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
 
+    /* ── Coin flip launch sound ── */
     function playFlipSound() {
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
-      const t  = ac.currentTime;
-      const tickBuf  = ac.createBuffer(1, ac.sampleRate * 0.04, ac.sampleRate);
+      const ac  = new (window.AudioContext || window.webkitAudioContext)();
+      const t   = ac.currentTime;
+
+      const tickBuf = ac.createBuffer(1, ac.sampleRate * 0.04, ac.sampleRate);
       const tickData = tickBuf.getChannelData(0);
       for (let i = 0; i < tickData.length; i++) tickData[i] = (Math.random() * 2 - 1);
-      const tick     = ac.createBufferSource(); tick.buffer = tickBuf;
-      const tickHp   = ac.createBiquadFilter(); tickHp.type = 'highpass'; tickHp.frequency.value = 3000;
+      const tick     = ac.createBufferSource();
+      tick.buffer    = tickBuf;
+      const tickHp   = ac.createBiquadFilter();
+      tickHp.type    = 'highpass';
+      tickHp.frequency.value = 3000;
       const tickGain = ac.createGain();
       tickGain.gain.setValueAtTime(0.55, t);
       tickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
-      tick.connect(tickHp); tickHp.connect(tickGain); tickGain.connect(ac.destination);
+      tick.connect(tickHp);
+      tickHp.connect(tickGain);
+      tickGain.connect(ac.destination);
       tick.start(t);
-      const spinDur = 0.72; const numClicks = 14;
+
+      const spinDur   = 0.72;
+      const numClicks = 14;
       for (let i = 0; i < numClicks; i++) {
         const progress = i / numClicks;
         const interval = 0.025 + progress * 0.07;
         const clickAt  = 0.04 + i * interval - (progress * progress * 0.04);
+
         const buf  = ac.createBuffer(1, ac.sampleRate * 0.018, ac.sampleRate);
         const data = buf.getChannelData(0);
         for (let j = 0; j < data.length; j++) data[j] = (Math.random() * 2 - 1);
-        const src  = ac.createBufferSource(); src.buffer = buf;
-        const hp   = ac.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = 2200 - progress * 800; hp.Q.value = 1.2;
-        const g    = ac.createGain(); const vol = 0.18 * (1 - progress * 0.5);
+
+        const src  = ac.createBufferSource();
+        src.buffer = buf;
+
+        const hp   = ac.createBiquadFilter();
+        hp.type    = 'bandpass';
+        hp.frequency.value = 2200 - progress * 800;
+        hp.Q.value = 1.2;
+
+        const g    = ac.createGain();
+        const vol  = 0.18 * (1 - progress * 0.5);
         g.gain.setValueAtTime(vol, t + clickAt);
         g.gain.exponentialRampToValueAtTime(0.001, t + clickAt + 0.016);
-        src.connect(hp); hp.connect(g); g.connect(ac.destination);
+
+        src.connect(hp);
+        hp.connect(g);
+        g.connect(ac.destination);
         src.start(t + clickAt);
       }
+
       const thudBuf  = ac.createBuffer(1, ac.sampleRate * 0.12, ac.sampleRate);
       const thudData = thudBuf.getChannelData(0);
       for (let i = 0; i < thudData.length; i++) thudData[i] = (Math.random() * 2 - 1);
-      const thud     = ac.createBufferSource(); thud.buffer = thudBuf;
-      const thudLp   = ac.createBiquadFilter(); thudLp.type = 'lowpass'; thudLp.frequency.value = 280;
-      const thudGain = ac.createGain(); const thudAt = spinDur;
+      const thud     = ac.createBufferSource();
+      thud.buffer    = thudBuf;
+      const thudLp   = ac.createBiquadFilter();
+      thudLp.type    = 'lowpass';
+      thudLp.frequency.value = 280;
+      const thudGain = ac.createGain();
+      const thudAt   = spinDur;
       thudGain.gain.setValueAtTime(0.5, t + thudAt);
       thudGain.gain.exponentialRampToValueAtTime(0.001, t + thudAt + 0.09);
-      thud.connect(thudLp); thudLp.connect(thudGain); thudGain.connect(ac.destination);
+      thud.connect(thudLp);
+      thudLp.connect(thudGain);
+      thudGain.connect(ac.destination);
       thud.start(t + thudAt);
+
       setTimeout(() => ac.close(), 1200);
     }
 
+    /* ── Mario-ish coin sound ── */
     function playCoinSound() {
       const ac  = new (window.AudioContext || window.webkitAudioContext)();
-      const vol = ac.createGain(); vol.gain.setValueAtTime(0.042, ac.currentTime); vol.connect(ac.destination);
-      [{freq:988,start:0,dur:0.08},{freq:1319,start:0.07,dur:0.18}].forEach(({freq,start,dur}) => {
-        const osc  = ac.createOscillator(); const gain = ac.createGain();
+      const vol = ac.createGain();
+      vol.gain.setValueAtTime(0.042, ac.currentTime);
+      vol.connect(ac.destination);
+
+      const notes = [
+        { freq: 988,  start: 0,    dur: 0.08 },
+        { freq: 1319, start: 0.07, dur: 0.18 },
+      ];
+
+      notes.forEach(({ freq, start, dur }) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+
         osc.type = 'square';
         osc.frequency.setValueAtTime(freq, ac.currentTime + start);
         osc.frequency.linearRampToValueAtTime(freq * 1.06, ac.currentTime + start + dur);
+
         gain.gain.setValueAtTime(0, ac.currentTime + start);
         gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + 0.01);
-        gain.gain.setValueAtTime(1, ac.currentTime + start + dur * 0.6);
+        gain.gain.setValueAtTime(1,  ac.currentTime + start + dur * 0.6);
         gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + start + dur);
-        osc.connect(gain); gain.connect(vol);
-        osc.start(ac.currentTime + start); osc.stop(ac.currentTime + start + dur + 0.02);
+
+        osc.connect(gain);
+        gain.connect(vol);
+        osc.start(ac.currentTime + start);
+        osc.stop(ac.currentTime + start + dur + 0.02);
       });
+
       setTimeout(() => ac.close(), 600);
     }
 
+    /* ── Womp womp ── */
     function playWompWomp() {
       const ac  = new (window.AudioContext || window.webkitAudioContext)();
-      const vol = ac.createGain(); vol.gain.setValueAtTime(0.042, ac.currentTime); vol.connect(ac.destination);
-      [{start:0,freqStart:440,freqEnd:220,dur:0.55},{start:0.45,freqStart:330,freqEnd:110,dur:0.75}].forEach(({start,freqStart,freqEnd,dur}) => {
-        const osc  = ac.createOscillator(); const gain = ac.createGain();
+      const vol = ac.createGain();
+      vol.gain.setValueAtTime(0.042, ac.currentTime);
+      vol.connect(ac.destination);
+
+      const blats = [
+        { start: 0,    freqStart: 440, freqEnd: 220, dur: 0.55 },
+        { start: 0.45, freqStart: 330, freqEnd: 110, dur: 0.75 },
+      ];
+
+      blats.forEach(({ start, freqStart, freqEnd, dur }) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(freqStart, ac.currentTime + start);
         osc.frequency.exponentialRampToValueAtTime(freqEnd, ac.currentTime + start + dur);
-        const lfo = ac.createOscillator(); const lfoG = ac.createGain();
-        lfo.frequency.value = 5.5; lfoG.gain.value = 8;
-        lfo.connect(lfoG); lfoG.connect(osc.frequency);
-        lfo.start(ac.currentTime + start); lfo.stop(ac.currentTime + start + dur);
+
+        const lfo  = ac.createOscillator();
+        const lfoG = ac.createGain();
+        lfo.frequency.value  = 5.5;
+        lfoG.gain.value      = 8;
+        lfo.connect(lfoG);
+        lfoG.connect(osc.frequency);
+        lfo.start(ac.currentTime + start);
+        lfo.stop(ac.currentTime + start + dur);
+
         gain.gain.setValueAtTime(0, ac.currentTime + start);
         gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + 0.04);
         gain.gain.setValueAtTime(1, ac.currentTime + start + dur - 0.12);
         gain.gain.linearRampToValueAtTime(0, ac.currentTime + start + dur);
-        osc.connect(gain); gain.connect(vol);
-        osc.start(ac.currentTime + start); osc.stop(ac.currentTime + start + dur + 0.05);
+
+        osc.connect(gain);
+        gain.connect(vol);
+        osc.start(ac.currentTime + start);
+        osc.stop(ac.currentTime + start + dur + 0.05);
       });
+
       setTimeout(() => ac.close(), 1600);
     }
   </script>
-
-<footer>
-  <a class="nav-link" href="index.html">← Back to the Vault</a>
-</footer>
 
 </body>
 </html>

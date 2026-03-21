@@ -14,94 +14,69 @@
     --muted: #6b6676;
     --card-bg: #ffffff;
     --border: #e8e2d9;
-    --shadow: 0 2px 16px rgba(26,26,46,0.07);
+    --shadow: 0 1px 8px rgba(26,26,46,0.07);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
 
   body {
     background: var(--parchment);
     color: var(--ink);
     font-family: 'Lato', sans-serif;
     font-weight: 300;
-    min-height: 100vh;
-    padding: 0 0 48px;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
   }
 
   header {
     text-align: center;
-    padding: 36px 24px 20px;
+    padding: 10px 16px 6px;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 28px;
+    flex-shrink: 0;
     position: relative;
   }
 
-  .back-link {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--gold);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s;
-  }
-
-  .back-link:hover { border-color: var(--gold); }
-
   header h1 {
     font-family: 'Cinzel', serif;
-    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     line-height: 1.2;
   }
 
   header .subtitle {
-    margin-top: 6px;
-    font-size: 0.85rem;
+    font-size: 0.68rem;
     color: var(--muted);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--muted);
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-  }
-
-  .loading .spinner {
-    font-size: 2.5rem;
-    margin-bottom: 16px;
-    display: inline-block;
-    animation: spin 1.2s linear infinite;
+    margin-top: 2px;
   }
 
   .source-badge {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.7rem;
+    gap: 4px;
+    font-size: 0.68rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--muted);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 3px 10px;
-    margin-top: 10px;
+    padding: 2px 8px;
+    margin-top: 4px;
   }
 
   .source-badge .dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
+    flex-shrink: 0;
   }
 
   .source-badge.live .dot      { background: #2d7a5e; }
@@ -111,19 +86,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin: 0 auto 28px;
-    font-size: 0.82rem;
+    gap: 6px;
+    padding: 5px 0 3px;
+    font-size: 0.78rem;
     color: var(--muted);
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    flex-shrink: 0;
   }
 
-  .pip-row { display: flex; gap: 6px; }
+  .pip-row { display: flex; gap: 5px; }
 
   .pip {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--gold);
     transition: background 0.3s, transform 0.2s;
@@ -131,56 +107,97 @@
 
   .pip.spent { background: var(--border); transform: scale(0.85); }
 
-  .container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 0 16px;
+  #app {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    overflow: hidden;
+    padding: 0 12px 6px;
+    min-height: 0;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+
+  .loading .spinner {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: spin 1.2s linear infinite;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-height: 0;
   }
 
   .field-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px 20px 16px;
+    border-radius: 10px;
+    padding: 6px 10px 5px;
     box-shadow: var(--shadow);
     position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: slideUp 0.3s ease both;
   }
+
+  .field-card:nth-child(1) { animation-delay: 0.03s; }
+  .field-card:nth-child(2) { animation-delay: 0.06s; }
+  .field-card:nth-child(3) { animation-delay: 0.09s; }
+  .field-card:nth-child(4) { animation-delay: 0.12s; }
+  .field-card:nth-child(5) { animation-delay: 0.15s; }
+  .field-card:nth-child(6) { animation-delay: 0.18s; }
 
   .field-label {
     font-family: 'Cinzel', serif;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 600;
     color: var(--gold);
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    margin-bottom: 6px;
+    margin-bottom: 2px;
+    line-height: 1;
   }
 
   .field-value {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 400;
-    line-height: 1.45;
+    line-height: 1.35;
     color: var(--ink);
-    min-height: 1.5em;
-    padding-right: 72px;
+    padding-right: 62px;
     transition: opacity 0.15s;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .field-value.fading { opacity: 0; }
 
   .reroll-btn {
     position: absolute;
-    top: 14px;
-    right: 16px;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
     background: none;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 4px 10px;
+    border-radius: 6px;
+    padding: 4px 8px;
     font-family: 'Lato', sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 700;
     color: var(--muted);
     cursor: pointer;
@@ -189,7 +206,8 @@
     transition: border-color 0.2s, color 0.2s, background 0.2s;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
+    white-space: nowrap;
   }
 
   .reroll-btn:hover:not(:disabled) {
@@ -199,14 +217,15 @@
   }
 
   .reroll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .reroll-btn .die { font-size: 0.9rem; }
+  .reroll-btn .die { font-size: 0.85rem; }
 
   .cta-area {
-    margin-top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     align-items: center;
+    padding-top: 4px;
+    flex-shrink: 0;
   }
 
   .roll-btn {
@@ -214,10 +233,10 @@
     background: var(--ink);
     color: var(--parchment);
     border: none;
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 8px;
+    padding: 11px;
     font-family: 'Cinzel', serif;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     cursor: pointer;
@@ -228,55 +247,64 @@
   .roll-btn:active { transform: scale(0.98); }
   .roll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  .pre-roll {
+  footer {
     text-align: center;
-    padding: 60px 24px;
+    padding: 4px 0 6px;
+    flex-shrink: 0;
   }
 
-  .pre-roll h2 {
+  .nav-link {
     font-family: 'Cinzel', serif;
-    font-size: clamp(1.3rem, 4vw, 1.8rem);
-    font-weight: 600;
-    margin-bottom: 10px;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s, color .2s;
+    opacity: 0.8;
+  }
+  .nav-link:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+    opacity: 1;
   }
 
-  .pre-roll p {
+  .lock-notice {
+    width: 100%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: default;
+  }
+
+  .lock-notice .lock-msg {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
     color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 32px;
-    line-height: 1.6;
   }
 
-  .big-roll-btn {
-    background: var(--ink);
-    color: var(--parchment);
-    border: none;
-    border-radius: 14px;
-    padding: 18px 48px;
+  .lock-notice .lock-countdown {
     font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
-
-  .big-roll-btn:hover { background: #2e2e4a; }
-  .big-roll-btn:active { transform: scale(0.97); }
-  .d20-icon { font-size: 3.5rem; margin-bottom: 16px; display: block; }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-
-  .field-card { animation: slideUp 0.35s ease both; }
-  .field-card:nth-child(1) { animation-delay: 0.05s; }
-  .field-card:nth-child(2) { animation-delay: 0.10s; }
-  .field-card:nth-child(3) { animation-delay: 0.15s; }
-  .field-card:nth-child(4) { animation-delay: 0.20s; }
-  .field-card:nth-child(5) { animation-delay: 0.25s; }
-  .field-card:nth-child(6) { animation-delay: 0.30s; }
 
   @keyframes spin {
     from { transform: rotate(0deg); }
@@ -284,12 +312,32 @@
   }
 
   .die.spinning { animation: spin 0.35s ease; }
+
+  .reset-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: 1px solid #c0392b;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c0392b;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .reset-btn:hover { opacity: 1; }
 </style>
 </head>
 <body>
 
 <header>
-  <a class="back-link" href="index.html">← No Dice</a>
   <h1>Roll Your Character</h1>
   <div class="subtitle">Improv D&amp;D · Fate is waiting</div>
 </header>
@@ -301,12 +349,11 @@
   </div>
 </div>
 
+<footer>
+  <a class="nav-link" href="index.html">← Back to the Vault</a>
+</footer>
+
 <script>
-// ============================================================
-//  CONFIGURATION
-//  Fill in SHEET_ID and API_KEY before deploying.
-//  Tab names must match your Google Sheet tabs exactly.
-// ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
   API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
@@ -322,10 +369,6 @@ const CONFIG = {
   ]
 };
 
-// ============================================================
-//  FALLBACK DATA
-//  Used when sheet credentials aren't set or fetch fails.
-// ============================================================
 const FALLBACK = {
   firstNames: [
     "Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert",
@@ -431,9 +474,6 @@ const FALLBACK = {
   ]
 };
 
-// ============================================================
-//  FIELD DISPLAY CONFIG
-// ============================================================
 const FIELDS = [
   { key: 'name',       label: 'Name',              pool: null          },
   { key: 'race',       label: 'Race / Species',    pool: 'races'       },
@@ -443,16 +483,41 @@ const FIELDS = [
   { key: 'secret',     label: 'Secret / Flaw',     pool: 'secrets'     },
 ];
 
-const MAX_MULLIGANS = 3;
+const MAX_MULLIGANS  = 3;
+const LOCK_DURATION  = 60 * 60 * 1000;
+const STORAGE_KEY    = 'nodice_chargen_session';
 
 let DATA       = null;
 let dataSource = 'fallback';
+let state      = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+let countdownInterval = null;
 
-let state = { rolled: false, mulligans: MAX_MULLIGANS, values: {} };
+function saveSession() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
 
-// ============================================================
-//  DATA LOADING
-// ============================================================
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved.values || typeof saved.mulligans !== 'number') return false;
+    if (saved.lockedAt) {
+      const elapsed = Date.now() - saved.lockedAt;
+      if (elapsed >= LOCK_DURATION) {
+        localStorage.removeItem(STORAGE_KEY);
+        return false;
+      }
+    }
+    state = saved;
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearSession() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
+
 function isConfigured() {
   return CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
          CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
@@ -485,11 +550,7 @@ async function loadData() {
   }
 }
 
-// ============================================================
-//  HELPERS
-// ============================================================
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
 function generateName() { return pick(DATA.firstNames) + ' ' + pick(DATA.lastNames); }
 
 function generateAll() {
@@ -502,38 +563,51 @@ function sourceBadgeHTML() {
   const cls  = dataSource === 'live' ? 'live' : 'fallback';
   const text = dataSource === 'live'
     ? 'Live from Google Sheets'
-    : isConfigured() ? 'Sheet unreachable — using built-in data' : 'Using built-in data';
+    : isConfigured() ? 'Sheet unreachable — built-in data' : 'Using built-in data';
   return `<div class="source-badge ${cls}"><span class="dot"></span>${text}</div>`;
 }
 
-// ============================================================
-//  RENDER
-// ============================================================
+function isLocked() { return state.lockedAt !== null; }
+
+function formatCountdown(ms) {
+  if (ms <= 0) return '00:00';
+  const totalSec = Math.ceil(ms / 1000);
+  const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
+  const secs = (totalSec % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+}
+
+function startCountdown() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    const el = document.getElementById('lock-countdown');
+    if (!el) { clearInterval(countdownInterval); return; }
+    const remaining = LOCK_DURATION - (Date.now() - state.lockedAt);
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      clearSession();
+      state = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+      doRoll();
+    } else {
+      el.textContent = formatCountdown(remaining);
+    }
+  }, 1000);
+}
+
 function render() {
   const app = document.getElementById('app');
-
-  if (!state.rolled) {
-    app.innerHTML = `
-      <div class="pre-roll">
-        <span class="d20-icon">🎲</span>
-        <h2>Your fate awaits</h2>
-        <p>Tap below and the dice will decide<br>who you are tonight.</p>
-        <button class="big-roll-btn" onclick="doRoll()">Roll My Character</button>
-        ${sourceBadgeHTML()}
-      </div>`;
-    return;
-  }
+  const locked = isLocked();
 
   const pips = Array.from({length: MAX_MULLIGANS}, (_, i) =>
     `<div class="pip${i >= state.mulligans ? ' spent' : ''}"></div>`
   ).join('');
 
   const cards = FIELDS.map(f => {
-    const canReroll = state.mulligans > 0;
+    const canReroll = state.mulligans > 0 && !locked;
     return `
       <div class="field-card" id="card-${f.key}">
         <div class="field-label">${f.label}</div>
-        <div class="field-value" id="val-${f.key}">${state.values[f.key]}</div>
+        <div class="field-value" id="val-${f.key}">${state.values[f.key] || ''}</div>
         <button class="reroll-btn" onclick="rerollField('${f.key}')"
           ${canReroll ? '' : 'disabled'} id="btn-${f.key}">
           <span class="die" id="die-${f.key}">⚄</span> Reroll
@@ -541,34 +615,57 @@ function render() {
       </div>`;
   }).join('');
 
+  const ctaBtn = locked ? (() => {
+    const remaining = LOCK_DURATION - (Date.now() - state.lockedAt);
+    return `<div class="lock-notice">
+      <span class="lock-msg">Out of rolls! Check back in</span>
+      <span class="lock-countdown" id="lock-countdown">${formatCountdown(remaining)}</span>
+    </div>`;
+  })() : `<button class="roll-btn" onclick="doRoll()"
+      ${state.mulligans > 0 ? '' : 'disabled'}>🎲 Roll New Character</button>`;
+
   app.innerHTML = `
     <div class="mulligan-bar">
-      Mulligans left &nbsp;
+      Mulligans &nbsp;
       <div class="pip-row">${pips}</div>
     </div>
     <div class="container">
       ${cards}
       <div class="cta-area">
-        <button class="roll-btn" onclick="doRoll()"
-          ${state.mulligans > 0 ? '' : 'disabled'}>🎲 Roll New Character</button>
+        ${ctaBtn}
         ${sourceBadgeHTML()}
       </div>
     </div>`;
+
+  if (locked) {
+    startCountdown();
+    const hdr = document.querySelector('header');
+    if (hdr && !hdr.querySelector('.reset-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'reset-btn';
+      btn.textContent = 'Reset';
+      btn.onclick = devReset;
+      hdr.appendChild(btn);
+    }
+  } else {
+    const existing = document.querySelector('.reset-btn');
+    if (existing) existing.remove();
+  }
 }
 
-// ============================================================
-//  ACTIONS
-// ============================================================
 function doRoll() {
+  if (isLocked()) return;
   if (state.rolled && state.mulligans <= 0) return;
   if (state.rolled) state.mulligans--;
   state.rolled = true;
   state.values = generateAll();
+  if (state.mulligans === 0) state.lockedAt = Date.now();
+  saveSession();
   render();
 }
 
 function rerollField(key) {
-  if (state.mulligans <= 0) return;
+  if (isLocked() || state.mulligans <= 0) return;
   state.mulligans--;
 
   const valEl = document.getElementById('val-' + key);
@@ -585,20 +682,34 @@ function rerollField(key) {
     valEl.classList.remove('fading');
     dieEl.classList.remove('spinning');
 
-    document.querySelectorAll('.pip')
-      .forEach((p, i) => p.classList.toggle('spent', i >= state.mulligans));
+    if (state.mulligans === 0) state.lockedAt = Date.now();
 
-    if (state.mulligans === 0) {
+    saveSession();
+
+    if (isLocked()) {
+      render();
+    } else {
+      document.querySelectorAll('.pip')
+        .forEach((p, i) => p.classList.toggle('spent', i >= state.mulligans));
       document.querySelectorAll('.reroll-btn, .roll-btn')
-        .forEach(b => { b.disabled = true; });
+        .forEach(b => { b.disabled = state.mulligans === 0; });
     }
   }, 160);
 }
 
-// ============================================================
-//  BOOT
-// ============================================================
-loadData().then(render);
+function devReset() {
+  clearInterval(countdownInterval);
+  clearSession();
+  state = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+  const existing = document.querySelector('.reset-btn');
+  if (existing) existing.remove();
+  doRoll();
+}
+
+loadData().then(() => {
+  const restored = loadSession();
+  if (restored) { render(); } else { doRoll(); }
+});
 </script>
 </body>
 </html>
