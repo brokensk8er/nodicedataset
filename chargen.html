@@ -281,6 +281,38 @@
     opacity: 1;
   }
 
+  /* ── Locked roll button — replaces the normal roll button ── */
+  .lock-notice {
+    width: 100%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: default;
+  }
+
+  .lock-notice .lock-msg {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .lock-notice .lock-countdown {
+    font-family: 'Cinzel', serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -451,11 +483,48 @@ const FIELDS = [
   { key: 'secret',     label: 'Secret / Flaw',     pool: 'secrets'     },
 ];
 
-const MAX_MULLIGANS = 3;
+const MAX_MULLIGANS  = 3;
+const LOCK_DURATION  = 60 * 60 * 1000; // 1 hour in ms
+const STORAGE_KEY    = 'nodice_chargen_session';
 
 let DATA       = null;
 let dataSource = 'fallback';
-let state = { rolled: false, mulligans: MAX_MULLIGANS, values: {} };
+let state      = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+let countdownInterval = null;
+
+// ============================================================
+//  SESSION PERSISTENCE
+// ============================================================
+function saveSession() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) { /* storage unavailable — silent fail */ }
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    // Validate shape
+    if (!saved.values || typeof saved.mulligans !== 'number') return false;
+    // If locked, check whether the hour has passed
+    if (saved.lockedAt) {
+      const elapsed = Date.now() - saved.lockedAt;
+      if (elapsed >= LOCK_DURATION) {
+        // Expired — wipe and start fresh
+        localStorage.removeItem(STORAGE_KEY);
+        return false;
+      }
+    }
+    state = saved;
+    return true;
+  } catch(e) { return false; }
+}
+
+function clearSession() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
 
 // ============================================================
 //  DATA LOADING
@@ -512,28 +581,73 @@ function sourceBadgeHTML() {
   return `<div class="source-badge ${cls}"><span class="dot"></span>${text}</div>`;
 }
 
+function isLocked() {
+  return state.lockedAt !== null;
+}
+
+function formatCountdown(ms) {
+  if (ms <= 0) return '00:00';
+  const totalSec = Math.ceil(ms / 1000);
+  const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
+  const secs = (totalSec % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+}
+
+// ============================================================
+//  COUNTDOWN TICK
+// ============================================================
+function startCountdown() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    const el = document.getElementById('lock-countdown');
+    if (!el) { clearInterval(countdownInterval); return; }
+    const remaining = LOCK_DURATION - (Date.now() - state.lockedAt);
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      clearSession();
+      state = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+      doRoll();
+    } else {
+      el.textContent = formatCountdown(remaining);
+    }
+  }, 1000);
+}
+
 // ============================================================
 //  RENDER
 // ============================================================
 function render() {
   const app = document.getElementById('app');
+  const locked = isLocked();
 
   const pips = Array.from({length: MAX_MULLIGANS}, (_, i) =>
     `<div class="pip${i >= state.mulligans ? ' spent' : ''}"></div>`
   ).join('');
 
+  // Cards look completely normal whether locked or not —
+  // only the reroll buttons disable when mulligans are gone
   const cards = FIELDS.map(f => {
-    const canReroll = state.mulligans > 0;
+    const canReroll = state.mulligans > 0 && !locked;
     return `
       <div class="field-card" id="card-${f.key}">
         <div class="field-label">${f.label}</div>
-        <div class="field-value" id="val-${f.key}">${state.values[f.key]}</div>
+        <div class="field-value" id="val-${f.key}">${state.values[f.key] || ''}</div>
         <button class="reroll-btn" onclick="rerollField('${f.key}')"
           ${canReroll ? '' : 'disabled'} id="btn-${f.key}">
           <span class="die" id="die-${f.key}">⚄</span> Reroll
         </button>
       </div>`;
   }).join('');
+
+  // CTA area: normal button, or the lock notice in its place
+  const ctaBtn = locked ? (() => {
+    const remaining = LOCK_DURATION - (Date.now() - state.lockedAt);
+    return `<div class="lock-notice">
+      <span class="lock-msg">Out of rolls! Check back in</span>
+      <span class="lock-countdown" id="lock-countdown">${formatCountdown(remaining)}</span>
+    </div>`;
+  })() : `<button class="roll-btn" onclick="doRoll()"
+      ${state.mulligans > 0 ? '' : 'disabled'}>🎲 Roll New Character</button>`;
 
   app.innerHTML = `
     <div class="mulligan-bar">
@@ -543,26 +657,29 @@ function render() {
     <div class="container">
       ${cards}
       <div class="cta-area">
-        <button class="roll-btn" onclick="doRoll()"
-          ${state.mulligans > 0 ? '' : 'disabled'}>🎲 Roll New Character</button>
+        ${ctaBtn}
         ${sourceBadgeHTML()}
       </div>
     </div>`;
+
+  if (locked) startCountdown();
 }
 
 // ============================================================
 //  ACTIONS
 // ============================================================
 function doRoll() {
+  if (isLocked()) return;
   if (state.rolled && state.mulligans <= 0) return;
   if (state.rolled) state.mulligans--;
   state.rolled = true;
   state.values = generateAll();
+  saveSession();
   render();
 }
 
 function rerollField(key) {
-  if (state.mulligans <= 0) return;
+  if (isLocked() || state.mulligans <= 0) return;
   state.mulligans--;
 
   const valEl = document.getElementById('val-' + key);
@@ -579,20 +696,37 @@ function rerollField(key) {
     valEl.classList.remove('fading');
     dieEl.classList.remove('spinning');
 
-    document.querySelectorAll('.pip')
-      .forEach((p, i) => p.classList.toggle('spent', i >= state.mulligans));
-
+    // If that was the last mulligan, lock immediately
     if (state.mulligans === 0) {
+      state.lockedAt = Date.now();
+    }
+
+    saveSession();
+
+    if (isLocked()) {
+      render(); // full re-render to show lock banner
+    } else {
+      document.querySelectorAll('.pip')
+        .forEach((p, i) => p.classList.toggle('spent', i >= state.mulligans));
       document.querySelectorAll('.reroll-btn, .roll-btn')
-        .forEach(b => { b.disabled = true; });
+        .forEach(b => { b.disabled = state.mulligans === 0; });
     }
   }, 160);
 }
 
 // ============================================================
-//  BOOT — roll immediately on load
+//  BOOT
 // ============================================================
-loadData().then(doRoll);
+loadData().then(() => {
+  const restored = loadSession();
+  if (restored) {
+    // Resume existing session
+    render();
+  } else {
+    // Fresh roll
+    doRoll();
+  }
+});
 </script>
 </body>
 </html>
