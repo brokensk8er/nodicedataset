@@ -31,12 +31,10 @@
       font-weight: 300;
       background-color: var(--parchment);
       color: var(--ink);
-      height: 100dvh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      overflow: hidden;
       background-image:
         radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
         radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
@@ -45,26 +43,25 @@
 
     /* ── Header ── */
     header {
-      width: calc(min(60vw, 60vh) + 4rem);
-      max-width: 94vw;
-      padding: clamp(.6rem, 2.5vh, 1.5rem) 2rem clamp(.3rem, 1vh, .75rem);
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem 1.5rem .75rem;
       text-align: center;
-      flex-shrink: 0;
     }
 
     .site-label {
       font-family: 'Cinzel', serif;
-      font-size: clamp(.55rem, 1.5vw, .7rem);
+      font-size: .7rem;
       font-weight: 400;
       letter-spacing: .25em;
       text-transform: uppercase;
       color: var(--gold-dim);
-      margin-bottom: .3rem;
+      margin-bottom: .4rem;
     }
 
     h1 {
       font-family: 'Cinzel', serif;
-      font-size: clamp(1.2rem, 5vw, 1.75rem);
+      font-size: 1.75rem;
       font-weight: 700;
       color: var(--ink);
       line-height: 1.15;
@@ -76,8 +73,8 @@
     }
 
     .subtitle {
-      margin-top: .25rem;
-      font-size: clamp(.72rem, 2vw, .85rem);
+      margin-top: .4rem;
+      font-size: .85rem;
       font-weight: 300;
       color: #666;
       letter-spacing: .03em;
@@ -85,47 +82,41 @@
 
     /* ── Divider ── */
     .divider {
-      width: 60px;
+      width: 80px;
       height: 2px;
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      margin: clamp(.3rem, 1vh, .75rem) auto;
+      margin: .9rem auto;
     }
 
-    /* ── Main — flex column, fills remaining height between header and footer ── */
+    /* ── Main ── */
     main {
-      width: calc(min(60vw, 60vh) + 4rem);
-      max-width: 94vw;
-      padding: 0;
+      width: 100%;
+      max-width: 420px;
+      padding: 0 1.25rem 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      flex: 1;
-      min-height: 0;
-      gap: 0;
+      gap: 1.25rem;
     }
 
-    /* Card fills main, minus footer row */
     .card {
       width: 100%;
-      flex: 1;
-      min-height: 0;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: clamp(.75rem, 2.5vh, 1.5rem) 2rem clamp(.6rem, 2vh, 1.2rem);
+      padding: 2.75rem 1.75rem 2rem;
       box-shadow: 0 4px 24px var(--shadow);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-evenly;
+      gap: 1.75rem;
     }
 
-    /* ── Coin stage — 60% of the smaller of vw/vh ── */
+    /* ── Coin stage — large and prominent, fixed size ── */
     .coin-stage {
-      width: min(60vw, 60vh);
-      height: min(60vw, 60vh);
+      width: 260px;
+      height: 260px;
       position: relative;
-      flex-shrink: 0;
     }
 
     /* ── coin wrapper — single visible face, flips via scaleX ── */
@@ -231,14 +222,14 @@
     /* ── Result banner ── */
     .result-banner {
       font-family: 'Cinzel', serif;
-      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: .12em;
       text-transform: uppercase;
       opacity: 0;
       transform: translateY(8px);
       transition: opacity .35s ease, transform .35s ease;
-      min-height: 1.6rem;
+      min-height: 2rem;
       text-align: center;
     }
 
@@ -268,7 +259,7 @@
     /* ── Roll button ── */
     .btn-roll {
       font-family: 'Cinzel', serif;
-      font-size: clamp(.8rem, 3vw, .95rem);
+      font-size: .85rem;
       font-weight: 600;
       letter-spacing: .14em;
       text-transform: uppercase;
@@ -276,15 +267,15 @@
       background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
       border: none;
       border-radius: 8px;
-      padding: clamp(.9rem, 3vh, 1.1rem) 2rem;
+      padding: .9rem 2.4rem;
       cursor: pointer;
       position: relative;
       overflow: hidden;
       box-shadow: 0 3px 12px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.4);
       transition: transform .12s ease, box-shadow .12s ease, opacity .2s;
       width: 100%;
-      max-width: 320px;
-      min-height: 52px;
+      max-width: 280px;
+      min-height: 48px;
       touch-action: manipulation;
     }
 
@@ -330,9 +321,8 @@
     }
 
     footer {
-      padding: clamp(.4rem, 1.5vh, 1rem) 0;
+      padding-bottom: 1.5rem;
       text-align: center;
-      flex-shrink: 0;
     }
 
     /* ── Slide-in card on load ── */
@@ -390,11 +380,11 @@
 
     </div><!-- .card -->
 
-  </main>
+    <footer>
+      <a class="nav-link" href="index.html">← Character Generator</a>
+    </footer>
 
-  <footer>
-    <a class="nav-link" href="index.html">← Character Generator</a>
-  </footer>
+  </main>
 
   <!-- Full-screen confetti canvas, pointer-events off so it doesn't block UI -->
   <canvas id="confettiCanvas" style="
@@ -421,6 +411,16 @@
       "The dice gods are pleased.",
       "A hero's moment — take it.",
       "Even the bards saw that coming.",
+      "The stars aligned for you.",
+      "Destiny bends to your will.",
+      "The realm rejoices in your name.",
+      "Boldness rewarded. Press on.",
+      "The fates have spoken — loudly.",
+      "Victory tastes sweet today.",
+      "Not luck. Greatness.",
+      "The gods nod in your favour.",
+      "Written in the stars, apparently.",
+      "Your legend grows.",
     ];
 
     const FAIL_LINES = [
@@ -430,6 +430,16 @@
       "Not today, adventurer.",
       "A bold attempt, poorly executed.",
       "The tavern will hear of this.",
+      "The stars were otherwise engaged.",
+      "Destiny had other plans.",
+      "The realm weeps. Briefly.",
+      "Boldness penalised. Regroup.",
+      "The fates have spoken — curtly.",
+      "Defeat tastes bitter today.",
+      "Not greatness. Not yet.",
+      "The gods look away.",
+      "Perhaps next time, adventurer.",
+      "Your legend… continues building.",
     ];
 
     // Inline image data
@@ -459,16 +469,8 @@
       coinFace.innerHTML = `<img src="${PASS_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
     }
 
-    // Binary result: pass or fail, no consecutive repeat
-    let lastResult = null;
-
     function pickResult() {
-      const options = lastResult === 'pass'  ? ['fail'] :
-                      lastResult === 'fail'  ? ['pass'] :
-                      ['pass', 'fail'];
-      const result = options[Math.floor(Math.random() * options.length)];
-      lastResult = result;
-      return result;
+      return Math.random() < 0.5 ? 'pass' : 'fail';
     }
 
     let isSpinning = false;
@@ -531,14 +533,14 @@
           coin.classList.add('wobbling');
 
           if (result === 'pass') {
-            banner.textContent = 'Pass';
+            banner.textContent = 'Go Time';
             banner.className   = 'result-banner visible pass';
             sub.textContent    = rand(PASS_LINES);
             sub.className      = 'result-sub visible';
             launchConfetti();
             playCoinSound();
           } else {
-            banner.textContent = 'Fail';
+            banner.textContent = 'No Time';
             banner.className   = 'result-banner visible fail';
             sub.textContent    = rand(FAIL_LINES);
             sub.className      = 'result-sub visible';
@@ -572,37 +574,43 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    function makeParticle(side) {
-      // Angle in degrees from horizontal: left cannon fans 20°–80° upward-right,
-      // right cannon fans 100°–160° upward-left (both measured from positive X axis)
-      const angleDeg = side === 'left'
-        ? 20 + Math.random() * 60    // 20° to 80°
-        : 100 + Math.random() * 60;  // 100° to 160°
+    function makeParticle(x, angleDeg) {
       const angleRad = angleDeg * Math.PI / 180;
-      const speed    = 10 + Math.random() * 9;
+      const speed    = 12 + Math.random() * 14;
       return {
-        x: side === 'left' ? 0 : canvas.width,
+        x,
         y: canvas.height,
         vx: Math.cos(angleRad) * speed,
-        vy: -Math.sin(angleRad) * speed,   // negative = upward in canvas coords
-        w:  6 + Math.random() * 6,
+        vy: -Math.sin(angleRad) * speed,
+        w:  5 + Math.random() * 7,
         h:  3 + Math.random() * 4,
         color: COLORS[Math.floor(Math.random() * COLORS.length)],
         rot:   Math.random() * 360,
-        rotV:  (Math.random() - 0.5) * 9,
-        gravity: 0.28 + Math.random() * 0.14,
+        rotV:  (Math.random() - 0.5) * 10,
+        gravity: 0.25 + Math.random() * 0.15,
         life: 1,
-        decay: 0.007 + Math.random() * 0.005,
+        decay: 0.005 + Math.random() * 0.005,
       };
     }
 
     function launchConfetti() {
       resizeCanvas();
       particles = [];
-      // burst from both corners
-      for (let i = 0; i < 80; i++) {
-        particles.push(makeParticle('left'));
-        particles.push(makeParticle('right'));
+      const W = canvas.width;
+      // Five cannons spread across the bottom — left edge, left-quarter,
+      // centre, right-quarter, right edge — each fanning upward
+      const cannons = [
+        { x: 0,       minAngle: 20,  maxAngle: 70  },  // far left
+        { x: W * 0.25, minAngle: 40,  maxAngle: 85  },  // left-quarter
+        { x: W * 0.5,  minAngle: 60,  maxAngle: 120 },  // centre
+        { x: W * 0.75, minAngle: 95,  maxAngle: 140 },  // right-quarter
+        { x: W,        minAngle: 110, maxAngle: 160 },  // far right
+      ];
+      for (const cannon of cannons) {
+        for (let i = 0; i < 60; i++) {
+          const angleDeg = cannon.minAngle + Math.random() * (cannon.maxAngle - cannon.minAngle);
+          particles.push(makeParticle(cannon.x, angleDeg));
+        }
       }
       if (rafId) cancelAnimationFrame(rafId);
       animateConfetti();
