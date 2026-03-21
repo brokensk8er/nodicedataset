@@ -41,7 +41,6 @@
     height: 100dvh;
   }
 
-  /* ── Header ── */
   header {
     text-align: center;
     padding: 10px 16px 6px;
@@ -78,7 +77,6 @@
     margin-top: 2px;
   }
 
-  /* ── Main — fills remaining height ── */
   main {
     flex: 1;
     display: flex;
@@ -90,7 +88,6 @@
     gap: 14px;
   }
 
-  /* ── The loot card — dramatic, centred ── */
   .loot-card {
     width: 100%;
     max-width: 440px;
@@ -105,7 +102,6 @@
     animation: cardIn .5s cubic-bezier(.22,1,.36,1) both;
   }
 
-  /* ── Item image placeholder / future art slot ── */
   .item-image-slot {
     width: 100%;
     aspect-ratio: 16 / 7;
@@ -136,7 +132,6 @@
     text-transform: uppercase;
   }
 
-  /* When an image is loaded it fills this slot */
   .item-image-slot img {
     position: absolute;
     inset: 0;
@@ -146,7 +141,6 @@
     border-radius: 10px;
   }
 
-  /* ── Item name ── */
   .item-name-label {
     font-family: 'Cinzel', serif;
     font-size: .6rem;
@@ -167,7 +161,6 @@
     transition: opacity .15s;
   }
 
-  /* ── Flavour text ── */
   .item-flavour-label {
     font-family: 'Cinzel', serif;
     font-size: .6rem;
@@ -190,13 +183,12 @@
   .item-name.fading,
   .item-flavour.fading { opacity: 0; }
 
-  /* ── Divider ── */
   .card-divider {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--border), transparent);
   }
 
-  /* ── Source badge ── */
+  /* Standard source badge */
   .source-badge {
     display: inline-flex;
     align-items: center;
@@ -218,10 +210,36 @@
     flex-shrink: 0;
   }
 
-  .source-badge.live .dot      { background: #2d7a5e; }
-  .source-badge.fallback .dot  { background: #b8860b; }
+  .source-badge.live .dot     { background: #2d7a5e; }
+  .source-badge.fallback .dot { background: #b8860b; }
 
-  /* ── Pull button ── */
+  /* Diagnostic badge — expanded to show error detail */
+  .source-badge.diag {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 10px;
+    padding: 6px 10px;
+    gap: 3px;
+    max-width: 100%;
+    word-break: break-word;
+    align-self: stretch;
+  }
+
+  .badge-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-error {
+    font-size: 0.60rem;
+    color: #c0392b;
+    letter-spacing: .02em;
+    text-transform: none;
+    font-style: italic;
+    padding-left: 10px;
+  }
+
   .pull-btn {
     width: 100%;
     max-width: 440px;
@@ -239,10 +257,9 @@
     flex-shrink: 0;
   }
 
-  .pull-btn:hover { background: #2e2e4a; }
+  .pull-btn:hover  { background: #2e2e4a; }
   .pull-btn:active { transform: scale(.98); }
 
-  /* ── Loading state ── */
   .loading {
     text-align: center;
     color: var(--muted);
@@ -257,7 +274,6 @@
     animation: spin 1.2s linear infinite;
   }
 
-  /* ── Footer nav ── */
   footer {
     text-align: center;
     padding: 4px 0 7px;
@@ -279,7 +295,6 @@
     border-color: var(--gold);
   }
 
-  /* ── Animations ── */
   @keyframes cardIn {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -302,21 +317,19 @@
 <main id="main">
   <div class="loading">
     <span class="spinner">💰</span><br>
-    Rifling through the dungeon…
+    Rifling through the dungeon&hellip;
   </div>
 </main>
 
 <footer>
-  <a class="nav-link" href="index.html">← Back to the Index</a>
+  <a class="nav-link" href="index.html">&larr; Back to the Index</a>
 </footer>
 
 <script>
 // ============================================================
 //  CONFIGURATION
 //  Same Sheet ID and API key as chargen.html.
-//  The data lives in a tab called "Loot" with two columns:
-//    Column A: Item Name
-//    Column B: Flavour Text / Description
+//  Tab named "Loot" — Column A: Item Name, Column B: Description
 // ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
@@ -326,8 +339,6 @@ const CONFIG = {
 
 // ============================================================
 //  FALLBACK DATA
-//  Used when the sheet is unreachable.
-//  Each entry: [ itemName, flavourText ]
 // ============================================================
 const FALLBACK_ITEMS = [
   ["The Sword of Mild Inconvenience",
@@ -365,17 +376,14 @@ const FALLBACK_ITEMS = [
 // ============================================================
 //  STATE
 // ============================================================
-let ITEMS      = null;   // array of { name, flavour, hash }
-let dataSource = 'fallback';
-let current    = null;   // currently displayed item
+let ITEMS       = null;
+let dataSource  = 'fallback';
+let diagError   = null;   // exact error for on-screen display
+let current     = null;
 let isAnimating = false;
 
 // ============================================================
 //  STABLE HASH
-//  Generates a short deterministic ID from an item name.
-//  Same item name → same hash, always.
-//  Used to link items to future generated images.
-//  Format: "item_" + 8 hex characters
 // ============================================================
 function itemHash(name) {
   let h = 5381;
@@ -404,10 +412,19 @@ async function loadData() {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
               + `/values/${encodeURIComponent(CONFIG.TAB)}!A:B?key=${CONFIG.API_KEY}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      // Read the full API error body so we can show it on screen
+      const errJson = await res.json().catch(() => ({}));
+      const apiMsg  = (errJson.error && errJson.error.message) || '(no message)';
+      diagError = `HTTP ${res.status} — ${apiMsg}`;
+      throw new Error(diagError);
+    }
     const json = await res.json();
     const rows = (json.values || []).filter(r => r[0] && r[0].trim());
-    if (rows.length === 0) throw new Error('Sheet tab is empty');
+    if (rows.length === 0) {
+      diagError = 'Tab "Loot" was found but contains no data rows';
+      throw new Error(diagError);
+    }
     ITEMS = rows.map(r => ({
       name:    (r[0] || '').trim(),
       flavour: (r[1] || '').trim(),
@@ -416,6 +433,7 @@ async function loadData() {
     dataSource = 'live';
   } catch (err) {
     console.warn('Loot sheet fetch failed — using fallback data.', err);
+    if (!diagError) diagError = err.message;
     buildItemsFromFallback();
     dataSource = 'fallback';
   }
@@ -430,7 +448,7 @@ function buildItemsFromFallback() {
 }
 
 // ============================================================
-//  PICK — never repeat until all items have been seen
+//  PICK — shuffle-bag, no immediate repeats
 // ============================================================
 let bag = [];
 
@@ -450,18 +468,23 @@ function pickItem() {
 }
 
 // ============================================================
-//  SOURCE BADGE
+//  SOURCE BADGE — shows full error detail when unreachable
 // ============================================================
 function sourceBadgeHTML() {
-  const cls  = dataSource === 'live' ? 'live' : 'fallback';
-  const text = dataSource === 'live'
-    ? 'Live from Google Sheets'
-    : isConfigured() ? 'Sheet unreachable — built-in data' : 'Using built-in data';
-  return `<div class="source-badge ${cls}"><span class="dot"></span>${text}</div>`;
+  if (dataSource === 'live') {
+    return `<div class="source-badge live"><span class="dot"></span>Live from Google Sheets</div>`;
+  }
+  if (diagError) {
+    return `<div class="source-badge fallback diag">
+      <div class="badge-row"><span class="dot"></span>Sheet unreachable &mdash; built-in data</div>
+      <div class="badge-error">&#9888; ${escHtml(diagError)}</div>
+    </div>`;
+  }
+  return `<div class="source-badge fallback"><span class="dot"></span>Using built-in data</div>`;
 }
 
 // ============================================================
-//  RENDER — initial full render
+//  RENDER
 // ============================================================
 function render(item) {
   current = item;
@@ -469,7 +492,7 @@ function render(item) {
   m.innerHTML = `
     <div class="loot-card" id="loot-card">
       <div class="item-image-slot" id="img-slot">
-        <span class="slot-icon">✨</span>
+        <span class="slot-icon">&#10024;</span>
         <span class="slot-hash">${item.hash}</span>
       </div>
       <div>
@@ -483,21 +506,21 @@ function render(item) {
       </div>
       ${sourceBadgeHTML()}
     </div>
-    <button class="pull-btn" id="pull-btn" onclick="doPull()">💰 Pull Another Item</button>`;
+    <button class="pull-btn" id="pull-btn" onclick="doPull()">&#128176; Pull Another Item</button>`;
 }
 
 // ============================================================
-//  PULL — animated swap on subsequent pulls
+//  PULL — animated swap
 // ============================================================
 function doPull() {
   if (isAnimating) return;
   isAnimating = true;
 
-  const nameEl   = document.getElementById('item-name');
-  const flavEl   = document.getElementById('item-flavour');
-  const imgSlot  = document.getElementById('img-slot');
-  const btn      = document.getElementById('pull-btn');
-  btn.disabled   = true;
+  const nameEl  = document.getElementById('item-name');
+  const flavEl  = document.getElementById('item-flavour');
+  const imgSlot = document.getElementById('img-slot');
+  const btn     = document.getElementById('pull-btn');
+  btn.disabled  = true;
 
   nameEl.classList.add('fading');
   flavEl.classList.add('fading');
@@ -510,19 +533,19 @@ function doPull() {
     flavEl.textContent = next.flavour;
 
     imgSlot.innerHTML = `
-      <span class="slot-icon">✨</span>
+      <span class="slot-icon">&#10024;</span>
       <span class="slot-hash">${next.hash}</span>`;
 
     nameEl.classList.remove('fading');
     flavEl.classList.remove('fading');
 
-    btn.disabled  = false;
-    isAnimating   = false;
+    btn.disabled = false;
+    isAnimating  = false;
   }, 180);
 }
 
 // ============================================================
-//  ESCAPE HTML helper
+//  ESCAPE HTML
 // ============================================================
 function escHtml(str) {
   return str
