@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No Dice — Loot Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #1a1a2e;
+    --parchment: #faf7f2;
+    --gold:      #c9a84c;
+    --gold-dim:  #a07c2e;
+    --gold-bg:   #fffdf5;
+    --card-bg:   #ffffff;
+    --border:    #e8e2d9;
+    --muted:     #6b6676;
+    --shadow:    rgba(26,26,46,.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    background-color: var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 10px 16px 6px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .site-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 400;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 2px;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: .04em;
+    line-height: 1.2;
+  }
+
+  header h1 span { color: var(--gold); }
+
+  header .subtitle {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── Main — fills remaining height ── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 20px 12px;
+    min-height: 0;
+    gap: 14px;
+  }
+
+  /* ── The loot card — dramatic, centred ── */
+  .loot-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 24px 24px;
+    box-shadow: 0 6px 32px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: cardIn .5s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  /* ── Item image placeholder / future art slot ── */
+  .item-image-slot {
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f0ebe3 0%, #e8e2d9 100%);
+    border: 1px dashed rgba(201,168,76,.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .item-image-slot .slot-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+    line-height: 1;
+  }
+
+  .item-image-slot .slot-hash {
+    font-family: 'Lato', monospace;
+    font-size: 0.58rem;
+    letter-spacing: .1em;
+    color: var(--gold-dim);
+    opacity: 0.7;
+    text-transform: uppercase;
+  }
+
+  /* When an image is loaded it fills this slot */
+  .item-image-slot img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  /* ── Item name ── */
+  .item-name-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .item-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+    letter-spacing: .02em;
+    transition: opacity .15s;
+  }
+
+  /* ── Flavour text ── */
+  .item-flavour-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .item-flavour {
+    font-size: .95rem;
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--ink);
+    font-style: italic;
+    transition: opacity .15s;
+  }
+
+  .item-name.fading,
+  .item-flavour.fading { opacity: 0; }
+
+  /* ── Divider ── */
+  .card-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ── Source badge ── */
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+    align-self: center;
+  }
+
+  .source-badge .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .source-badge.live .dot      { background: #2d7a5e; }
+  .source-badge.fallback .dot  { background: #b8860b; }
+
+  /* ── Pull button ── */
+  .pull-btn {
+    width: 100%;
+    max-width: 440px;
+    background: var(--ink);
+    color: var(--parchment);
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: 'Cinzel', serif;
+    font-size: .9rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+    flex-shrink: 0;
+  }
+
+  .pull-btn:hover { background: #2e2e4a; }
+  .pull-btn:active { transform: scale(.98); }
+
+  /* ── Loading state ── */
+  .loading {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+
+  .loading .spinner {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: spin 1.2s linear infinite;
+  }
+
+  /* ── Footer nav ── */
+  footer {
+    text-align: center;
+    padding: 4px 0 7px;
+    flex-shrink: 0;
+  }
+
+  .nav-link {
+    font-family: 'Cinzel', serif;
+    font-size: .58rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s, color .2s;
+  }
+  .nav-link:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  /* ── Animations ── */
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+  <h1>The <span>Loot</span> Table</h1>
+  <p class="subtitle">Reach into the pile. See what fate provides.</p>
+</header>
+
+<main id="main">
+  <div class="loading">
+    <span class="spinner">💰</span><br>
+    Rifling through the dungeon…
+  </div>
+</main>
+
+<footer>
+  <a class="nav-link" href="index.html">← Back to the Index</a>
+</footer>
+
+<script>
+// ============================================================
+//  CONFIGURATION
+//  Same Sheet ID and API key as chargen.html.
+//  Add a tab called "Magic Items" to your Google Sheet with
+//  two columns:
+//    Column A: Item Name
+//    Column B: Flavour Text / Description
+// ============================================================
+const CONFIG = {
+  SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
+  API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+  TAB:      'Magic Items',
+};
+
+// ============================================================
+//  FALLBACK DATA
+//  Used when the sheet is unreachable.
+//  Each entry: [ itemName, flavourText ]
+// ============================================================
+const FALLBACK_ITEMS = [
+  ["The Sword of Mild Inconvenience",
+   "A finely crafted blade that, upon striking an enemy, causes them to briefly remember an embarrassing moment from their past. Effective, but not for the reasons the wielder expects."],
+  ["Boots of Confident Striding",
+   "These boots do not make you faster. They simply make you look like you know exactly where you're going, even when you absolutely do not."],
+  ["The Amulet of Someone Else's Problem",
+   "Once per day, the wearer may designate any ongoing situation as definitively someone else's problem. The situation does not change. Their attitude toward it does."],
+  ["Gloves of Excessive Gesturing",
+   "Enchanted gauntlets that compel the wearer to use sweeping, dramatic hand movements when speaking. Intimidation checks are made with advantage. Being taken seriously is made with disadvantage."],
+  ["The Ring of Plausible Deniability",
+   "A plain silver band that, when worn, ensures there is always just enough doubt. Witnesses become uncertain. Evidence becomes ambiguous. Nobody can quite put their finger on it."],
+  ["Cloak of Mild Weatherproofing",
+   "Keeps out light drizzle. Completely ineffective in heavy rain. Surprisingly warm. Smells faintly of cinnamon. Previous owner unknown."],
+  ["The Lantern of Inconvenient Truth",
+   "Illuminates the truth in a ten-foot radius. Users report this is significantly less helpful than advertised, and considerably more awkward."],
+  ["Bracers of Delayed Reaction",
+   "When the wearer is attacked, these bracers activate — providing +3 to AC about three seconds after the blow has already landed. The enchanter's notes suggest this was 'not the intended behaviour'."],
+  ["The Pouch of Exact Change",
+   "This coin purse always contains the precise amount of money needed for any purchase, down to the copper. It never has more than that. Financial planning becomes simultaneously easier and deeply frustrating."],
+  ["Helm of Remembered Names",
+   "Whispers the name of everyone the wearer has ever met directly into their ear at slightly the wrong moment. Beloved at reunions. Catastrophic in stealth situations."],
+  ["The Spoon of Distant Soups",
+   "Once per long rest, this ornate silver spoon allows the user to taste any soup currently being prepared within a one-mile radius. Its original purpose remains a subject of intense scholarly debate."],
+  ["Staff of Mild Weather Prediction",
+   "Accurately predicts weather patterns eighteen to twenty-four hours in advance for a localised area. Completely useless in a dungeon. Invaluable for farmers. Unclear why it's in a dungeon."],
+  ["The Mirror of Honest Opinion",
+   "Shows the viewer exactly what they look like, then provides a brief, unsolicited, and distressingly accurate assessment of their recent decisions. Cannot be turned to face a wall — it will turn back."],
+  ["Dagger of Pointed Commentary",
+   "A razor-sharp blade that, when thrown, delivers both a wound and a brief but incisive critique of the target's recent tactical choices. Enemies have described it as 'fair, but unkind'."],
+  ["The Compass of Sunk Cost",
+   "Always points toward whatever the party has spent the most time on so far this adventure, regardless of whether that direction is useful. Previous owners found it compelling. Historians find it instructive."],
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+let ITEMS      = null;   // array of { name, flavour, hash }
+let dataSource = 'fallback';
+let current    = null;   // currently displayed item
+let isAnimating = false;
+
+// ============================================================
+//  STABLE HASH
+//  Generates a short deterministic ID from an item name.
+//  Same item name → same hash, always.
+//  Used to link items to future generated images.
+//  Format: "item_" + 8 hex characters
+// ============================================================
+function itemHash(name) {
+  // Simple djb2-style hash, converted to 8 hex chars
+  let h = 5381;
+  for (let i = 0; i < name.length; i++) {
+    h = ((h << 5) + h) ^ name.charCodeAt(i);
+    h = h >>> 0; // keep unsigned 32-bit
+  }
+  return 'item_' + h.toString(16).padStart(8, '0');
+}
+
+// ============================================================
+//  DATA LOADING
+// ============================================================
+function isConfigured() {
+  return CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
+         CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
+}
+
+async function loadData() {
+  if (!isConfigured()) {
+    buildItemsFromFallback();
+    dataSource = 'fallback';
+    return;
+  }
+  try {
+    // Fetch two columns: A (name) and B (flavour)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
+              + `/values/${encodeURIComponent(CONFIG.TAB)}!A:B?key=${CONFIG.API_KEY}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const rows = (json.values || []).filter(r => r[0] && r[0].trim());
+    if (rows.length === 0) throw new Error('Sheet tab is empty');
+    ITEMS = rows.map(r => ({
+      name:    (r[0] || '').trim(),
+      flavour: (r[1] || '').trim(),
+      hash:    itemHash((r[0] || '').trim()),
+    }));
+    dataSource = 'live';
+  } catch (err) {
+    console.warn('Magic Items sheet fetch failed — using fallback data.', err);
+    buildItemsFromFallback();
+    dataSource = 'fallback';
+  }
+}
+
+function buildItemsFromFallback() {
+  ITEMS = FALLBACK_ITEMS.map(([name, flavour]) => ({
+    name,
+    flavour,
+    hash: itemHash(name),
+  }));
+}
+
+// ============================================================
+//  PICK — never repeat until all items have been seen
+//  Uses a simple shuffle-bag approach stored in memory.
+// ============================================================
+let bag = [];
+
+function pickItem() {
+  if (bag.length === 0) {
+    // Refill and shuffle
+    bag = ITEMS.map((_, i) => i);
+    for (let i = bag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [bag[i], bag[j]] = [bag[j], bag[i]];
+    }
+  }
+  // Avoid immediately repeating the last item shown
+  if (current && bag.length > 1 && ITEMS[bag[bag.length - 1]] === current) {
+    const idx = bag.pop();
+    bag.unshift(idx);
+  }
+  return ITEMS[bag.pop()];
+}
+
+// ============================================================
+//  SOURCE BADGE
+// ============================================================
+function sourceBadgeHTML() {
+  const cls  = dataSource === 'live' ? 'live' : 'fallback';
+  const text = dataSource === 'live'
+    ? 'Live from Google Sheets'
+    : isConfigured() ? 'Sheet unreachable — built-in data' : 'Using built-in data';
+  return `<div class="source-badge ${cls}"><span class="dot"></span>${text}</div>`;
+}
+
+// ============================================================
+//  RENDER — initial full render
+// ============================================================
+function render(item) {
+  current = item;
+  const m = document.getElementById('main');
+  m.innerHTML = `
+    <div class="loot-card" id="loot-card">
+      <div class="item-image-slot" id="img-slot">
+        <span class="slot-icon">✨</span>
+        <span class="slot-hash">${item.hash}</span>
+      </div>
+      <div>
+        <div class="item-name-label">Magic Item</div>
+        <div class="item-name" id="item-name">${escHtml(item.name)}</div>
+      </div>
+      <div class="card-divider"></div>
+      <div>
+        <div class="item-flavour-label">Description</div>
+        <div class="item-flavour" id="item-flavour">${escHtml(item.flavour)}</div>
+      </div>
+      ${sourceBadgeHTML()}
+    </div>
+    <button class="pull-btn" id="pull-btn" onclick="doPull()">💰 Pull Another Item</button>`;
+}
+
+// ============================================================
+//  PULL — animated swap on subsequent pulls
+// ============================================================
+function doPull() {
+  if (isAnimating) return;
+  isAnimating = true;
+
+  const nameEl   = document.getElementById('item-name');
+  const flavEl   = document.getElementById('item-flavour');
+  const imgSlot  = document.getElementById('img-slot');
+  const btn      = document.getElementById('pull-btn');
+  btn.disabled   = true;
+
+  // Fade out
+  nameEl.classList.add('fading');
+  flavEl.classList.add('fading');
+
+  setTimeout(() => {
+    const next = pickItem();
+    current = next;
+
+    nameEl.textContent = next.name;
+    flavEl.textContent = next.flavour;
+
+    // Update image slot hash
+    imgSlot.innerHTML = `
+      <span class="slot-icon">✨</span>
+      <span class="slot-hash">${next.hash}</span>`;
+
+    // Fade back in
+    nameEl.classList.remove('fading');
+    flavEl.classList.remove('fading');
+
+    btn.disabled  = false;
+    isAnimating   = false;
+  }, 180);
+}
+
+// ============================================================
+//  ESCAPE HTML helper
+// ============================================================
+function escHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ============================================================
+//  BOOT
+// ============================================================
+loadData().then(() => {
+  render(pickItem());
+});
+</script>
+</body>
+</html>

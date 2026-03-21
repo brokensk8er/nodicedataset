@@ -37,7 +37,6 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
-  /* ── Header ── */
   header {
     width: 100%;
     max-width: 520px;
@@ -82,7 +81,6 @@
     margin: 1.1rem auto 0;
   }
 
-  /* ── Main grid ── */
   main {
     width: 100%;
     max-width: 520px;
@@ -106,7 +104,6 @@
     gap: 14px;
   }
 
-  /* ── Tool card ── */
   .tool-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -221,7 +218,6 @@
     flex-shrink: 0;
   }
 
-  /* ── Slide-in animation ── */
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -237,7 +233,6 @@
   .tool-card:nth-child(4) { animation-delay: .26s; }
   .tool-card:nth-child(5) { animation-delay: .32s; }
 
-  /* ── Footer ── */
   footer {
     text-align: center;
     padding-bottom: 1.5rem;
@@ -277,6 +272,14 @@
       <span class="tool-badge badge-ready">Ready</span>
     </a>
 
+    <!-- Loot Table — ACTIVE -->
+    <a class="tool-card active" href="loot.html">
+      <div class="tool-icon">💰</div>
+      <div class="tool-name">Loot Table</div>
+      <div class="tool-desc">Reach into the pile. See what fate provides.</div>
+      <span class="tool-badge badge-ready">Ready</span>
+    </a>
+
     <!-- Scenario Generator — COMING SOON (wide) -->
     <div class="tool-card coming-soon wide">
       <div class="tool-icon">🗺️</div>
@@ -287,20 +290,14 @@
       </div>
     </div>
 
-    <!-- NPC Generator — COMING SOON -->
-    <div class="tool-card coming-soon">
+    <!-- NPC Generator — COMING SOON (wide) -->
+    <div class="tool-card coming-soon wide">
       <div class="tool-icon">🧙</div>
-      <div class="tool-name">NPC Gen</div>
-      <div class="tool-desc">Instant strangers with agendas.</div>
-      <span class="tool-badge badge-soon">Coming Soon</span>
-    </div>
-
-    <!-- Loot Table — COMING SOON -->
-    <div class="tool-card coming-soon">
-      <div class="tool-icon">💰</div>
-      <div class="tool-name">Loot Table</div>
-      <div class="tool-desc">Treasure that raises more questions.</div>
-      <span class="tool-badge badge-soon">Coming Soon</span>
+      <div class="tool-text">
+        <div class="tool-name">NPC Gen</div>
+        <div class="tool-desc">Instant strangers with agendas and terrible timing.</div>
+        <span class="tool-badge badge-soon">Coming Soon</span>
+      </div>
     </div>
 
   </div>
