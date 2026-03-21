@@ -1,25 +1,29 @@
-# 🎲 Improv D&D — Random Generator Suite
+# 🎲 No Dice — Improv D&D Tool Suite
 
-A mobile-friendly web app for live improv Dungeons & Dragons shows. Players scan a QR code and instantly roll a random character. Built as a static GitHub Pages site with Google Sheets as a live editable data backend.
+A mobile-friendly web app for live improv Dungeons & Dragons shows. Players scan a QR code and instantly get tools to shape their session. Built as a static GitHub Pages site with Google Sheets as a live editable data backend.
 
 ---
 
 ## Project Status
 
-| Generator       | Status      | File            |
-|----------------|-------------|-----------------|
-| Character       | ✅ Complete  | `index.html`    |
-| Scenario        | 🔜 Planned  | `scenario.html` |
-| Quest / Hook    | 🔜 Planned  | `quest.html`    |
-| Item / Loot     | 🔜 Planned  | `item.html`     |
+| Tool                | Status         | File            |
+|--------------------|----------------|-----------------|
+| Hub / Vault         | ✅ Complete    | `index.html`    |
+| Character Generator | ✅ Complete    | `chargen.html`  |
+| Fate's Flip (coin)  | ✅ Complete    | `coinflip.html` |
+| Scenario Generator  | 🔜 Planned     | `scenario.html` |
+| NPC Generator       | 🔜 Planned     | `npc.html`      |
+| Loot Table          | 🔜 Planned     | `loot.html`     |
 
 ---
 
 ## How It Works
 
-Players scan a QR code at the show. The page loads, fetches the latest variable data from a Google Sheet, and generates a random character. Players get **3 mulligans** shared across all fields — they can spend them rerolling individual fields or the entire character, but once they're gone, the dice have spoken.
+Players scan a QR code at the show and land on the hub page, where they choose a tool. The character generator fetches the latest variable data from a Google Sheet and rolls a random character. Players get **3 mulligans** shared across all fields — they can spend them rerolling individual fields or the entire character, but once they're gone, the dice have spoken.
 
-If the Google Sheet is unreachable for any reason, the page falls back silently to built-in hardcoded data so players never see a broken screen.
+The coin flip tool gives a binary pass/fail result with a 3D animated coin, confetti on a pass, and Web Audio sound effects — no external dependencies.
+
+If the Google Sheet is unreachable for any reason, the character generator falls back silently to built-in hardcoded data so players never see a broken screen.
 
 ---
 
@@ -27,10 +31,12 @@ If the Google Sheet is unreachable for any reason, the page falls back silently 
 
 ```
 /
-├── index.html          — Character generator (live)
+├── index.html          — Hub / tool vault (links to all tools)
+├── chargen.html        — Character generator (live)
+├── coinflip.html       — Coin flip / pass-fail tool (live)
 ├── scenario.html       — Scenario generator (planned)
-├── quest.html          — Quest hook generator (planned)
-├── item.html           — Item/loot generator (planned)
+├── npc.html            — NPC generator (planned)
+├── loot.html           — Loot table generator (planned)
 ├── design-system.css   — Visual design reference (not linked, docs only)
 ├── character-data.csv  — Starter data for Google Sheets import
 └── README.md           — This file
@@ -38,22 +44,36 @@ If the Google Sheet is unreachable for any reason, the page falls back silently 
 
 ---
 
-## Character Generator Fields
+## Tool Details
 
-Each generated character has six fields:
+### Hub (`index.html`)
+A 2-column card grid linking to all tools. Active tools are `<a>` tags; coming-soon tools are styled `<div>` cards with an amber badge. Add new tools here as they're built.
 
-| Field            | Description                              |
-|-----------------|------------------------------------------|
-| Name             | Ridiculous first + last name combo       |
-| Race / Species   | D&D race with a comedic twist            |
-| Class            | Standard class with a silly caveat       |
-| Backstory        | One-line absurd origin story             |
-| Personality Quirk| A behavioural trait to play into         |
-| Secret / Flaw    | Something they'd rather you didn't know  |
+### Character Generator (`chargen.html`)
+Generates a full character across six fields:
+
+| Field             | Description                              |
+|------------------|------------------------------------------|
+| Name              | Ridiculous first + last name combo       |
+| Race / Species    | D&D race with a comedic twist            |
+| Class             | Standard class with a silly caveat       |
+| Backstory         | One-line absurd origin story             |
+| Personality Quirk | A behavioural trait to play into         |
+| Secret / Flaw     | Something they'd rather you didn't know  |
+
+Designed to fit entirely on one phone screen without scrolling — cards stretch to fill `100dvh` using flexbox. Pulls live data from Google Sheets with silent fallback to built-in data.
+
+### Fate's Flip (`coinflip.html`)
+A binary pass/fail coin flip tool. Features:
+- 3D coin flip animation (CSS `scaleX` squish, face swap at edge)
+- Confetti burst on a pass (5-cannon spread, Web Audio coin chime)
+- Womp-womp sound on a fail
+- Sassy flavour text on every result
+- No external JS dependencies — all audio synthesised via Web Audio API
 
 ---
 
-## Mulligan System
+## Mulligan System (Character Generator)
 
 - Players start with **3 mulligans** shared across all fields
 - Each mulligan can be spent on any field reroll, or on "Roll New Character" (rerolls everything)
@@ -89,7 +109,7 @@ Each generated character has six fields:
 
 ### Wire it up
 
-Open `index.html` and fill in the `CONFIG` block near the top of the `<script>`:
+Open `chargen.html` and fill in the `CONFIG` block near the top of the `<script>`:
 
 ```js
 const CONFIG = {
@@ -122,7 +142,7 @@ Just open the Google Sheet and edit any tab. Add rows, delete rows, change wordi
 Full reference lives in `design-system.css`. Summary:
 
 **Fonts**
-- `Cinzel` — headings, field labels, buttons (D&D serif flavour)
+- `Cinzel 400/600/700` — headings, field labels, buttons, nav links (D&D serif flavour)
 - `Lato 300/400` — body text and generated values (clean, phone-readable)
 
 **Colour tokens**
@@ -130,36 +150,39 @@ Full reference lives in `design-system.css`. Summary:
 --ink:       #1a1a2e   /* text, dark buttons */
 --parchment: #faf7f2   /* page background */
 --gold:      #c9a84c   /* accent — labels, pips, hover states */
+--gold-dim:  #a07c2e   /* subdued gold — site labels, back links */
 --card-bg:   #ffffff   /* field card background */
 --border:    #e8e2d9   /* all borders */
 --muted:     #6b6676   /* secondary text */
 ```
 
 **Design principles**
-- Mobile-first, max content width 480px
+- Mobile-first, `100dvh` layouts — no scrolling required
 - Cards animate in with a staggered slide-up on each roll
 - Die icon spins on reroll, field value fades out/in
 - Source badge shows green (live sheet) or amber (fallback data)
 - No external JS dependencies — vanilla HTML/CSS/JS only
+- Parchment background with subtle noise texture and gold radial gradients
 
 ---
 
 ## Building Future Generators
 
-Each new generator (scenario, quest, item) follows the same pattern:
+Each new generator (scenario, NPC, loot) follows the same pattern:
 
-1. Copy `index.html` as your starting point
+1. Copy `chargen.html` as your starting point
 2. Update `CONFIG.TABS` to point at the new sheet's tab names
 3. Update `FIELDS` with the new category keys and labels
 4. Update `FALLBACK` with starter data for the new generator
 5. Change `<title>`, `<h1>`, and `.subtitle` text
-6. Optionally override `--gold` and `--gold-bg` in a `<style>` block for a different accent colour per generator:
+6. Update `index.html`: change the tool card from `class="coming-soon"` to `class="active"` and wrap the `<div>` in an `<a href="yourtool.html">`
+7. Optionally override `--gold` and `--gold-dim` for a different accent colour:
 
 ```css
-/* Example: blue accent for a quest generator */
+/* Example: teal accent for a scenario generator */
 :root {
-  --gold:    #2e6da4;
-  --gold-bg: #f0f6ff;
+  --gold:    #2d7a5e;
+  --gold-dim: #1e5a44;
 }
 ```
 
@@ -171,7 +194,7 @@ The mulligan system, Google Sheets wiring, source badge, animations, and fallbac
 
 When starting a new Claude conversation to continue this project, paste this at the top:
 
-> *I'm building an improv D&D random generator suite on GitHub Pages. It pulls variable data from Google Sheets (one tab per category), has a 3-mulligan shared reroll system, and uses a Cinzel/Lato design system with a parchment colour palette. The character generator is complete in `index.html`. The design reference is in `design-system.css`. I'd like to continue building [describe what you need].*
+> *I'm building an improv D&D random generator suite on GitHub Pages called "No Dice". It has a hub page (`index.html`), a character generator (`chargen.html`), and a coin flip tool (`coinflip.html`). It uses a Cinzel/Lato design system with a parchment colour palette, pulls variable data from Google Sheets (one tab per category), and has a 3-mulligan shared reroll system. I'd like to continue building [describe what you need].*
 
 Then paste in the relevant file(s) for context.
 
@@ -184,7 +207,8 @@ Then paste in the relevant file(s) for context.
 - [ ] QR code tested on at least one phone
 - [ ] Fallback data is current (matches sheet content roughly)
 - [ ] API key restrictions include the live GitHub Pages URL
+- [ ] Test both tools on the actual show device before the night
 
 ---
 
-*Built with Claude · Improv D&D · Your hometown, probably*
+*Built with Claude · No Dice · Improv D&D · Your hometown, probably*
