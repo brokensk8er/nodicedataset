@@ -674,6 +674,10 @@ function doRoll() {
   if (state.rolled) state.mulligans--;
   state.rolled = true;
   state.values = generateAll();
+  // Lock as soon as the last mulligan is consumed
+  if (state.mulligans === 0) {
+    state.lockedAt = Date.now();
+  }
   saveSession();
   render();
 }
