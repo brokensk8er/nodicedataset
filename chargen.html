@@ -40,6 +40,31 @@
     height: 100dvh;
   }
 
+  /* ── Desktop wrapper — centres and constrains on wide screens ── */
+  .page-frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+  }
+
+  @media (min-width: 600px) {
+    body {
+      align-items: center;
+      justify-content: center;
+    }
+    .page-frame {
+      width: 420px;
+      height: 92dvh;
+      max-height: 860px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 48px rgba(26,26,46,.18), 0 2px 8px rgba(26,26,46,.08);
+      border: 1px solid var(--border);
+    }
+  }
+
   /* ── Header ── */
   header {
     text-align: center;
@@ -47,6 +72,7 @@
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     position: relative;
+    background-color: var(--parchment);
   }
 
   .site-label {
@@ -90,6 +116,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     flex-shrink: 0;
+    background-color: var(--parchment);
   }
 
   .pip-row { display: flex; gap: 5px; }
@@ -111,6 +138,7 @@
     overflow: hidden;
     padding: 0 12px 6px;
     min-height: 0;
+    background-color: var(--parchment);
   }
 
   /* Loading state */
@@ -147,23 +175,13 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    /* thin, unobtrusive scrollbar */
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
 
-  .fields-scroll::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .fields-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .fields-scroll::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 2px;
-  }
+  .fields-scroll::-webkit-scrollbar { width: 4px; }
+  .fields-scroll::-webkit-scrollbar-track { background: transparent; }
+  .fields-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   /* ── Each field row inside the card ── */
   .field-row {
@@ -178,7 +196,6 @@
     background: rgba(201,168,76,.03);
   }
 
-  /* Gold divider between rows */
   .field-row + .field-row::before {
     content: '';
     position: absolute;
@@ -214,7 +231,7 @@
 
   .field-value.fading { opacity: 0; }
 
-  /* ── Reroll button — sits right-aligned inside each row ── */
+  /* ── Reroll button ── */
   .reroll-btn {
     flex-shrink: 0;
     margin-left: 10px;
@@ -246,7 +263,7 @@
   .reroll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .reroll-btn .die { font-size: 0.82rem; }
 
-  /* ── Bottom strip inside the card: roll button + source badge ── */
+  /* ── Card footer ── */
   .card-footer {
     flex-shrink: 0;
     border-top: 1px solid var(--border);
@@ -277,7 +294,7 @@
   .roll-btn:active { transform: scale(0.98); }
   .roll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* ── Lock notice (replaces roll button when locked) ── */
+  /* ── Lock notice ── */
   .lock-notice {
     width: 100%;
     background: var(--border);
@@ -333,11 +350,12 @@
   .source-badge.live .dot     { background: #2d7a5e; }
   .source-badge.fallback .dot { background: #b8860b; }
 
-  /* ── Footer nav — outside the card ── */
+  /* ── Footer nav ── */
   footer {
     text-align: center;
     padding: 5px 0 7px;
     flex-shrink: 0;
+    background-color: var(--parchment);
   }
 
   .nav-link {
@@ -393,22 +411,26 @@
 </head>
 <body>
 
-<header>
-  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
-  <h1>Roll Your <span>Character</span></h1>
-  <p class="subtitle">Fate is waiting</p>
-</header>
+<div class="page-frame">
 
-<div id="app">
-  <div class="loading">
-    <span class="spinner">🎲</span><br>
-    Consulting the dice gods…
+  <header>
+    <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+    <h1>Roll Your <span>Character</span></h1>
+    <p class="subtitle">Fate is waiting</p>
+  </header>
+
+  <div id="app">
+    <div class="loading">
+      <span class="spinner">🎲</span><br>
+      Consulting the dice gods…
+    </div>
   </div>
-</div>
 
-<footer>
-  <a class="nav-link" href="index.html">← Back to the Vault</a>
-</footer>
+  <footer>
+    <a class="nav-link" href="index.html">← Back to the Vault</a>
+  </footer>
+
+</div>
 
 <script>
 // ============================================================
