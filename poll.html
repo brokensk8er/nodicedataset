@@ -520,6 +520,119 @@
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
   }
+
+  /* ── Dynamic option builder (admin form) ── */
+
+  /* Row = letter tag + input + optional remove button */
+  .option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    animation: optionSlideIn .2s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  @keyframes optionSlideIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .option-row .form-input {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  /* Gold letter badge — A, B, C … */
+  .option-letter-tag {
+    font-family: 'Cinzel', serif;
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--gold);
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+  }
+
+  /* ✕ remove button — only visible on options C/D/E */
+  .btn-remove-option {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: .85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+
+  .btn-remove-option:hover {
+    border-color: var(--fail-red);
+    color: var(--fail-red);
+    background: rgba(192,57,43,.05);
+  }
+
+  /* Invisible spacer keeps required rows aligned with removable ones */
+  .btn-remove-placeholder {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Options section heading row */
+  .options-section-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .options-count-hint {
+    font-family: 'Lato', sans-serif;
+    font-size: .6rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: .03em;
+  }
+
+  /* Dashed "add another option" button */
+  .btn-add-option {
+    width: 100%;
+    background: none;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: .82rem;
+    font-weight: 400;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: .03em;
+    transition: border-color .18s, color .18s, background .18s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .btn-add-option:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-bg);
+  }
+
+  .btn-add-option .add-plus {
+    font-size: 1.1rem;
+    line-height: 1;
+    opacity: .55;
+  }
 </style>
 </head>
 <body>
@@ -666,6 +779,19 @@ if (IS_DEMO) {
   let unsubPoll = null;
   let unsubVotes = null;
 
+  // Option letter labels and constants — used by admin and audience renderers
+  const LETTERS       = ['A', 'B', 'C', 'D', 'E'];
+  const MIN_OPTIONS   = 2;
+  const MAX_OPTIONS   = 5;
+  const PLACEHOLDERS  = [
+    'The first option…',
+    'The second option…',
+    'A third choice…',
+    'Or maybe this…',
+    'One more possibility…',
+  ];
+  let adminOptionCount = MIN_OPTIONS;
+
   try {
     app     = initializeApp(FIREBASE_CONFIG);
     db      = getDatabase(app);
@@ -684,51 +810,134 @@ if (IS_DEMO) {
   const voterId = getVoterId();
 
   // ── RENDER: Admin form (no active poll) ──────────────────
-  function renderAdminForm() {
+  // activeCount tracks how many option rows are shown (2–5).
+  // It lives outside so re-renders triggered by add/remove
+  // can restore the right count.
+
+  function renderAdminForm(preserveValues) {
     subtitle.textContent = 'Showrunner controls';
+
+    // Build option rows HTML
+    const optionRowsHtml = LETTERS.slice(0, adminOptionCount).map((letter, i) => {
+      const isRequired = i < MIN_OPTIONS;
+      const removeBtn = isRequired
+        ? `<div class="btn-remove-placeholder"></div>`
+        : `<button class="btn-remove-option" data-index="${i}" title="Remove option" aria-label="Remove option ${letter}">✕</button>`;
+      return `
+        <div class="option-row" id="option-row-${i}">
+          <span class="option-letter-tag">${letter}</span>
+          <input class="form-input" id="opt-${i}" type="text"
+            placeholder="${PLACEHOLDERS[i]}" maxlength="80" autocomplete="off"
+            value="${preserveValues && preserveValues[i] ? esc(preserveValues[i]) : ''}">
+          ${removeBtn}
+        </div>`;
+    }).join('');
+
+    const canAddMore = adminOptionCount < MAX_OPTIONS;
+    const addBtnHtml = canAddMore
+      ? `<button class="btn-add-option" id="add-option-btn">
+           <span class="add-plus">＋</span>
+           Add another option (${adminOptionCount}/${MAX_OPTIONS})
+         </button>`
+      : '';
+
     cardBody.innerHTML = `
       <div class="admin-badge">⚔ Showrunner</div>
       <div class="form-group">
         <label class="form-label" for="q-input">Question</label>
         <input class="form-input" id="q-input" type="text"
-          placeholder="Do we go with A or B?" maxlength="120" autocomplete="off">
+          placeholder="What does the crowd choose?" maxlength="120" autocomplete="off"
+          value="${preserveValues && preserveValues.question ? esc(preserveValues.question) : ''}">
       </div>
-      <div class="form-group">
-        <label class="form-label" for="opt-a">Option A</label>
-        <input class="form-input" id="opt-a" type="text"
-          placeholder="The first option…" maxlength="80" autocomplete="off">
+      <div class="options-section-label">
+        <span class="form-label" style="margin-bottom:0;">Options</span>
+        <span class="options-count-hint">Min 2 · Max 5</span>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="opt-b">Option B</label>
-        <input class="form-input" id="opt-b" type="text"
-          placeholder="The second option…" maxlength="80" autocomplete="off">
-      </div>`;
+      <div id="options-container">
+        ${optionRowsHtml}
+      </div>
+      ${addBtnHtml}`;
 
     showFooter(`
       <button class="btn-primary" id="launch-btn">⚔ Launch Poll</button>
       <div class="source-badge live"><span class="dot"></span>Connected</div>`);
 
+    // Wire launch button
     document.getElementById('launch-btn').onclick = launchPoll;
 
-    // Enter key on any input triggers launch
-    ['q-input', 'opt-a', 'opt-b'].forEach(id => {
-      document.getElementById(id).addEventListener('keydown', e => {
-        if (e.key === 'Enter') launchPoll();
+    // Enter on question field moves to first option; enter on last option launches
+    document.getElementById('q-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { document.getElementById('opt-0')?.focus(); }
+    });
+    for (let i = 0; i < adminOptionCount; i++) {
+      document.getElementById(`opt-${i}`).addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const next = document.getElementById(`opt-${i + 1}`);
+          if (next) { next.focus(); } else { launchPoll(); }
+        }
+      });
+    }
+
+    // Wire add button
+    document.getElementById('add-option-btn')?.addEventListener('click', () => {
+      const vals = gatherFormValues();
+      adminOptionCount++;
+      renderAdminForm(vals);
+      // Focus the newly added input
+      setTimeout(() => document.getElementById(`opt-${adminOptionCount - 1}`)?.focus(), 50);
+    });
+
+    // Wire remove buttons
+    document.querySelectorAll('.btn-remove-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.index);
+        const vals = gatherFormValues();
+        // Shift values down to fill the removed slot
+        vals.splice(idx, 1);
+        adminOptionCount--;
+        renderAdminForm(vals);
       });
     });
   }
 
-  // ── RENDER: Admin results — pre-reveal (votes coming in, results hidden from audience) ──
+  // Collect current question + option values from the form
+  function gatherFormValues() {
+    const vals = [];
+    vals.question = document.getElementById('q-input')?.value ?? '';
+    for (let i = 0; i < adminOptionCount; i++) {
+      vals.push(document.getElementById(`opt-${i}`)?.value ?? '');
+    }
+    return vals;
+  }
+
+  // ── RENDER: Admin results — pre-reveal ───────────────────
   function renderAdminPreReveal(poll, votes) {
-    const countA = Object.values(votes).filter(v => v === 'A').length;
-    const countB = Object.values(votes).filter(v => v === 'B').length;
-    const total  = countA + countB;
-    const pctA   = total ? Math.round(countA / total * 100) : 0;
-    const pctB   = total ? Math.round(countB / total * 100) : 0;
-    const winA   = countA > countB;
-    const winB   = countB > countA;
+    const options = poll.options || [];
+    const counts  = options.map((_, i) =>
+      Object.values(votes).filter(v => v === String(i)).length
+    );
+    const total   = counts.reduce((a, b) => a + b, 0);
+    const pcts    = counts.map(c => total ? Math.round(c / total * 100) : 0);
+    const maxCount = Math.max(...counts);
 
     subtitle.textContent = 'Showrunner controls';
+
+    const barsHtml = options.map((opt, i) => {
+      const isWinner = counts[i] === maxCount && total > 0;
+      return `
+        <div class="result-row">
+          <div class="result-label-row">
+            <span class="result-option-name">${LETTERS[i]} — ${esc(opt)}</span>
+            <span>
+              <span class="result-pct">${pcts[i]}%</span>
+              <span class="result-count">${counts[i]} vote${counts[i] !== 1 ? 's' : ''}</span>
+            </span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${isWinner ? 'winner' : ''}" style="width:${pcts[i]}%"></div>
+          </div>
+        </div>`;
+    }).join('');
 
     cardBody.innerHTML = `
       <div class="admin-badge">⚔ Showrunner</div>
@@ -737,32 +946,7 @@ if (IS_DEMO) {
         <div class="live-indicator"><span class="live-dot"></span>Votes incoming</div>
       </div>
       <p class="question-text">${esc(poll.question)}</p>
-      <div class="result-bar-wrap">
-        <div class="result-row">
-          <div class="result-label-row">
-            <span class="result-option-name">A — ${esc(poll.optA)}</span>
-            <span>
-              <span class="result-pct">${pctA}%</span>
-              <span class="result-count">${countA} vote${countA !== 1 ? 's' : ''}</span>
-            </span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${winA ? 'winner' : ''}" style="width:${pctA}%"></div>
-          </div>
-        </div>
-        <div class="result-row">
-          <div class="result-label-row">
-            <span class="result-option-name">B — ${esc(poll.optB)}</span>
-            <span>
-              <span class="result-pct">${pctB}%</span>
-              <span class="result-count">${countB} vote${countB !== 1 ? 's' : ''}</span>
-            </span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${winB ? 'winner' : ''}" style="width:${pctB}%"></div>
-          </div>
-        </div>
-      </div>
+      <div class="result-bar-wrap">${barsHtml}</div>
       <p class="total-votes" style="margin-bottom:4px;">${total} vote${total !== 1 ? 's' : ''} cast — audience sees nothing yet</p>`;
 
     showFooter(`
@@ -775,17 +959,34 @@ if (IS_DEMO) {
     document.getElementById('close-btn').onclick  = clearPoll;
   }
 
-  // ── RENDER: Admin results — post-reveal (audience can now see bars) ──
+  // ── RENDER: Admin results — post-reveal ──────────────────
   function renderAdminPostReveal(poll, votes) {
-    const countA = Object.values(votes).filter(v => v === 'A').length;
-    const countB = Object.values(votes).filter(v => v === 'B').length;
-    const total  = countA + countB;
-    const pctA   = total ? Math.round(countA / total * 100) : 0;
-    const pctB   = total ? Math.round(countB / total * 100) : 0;
-    const winA   = countA > countB;
-    const winB   = countB > countA;
+    const options = poll.options || [];
+    const counts  = options.map((_, i) =>
+      Object.values(votes).filter(v => v === String(i)).length
+    );
+    const total    = counts.reduce((a, b) => a + b, 0);
+    const pcts     = counts.map(c => total ? Math.round(c / total * 100) : 0);
+    const maxCount = Math.max(...counts);
 
     subtitle.textContent = 'Showrunner controls';
+
+    const barsHtml = options.map((opt, i) => {
+      const isWinner = counts[i] === maxCount && total > 0;
+      return `
+        <div class="result-row">
+          <div class="result-label-row">
+            <span class="result-option-name">${LETTERS[i]} — ${esc(opt)}</span>
+            <span>
+              <span class="result-pct">${pcts[i]}%</span>
+              <span class="result-count">${counts[i]} vote${counts[i] !== 1 ? 's' : ''}</span>
+            </span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${isWinner ? 'winner' : ''}" style="width:${pcts[i]}%"></div>
+          </div>
+        </div>`;
+    }).join('');
 
     cardBody.innerHTML = `
       <div class="admin-badge">⚔ Showrunner</div>
@@ -796,32 +997,7 @@ if (IS_DEMO) {
         </div>
       </div>
       <p class="question-text">${esc(poll.question)}</p>
-      <div class="result-bar-wrap">
-        <div class="result-row">
-          <div class="result-label-row">
-            <span class="result-option-name">A — ${esc(poll.optA)}</span>
-            <span>
-              <span class="result-pct">${pctA}%</span>
-              <span class="result-count">${countA} vote${countA !== 1 ? 's' : ''}</span>
-            </span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${winA ? 'winner' : ''}" style="width:${pctA}%"></div>
-          </div>
-        </div>
-        <div class="result-row">
-          <div class="result-label-row">
-            <span class="result-option-name">B — ${esc(poll.optB)}</span>
-            <span>
-              <span class="result-pct">${pctB}%</span>
-              <span class="result-count">${countB} vote${countB !== 1 ? 's' : ''}</span>
-            </span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${winB ? 'winner' : ''}" style="width:${pctB}%"></div>
-          </div>
-        </div>
-      </div>
+      <div class="result-bar-wrap">${barsHtml}</div>
       <p class="total-votes" style="margin-bottom:4px;">${total} vote${total !== 1 ? 's' : ''} cast</p>`;
 
     showFooter(`
@@ -829,17 +1005,19 @@ if (IS_DEMO) {
       <button class="btn-danger" id="close-btn">Close Poll &amp; Clear</button>
       <div class="source-badge live"><span class="dot"></span>Connected</div>`);
 
-    document.getElementById('new-btn').onclick  = clearPoll;
+    document.getElementById('new-btn').onclick   = clearPoll;
     document.getElementById('close-btn').onclick = clearPoll;
   }
 
   // ── RENDER: Audience — voted, waiting for reveal ─────────
-  function renderAudienceAwaitingReveal(poll, myVoteChoice) {
+  function renderAudienceAwaitingReveal(poll, myVoteIndex) {
+    const options    = poll.options || [];
+    const choiceText = options[myVoteIndex] ?? '';
     subtitle.textContent = 'The crowd decides';
     cardBody.innerHTML = `
       <div class="question-label">The Question</div>
       <p class="question-text">${esc(poll.question)}</p>
-      <p class="voted-chip">✔ Voted — ${myVoteChoice === 'A' ? esc(poll.optA) : esc(poll.optB)}</p>
+      <p class="voted-chip">✔ Voted — ${LETTERS[myVoteIndex]}: ${esc(choiceText)}</p>
       <span class="status-icon waiting-pulse" style="margin-top:6px;">⚔</span>
       <p class="status-heading" style="font-size:.95rem;">Waiting for the reveal…</p>
       <p class="status-body" style="margin-bottom:10px;">The showrunner will reveal the results shortly.</p>`;
@@ -859,68 +1037,61 @@ if (IS_DEMO) {
 
   // ── RENDER: Audience vote ────────────────────────────────
   function renderAudienceVote(poll) {
+    const options = poll.options || [];
     subtitle.textContent = 'The crowd decides';
+
+    const btnsHtml = options.map((opt, i) => `
+      <button class="vote-btn" id="vote-btn-${i}">
+        <span class="option-letter">${LETTERS[i]}</span>
+        <span>${esc(opt)}</span>
+      </button>`).join('');
+
     cardBody.innerHTML = `
       <div class="question-label">The Question</div>
       <p class="question-text">${esc(poll.question)}</p>
-      <div class="vote-options">
-        <button class="vote-btn" id="vote-a">
-          <span class="option-letter">A</span>
-          <span>${esc(poll.optA)}</span>
-        </button>
-        <button class="vote-btn" id="vote-b">
-          <span class="option-letter">B</span>
-          <span>${esc(poll.optB)}</span>
-        </button>
-      </div>`;
+      <div class="vote-options">${btnsHtml}</div>`;
     hideFooter();
 
-    document.getElementById('vote-a').onclick = () => castVote('A', poll);
-    document.getElementById('vote-b').onclick = () => castVote('B', poll);
+    options.forEach((_, i) => {
+      document.getElementById(`vote-btn-${i}`).onclick = () => castVote(i, poll);
+    });
   }
 
-  // ── RENDER: Audience results (post-vote) ─────────────────
-  function renderAudienceResults(poll, votes, myVoteChoice) {
-    const countA = Object.values(votes).filter(v => v === 'A').length;
-    const countB = Object.values(votes).filter(v => v === 'B').length;
-    const total  = countA + countB;
-    const pctA   = total ? Math.round(countA / total * 100) : 0;
-    const pctB   = total ? Math.round(countB / total * 100) : 0;
-    const winA   = countA > countB;
-    const winB   = countB > countA;
+  // ── RENDER: Audience results (post-reveal) ───────────────
+  function renderAudienceResults(poll, votes, myVoteIndex) {
+    const options  = poll.options || [];
+    const counts   = options.map((_, i) =>
+      Object.values(votes).filter(v => v === String(i)).length
+    );
+    const total    = counts.reduce((a, b) => a + b, 0);
+    const pcts     = counts.map(c => total ? Math.round(c / total * 100) : 0);
+    const maxCount = Math.max(...counts);
 
+    const choiceText = options[myVoteIndex] ?? '';
     subtitle.textContent = 'The crowd decides';
+
+    const barsHtml = options.map((opt, i) => {
+      const isWinner = counts[i] === maxCount && total > 0;
+      return `
+        <div class="result-row">
+          <div class="result-label-row">
+            <span class="result-option-name">${LETTERS[i]} — ${esc(opt)}</span>
+            <span>
+              <span class="result-pct">${pcts[i]}%</span>
+              <span class="result-count">${counts[i]}</span>
+            </span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${isWinner ? 'winner' : ''}" style="width:${pcts[i]}%"></div>
+          </div>
+        </div>`;
+    }).join('');
 
     cardBody.innerHTML = `
       <div class="question-label">The Question</div>
       <p class="question-text">${esc(poll.question)}</p>
-      <p class="voted-chip">✔ You voted ${myVoteChoice === 'A' ? esc(poll.optA) : esc(poll.optB)}</p>
-      <div class="result-bar-wrap">
-        <div class="result-row">
-          <div class="result-label-row">
-            <span class="result-option-name">A — ${esc(poll.optA)}</span>
-            <span>
-              <span class="result-pct">${pctA}%</span>
-              <span class="result-count">${countA}</span>
-            </span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${winA ? 'winner' : ''}" id="bar-a" style="width:${pctA}%"></div>
-          </div>
-        </div>
-        <div class="result-row">
-          <div class="result-label-row">
-            <span class="result-option-name">B — ${esc(poll.optB)}</span>
-            <span>
-              <span class="result-pct">${pctB}%</span>
-              <span class="result-count">${countB}</span>
-            </span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${winB ? 'winner' : ''}" id="bar-b" style="width:${pctB}%"></div>
-          </div>
-        </div>
-      </div>
+      <p class="voted-chip">✔ You voted ${LETTERS[myVoteIndex]}: ${esc(choiceText)}</p>
+      <div class="result-bar-wrap">${barsHtml}</div>
       <p class="total-votes">${total} vote${total !== 1 ? 's' : ''} cast — results updating live</p>`;
 
     showFooter(`<div class="source-badge live"><span class="dot"></span>Connected</div>`);
@@ -929,28 +1100,69 @@ if (IS_DEMO) {
   // ── ACTIONS ──────────────────────────────────────────────
 
   async function launchPoll() {
-    const q    = document.getElementById('q-input')?.value.trim();
-    const optA = document.getElementById('opt-a')?.value.trim();
-    const optB = document.getElementById('opt-b')?.value.trim();
+    const q = document.getElementById('q-input')?.value.trim();
 
-    if (!q || !optA || !optB) {
-      // Shake empty fields
-      ['q-input', 'opt-a', 'opt-b'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el && !el.value.trim()) {
+    // Collect all active option values
+    const options = [];
+    for (let i = 0; i < adminOptionCount; i++) {
+      options.push((document.getElementById(`opt-${i}`)?.value ?? '').trim());
+    }
+
+    // Validate — question + all active options must be non-empty
+    let hasError = false;
+    if (!q) {
+      const el = document.getElementById('q-input');
+      el.style.borderColor = '#c0392b';
+      el.focus();
+      setTimeout(() => { el.style.borderColor = ''; }, 1200);
+      hasError = true;
+    }
+    options.forEach((val, i) => {
+      if (!val) {
+        const el = document.getElementById(`opt-${i}`);
+        if (el) {
           el.style.borderColor = '#c0392b';
-          el.focus();
+          if (!hasError) { el.focus(); }
           setTimeout(() => { el.style.borderColor = ''; }, 1200);
         }
-      });
-      return;
-    }
+        hasError = true;
+      }
+    });
+    if (hasError) return;
 
     const btn = document.getElementById('launch-btn');
     if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
 
-    await set(pollRef, { question: q, optA, optB, active: true, revealed: false, ts: Date.now() });
+    // Store options as an array; votes will be stored as their index ("0", "1", …)
+    await set(pollRef, { question: q, options, active: true, revealed: false, ts: Date.now() });
     await set(votesRef, {});  // clear any stale votes
+
+    // Reset option count for next poll
+    adminOptionCount = MIN_OPTIONS;
+  }
+
+  async function castVote(index, poll) {
+    // index is a number (0–4); stored as a string key in Firebase
+    const choice = String(index);
+    myVote = choice;
+    sessionStorage.setItem('nodice_poll_vote_ts', poll.ts);
+    sessionStorage.setItem('nodice_poll_vote_choice', choice);
+
+    // Disable all vote buttons immediately
+    (poll.options || []).forEach((_, i) => {
+      const btn = document.getElementById(`vote-btn-${i}`);
+      if (btn) btn.disabled = true;
+    });
+
+    // Write to Firebase
+    const voterRef = ref(db, `nodice/votes/${voterId}`);
+    await set(voterRef, choice);
+
+    // Show waiting screen
+    renderAudienceAwaitingReveal(poll, index);
+
+    // Watch for the reveal
+    subscribeToVotes(poll, index);
   }
 
   async function revealResults() {
@@ -962,42 +1174,18 @@ if (IS_DEMO) {
   async function clearPoll() {
     await set(pollRef, { active: false });
     await set(votesRef, {});
+    adminOptionCount = MIN_OPTIONS;
   }
 
-  async function castVote(choice, poll) {
-    myVote = choice;
-    sessionStorage.setItem('nodice_poll_vote_ts', poll.ts);
-    sessionStorage.setItem('nodice_poll_vote_choice', choice);
-
-    // Disable buttons immediately
-    ['vote-a', 'vote-b'].forEach(id => {
-      const btn = document.getElementById(id);
-      if (btn) btn.disabled = true;
-    });
-
-    // Write to Firebase — voter ID is the key so duplicate submissions are idempotent
-    const voterRef = ref(db, `nodice/votes/${voterId}`);
-    await set(voterRef, choice);
-
-    // Show waiting screen — results only reveal when showrunner says so
-    renderAudienceAwaitingReveal(poll, choice);
-
-    // Keep watching for the reveal
-    subscribeToVotes(poll, choice);
-  }
-
-  function subscribeToVotes(poll, myVoteChoice) {
+  function subscribeToVotes(poll, myVoteIndex) {
     if (unsubVotes) unsubVotes();
     unsubVotes = onValue(votesRef, snap => {
-      // Re-read poll.revealed from the live poll snapshot
-      // We get the latest poll state via the outer onValue(pollRef) listener,
-      // so we track it in currentPollSnap
       const latestPoll = currentPollSnap;
       const votes = snap.val() || {};
       if (latestPoll && latestPoll.revealed) {
-        renderAudienceResults(latestPoll, votes, myVoteChoice);
+        renderAudienceResults(latestPoll, votes, myVoteIndex);
       } else {
-        renderAudienceAwaitingReveal(poll, myVoteChoice);
+        renderAudienceAwaitingReveal(poll, myVoteIndex);
       }
     });
   }
@@ -1005,11 +1193,10 @@ if (IS_DEMO) {
   // ── MAIN REALTIME LISTENER ───────────────────────────────
   //
   // Both admin and audience listen to the poll document.
-  // The poll document shape is:
-  //   { active: bool, question: string, optA: string, optB: string, ts: number }
-  //
-  // When active changes, both views update instantly.
-  // Admin also listens to votes separately for the result tallies.
+  // Poll document shape:
+  //   { active: bool, question: string, options: string[], revealed: bool, ts: number }
+  // Votes shape:
+  //   { [voterId]: "0" | "1" | "2" | "3" | "4" }  (string index into options array)
 
   function startListening() {
     // Initial loading state
@@ -1055,21 +1242,18 @@ if (IS_DEMO) {
       // Check if this voter has already voted in THIS poll
       const storedTs     = sessionStorage.getItem('nodice_poll_vote_ts');
       const storedChoice = sessionStorage.getItem('nodice_poll_vote_choice');
-      if (storedTs && parseInt(storedTs) === poll.ts && storedChoice) {
-        // Already voted — show results if revealed, otherwise show waiting screen
+      if (storedTs && parseInt(storedTs) === poll.ts && storedChoice !== null) {
+        // storedChoice is a string like "0", "1", "2" — parse to number for renderers
+        const storedIndex = parseInt(storedChoice);
         myVote = storedChoice;
         if (poll.revealed) {
-          // Subscribe so bars update live
-          if (!unsubVotes) subscribeToVotes(poll, storedChoice);
-          // If already subscribed, subscribeToVotes will re-render via its own listener.
-          // But since revealed just flipped, force a fresh render now:
+          if (!unsubVotes) subscribeToVotes(poll, storedIndex);
           get(votesRef).then(snap => {
-            renderAudienceResults(poll, snap.val() || {}, storedChoice);
+            renderAudienceResults(poll, snap.val() || {}, storedIndex);
           });
         } else {
-          // Not yet revealed — show the holding screen, keep listening
-          renderAudienceAwaitingReveal(poll, storedChoice);
-          if (!unsubVotes) subscribeToVotes(poll, storedChoice);
+          renderAudienceAwaitingReveal(poll, storedIndex);
+          if (!unsubVotes) subscribeToVotes(poll, storedIndex);
         }
         return;
       }
