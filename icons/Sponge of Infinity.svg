@@ -1,0 +1,18 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- sponge body (irregular blocky shape) -->
+  <path d="M16 28 Q14 24 18 20 Q22 16 28 18 Q30 14 36 14 Q42 12 46 16 Q52 14 58 18 Q64 20 64 26 Q68 30 64 36 Q66 42 62 46 Q64 52 58 56 Q54 60 46 58 Q42 62 36 62 Q30 64 26 60 Q20 60 16 54 Q12 48 16 42 Q12 36 16 28 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- sponge pore holes -->
+  <circle cx="28" cy="28" r="3" stroke-width="1.2"/>
+  <circle cx="40" cy="24" r="3" stroke-width="1.2"/>
+  <circle cx="52" cy="30" r="3" stroke-width="1.2"/>
+  <circle cx="24" cy="42" r="2.5" stroke-width="1.2"/>
+  <circle cx="36" cy="46" r="3" stroke-width="1.2"/>
+  <circle cx="50" cy="44" r="2.5" stroke-width="1.2"/>
+  <circle cx="58" cy="36" r="2.5" stroke-width="1.2"/>
+  <!-- infinity symbol -->
+  <path d="M26 34 Q30 28 36 34 Q30 40 26 34 Z" stroke-width="1.3" fill="#e8e4dc"/>
+  <path d="M44 34 Q50 28 54 34 Q50 40 44 34 Z" stroke-width="1.3" fill="#e8e4dc"/>
+  <!-- water squish lines below -->
+  <path d="M20 66 Q30 62 40 66 Q50 70 60 66" stroke-width="1.4"/>
+  <path d="M16 70 Q28 66 40 70 Q52 74 64 70" stroke-width="1.2"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- left sock -->
+  <path d="M16 18 L16 54 Q16 62 24 62 Q32 62 32 54 Q32 50 40 50 Q44 50 44 54 Q44 58 40 60" stroke-width="1.8" fill="#e8e4dc"/>
+  <line x1="16" y1="18" x2="32" y2="18" stroke-width="1.6"/>
+  <!-- stripes on left sock -->
+  <line x1="16" y1="24" x2="32" y2="24" stroke-width="1.1"/>
+  <line x1="16" y1="30" x2="32" y2="30" stroke-width="1.1"/>
+  <!-- right sock (separate, distance away) -->
+  <path d="M52 28 L52 64 Q52 72 60 72 Q68 72 68 64 Q68 60 62 58" stroke-width="1.8" fill="#e8e4dc"/>
+  <line x1="52" y1="28" x2="68" y2="28" stroke-width="1.6"/>
+  <!-- stripes on right sock -->
+  <line x1="52" y1="34" x2="68" y2="34" stroke-width="1.1"/>
+  <line x1="52" y1="40" x2="68" y2="40" stroke-width="1.1"/>
+  <!-- impossibility symbol / gap between -->
+  <line x1="44" y1="44" x2="48" y2="44" stroke-width="2" stroke-dasharray="1,2"/>
+</svg>

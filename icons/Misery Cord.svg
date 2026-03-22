@@ -1,0 +1,14 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ball of cord -->
+  <circle cx="40" cy="44" r="22" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- wound cord lines on ball -->
+  <path d="M22 36 Q32 28 48 32 Q60 36 58 48 Q56 60 44 62 Q32 64 26 56 Q20 48 22 36 Z" stroke-width="1.2"/>
+  <path d="M26 30 Q36 24 52 30 Q62 36 60 50" stroke-width="1.1"/>
+  <path d="M30 58 Q40 66 54 60" stroke-width="1.1"/>
+  <!-- trailing end of cord with sad face knot -->
+  <path d="M62 44 Q70 40 72 32" stroke-width="1.6"/>
+  <circle cx="73" cy="30" r="4" stroke-width="1.3" fill="#e8e4dc"/>
+  <line x1="71" y1="29" x2="72" y2="30" stroke-width="1.1"/>
+  <line x1="75" y1="29" x2="74" y2="30" stroke-width="1.1"/>
+  <path d="M71 32 Q73 31 75 32" stroke-width="1.1"/>
+</svg>

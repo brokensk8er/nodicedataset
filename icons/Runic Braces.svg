@@ -1,0 +1,20 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- open mouth with teeth and braces -->
+  <path d="M14 40 Q14 60 40 64 Q66 60 66 40 Q66 28 40 26 Q14 28 14 40 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- upper teeth row -->
+  <rect x="20" y="34" width="8" height="10" rx="1" stroke-width="1.3" fill="white"/>
+  <rect x="30" y="32" width="8" height="12" rx="1" stroke-width="1.3" fill="white"/>
+  <rect x="40" y="32" width="8" height="12" rx="1" stroke-width="1.3" fill="white"/>
+  <rect x="50" y="34" width="8" height="10" rx="1" stroke-width="1.3" fill="white"/>
+  <!-- brace wire -->
+  <line x1="20" y1="40" x2="58" y2="40" stroke-width="1.6"/>
+  <!-- brackets on teeth -->
+  <rect x="22" y="38" width="4" height="4" stroke-width="1"/>
+  <rect x="32" y="37" width="4" height="4" stroke-width="1"/>
+  <rect x="42" y="37" width="4" height="4" stroke-width="1"/>
+  <rect x="52" y="38" width="4" height="4" stroke-width="1"/>
+  <!-- runic symbols above -->
+  <text x="24" y="28" font-size="8" stroke-width="0.8" fill="none" stroke="#1a1a2e">ᚱ</text>
+  <text x="36" y="26" font-size="8" stroke-width="0.8" fill="none" stroke="#1a1a2e">ᚢ</text>
+  <text x="48" y="28" font-size="8" stroke-width="0.8" fill="none" stroke="#1a1a2e">ᚾ</text>
+</svg>

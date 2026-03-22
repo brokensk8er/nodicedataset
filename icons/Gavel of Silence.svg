@@ -1,0 +1,14 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- gavel handle -->
+  <line x1="26" y1="62" x2="50" y2="38" stroke-width="2.2"/>
+  <!-- gavel head -->
+  <rect x="44" y="22" width="24" height="14" rx="3" stroke-width="1.8" fill="#e8e4dc" transform="rotate(-45 56 29)"/>
+  <!-- sound wave crossed out -->
+  <path d="M18 38 Q14 34 14 30 Q14 26 18 22" stroke-width="1.4"/>
+  <path d="M22 36 Q16 30 22 24" stroke-width="1.4"/>
+  <!-- X through the waves (silence) -->
+  <line x1="12" y1="20" x2="24" y2="40" stroke-width="1.6"/>
+  <line x1="24" y1="20" x2="12" y2="40" stroke-width="1.6"/>
+  <!-- block (sound block surface) -->
+  <rect x="16" y="62" width="28" height="8" rx="2" stroke-width="1.4" fill="#e8e4dc"/>
+</svg>

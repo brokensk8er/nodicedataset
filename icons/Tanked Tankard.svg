@@ -1,0 +1,21 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- large sturdy tankard body -->
+  <path d="M22 22 L22 62 Q22 68 40 68 Q58 68 58 62 L58 22 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- lid -->
+  <path d="M20 22 Q40 18 60 22" stroke-width="1.6" fill="#e8e4dc"/>
+  <line x1="20" y1="22" x2="60" y2="22" stroke-width="1.6"/>
+  <!-- handle -->
+  <path d="M58 32 Q70 32 70 44 Q70 56 58 56" stroke-width="1.8"/>
+  <!-- LARGE SPIKE at bottom -->
+  <path d="M36 68 L40 78 L44 68" stroke-width="2" fill="#e8e4dc"/>
+  <!-- rivets on tankard -->
+  <circle cx="28" cy="30" r="2" stroke-width="1.2" fill="#e8e4dc"/>
+  <circle cx="28" cy="50" r="2" stroke-width="1.2" fill="#e8e4dc"/>
+  <circle cx="52" cy="30" r="2" stroke-width="1.2" fill="#e8e4dc"/>
+  <circle cx="52" cy="50" r="2" stroke-width="1.2" fill="#e8e4dc"/>
+  <!-- foam at top -->
+  <path d="M24 22 Q28 16 32 20 Q36 14 40 20 Q44 14 48 20 Q52 16 56 22" stroke-width="1.2" fill="#e8e4dc"/>
+  <!-- impact star from spike -->
+  <line x1="32" y1="74" x2="26" y2="76" stroke-width="1.2"/>
+  <line x1="48" y1="74" x2="54" y2="76" stroke-width="1.2"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- straw -->
+  <rect x="36" y="10" width="8" height="60" rx="3" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- liquid being sucked up (waves inside straw) -->
+  <path d="M38 50 Q40 46 42 50 Q40 54 38 50" stroke-width="1.1"/>
+  <path d="M38 42 Q40 38 42 42 Q40 46 38 42" stroke-width="1.1"/>
+  <!-- shrivelled apple to the left (after) -->
+  <path d="M18 40 Q14 34 18 28 Q24 22 28 28 Q32 34 28 40 Q24 46 18 40 Z" stroke-width="1.4" fill="#e8e4dc"/>
+  <path d="M22 22 Q24 18 26 22" stroke-width="1.2"/><!-- leaf/stem -->
+  <!-- crinkle lines on apple showing desiccation -->
+  <path d="M18 34 Q22 32 26 34" stroke-width="0.9"/>
+  <path d="M17 38 Q22 36 27 38" stroke-width="0.9"/>
+  <!-- water droplet going up the straw -->
+  <path d="M38 60 Q40 56 42 60 Q42 64 40 64 Q38 64 38 60 Z" stroke-width="1.2" fill="#e8e4dc"/>
+</svg>

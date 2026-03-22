@@ -1,0 +1,19 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- breastplate shape -->
+  <path d="M18 18 Q18 10 40 8 Q62 10 62 18 L64 52 Q64 60 40 64 Q16 60 16 52 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- chest armour ridges -->
+  <path d="M24 22 Q32 18 40 18 Q48 18 56 22" stroke-width="1.1"/>
+  <path d="M22 32 Q32 28 40 28 Q48 28 58 32" stroke-width="1.1"/>
+  <!-- magical drawers embedded in breastplate -->
+  <rect x="26" y="36" width="12" height="8" rx="1" stroke-width="1.3" fill="#e8e4dc"/>
+  <rect x="42" y="36" width="12" height="8" rx="1" stroke-width="1.3" fill="#e8e4dc"/>
+  <!-- drawer handles -->
+  <line x1="30" y1="40" x2="34" y2="40" stroke-width="1.2"/>
+  <line x1="46" y1="40" x2="50" y2="40" stroke-width="1.2"/>
+  <!-- one drawer open with item inside -->
+  <rect x="42" y="28" width="12" height="8" rx="1" stroke-width="1.2" fill="#e8e4dc" stroke-dasharray="2,1"/>
+  <line x1="46" y1="32" x2="50" y2="32" stroke-width="1.1"/><!-- item inside -->
+  <!-- keyhole for lock -->
+  <circle cx="40" cy="52" r="3" stroke-width="1.3"/>
+  <rect x="39" y="52" width="2" height="4" rx="0" stroke-width="1.1"/>
+</svg>

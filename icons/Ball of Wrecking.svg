@@ -1,0 +1,17 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- bowling ball -->
+  <circle cx="32" cy="48" r="22" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- ball finger holes -->
+  <circle cx="26" cy="42" r="3" stroke-width="1.3"/>
+  <circle cx="34" cy="38" r="3" stroke-width="1.3"/>
+  <circle cx="40" cy="44" r="3" stroke-width="1.3"/>
+  <!-- speed lines behind ball -->
+  <line x1="10" y1="40" x2="4" y2="38" stroke-width="1.3"/>
+  <line x1="10" y1="48" x2="4" y2="48" stroke-width="1.3"/>
+  <line x1="10" y1="56" x2="4" y2="58" stroke-width="1.3"/>
+  <!-- wall exploding ahead -->
+  <rect x="56" y="26" width="6" height="50" rx="1" stroke-width="1.4" fill="#e8e4dc"/>
+  <path d="M58 36 L66 28 M60 44 L70 40 M58 52 L68 52 M60 60 L68 64" stroke-width="1.3"/>
+  <!-- explosion burst -->
+  <path d="M62 42 L68 36 L70 42 L76 40 L72 48 L78 50 L70 54 L74 62 L64 58 L62 66 L58 58 L52 62 L56 52 L48 50 L56 46 Z" stroke-width="1.2"/>
+</svg>

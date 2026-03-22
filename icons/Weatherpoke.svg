@@ -1,0 +1,17 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- spear shaft -->
+  <line x1="40" y1="74" x2="40" y2="32" stroke-width="2.2"/>
+  <!-- weathervane rooster on top -->
+  <path d="M40 32 Q36 24 38 18 Q42 14 46 18 Q48 24 44 28 Z" stroke-width="1.6" fill="#e8e4dc"/>
+  <!-- tail feathers -->
+  <path d="M38 20 Q32 16 30 20 Q34 22 38 20" stroke-width="1.2" fill="#e8e4dc"/>
+  <!-- cardinal direction arms -->
+  <line x1="24" y1="30" x2="56" y2="30" stroke-width="1.4"/>
+  <line x1="40" y1="18" x2="40" y2="32" stroke-width="1.4"/>
+  <!-- sun / cloud / lightning symbols quadrants -->
+  <circle cx="18" cy="30" r="4" stroke-width="1.2"/><!-- sun -->
+  <line x1="18" y1="24" x2="18" y2="22" stroke-width="1.1"/>
+  <line x1="22" y1="26" x2="24" y2="24" stroke-width="1.1"/>
+  <path d="M58 26 Q62 22 66 26 Q62 24 66 28 Q62 30 58 28 Z" stroke-width="1.2" fill="#e8e4dc"/><!-- cloud -->
+  <path d="M56 52 L60 44 L54 44 L58 36" stroke-width="1.4"/><!-- lightning -->
+</svg>

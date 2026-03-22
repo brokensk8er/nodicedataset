@@ -102,10 +102,9 @@
 
   .item-image-slot {
     width: 100%;
-    aspect-ratio: 16 / 7;
     border-radius: 10px;
     background: linear-gradient(135deg, #f0ebe3 0%, #e8e2d9 100%);
-    border: 1px dashed rgba(201,168,76,.4);
+    border: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -113,6 +112,21 @@
     gap: 4px;
     overflow: hidden;
     position: relative;
+    min-height: 60px;
+  }
+
+  .item-image-slot.has-image {
+    background: none;
+    border-color: var(--border);
+    padding: 8px;
+  }
+
+  .item-image-slot.has-image img {
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
 
   .item-image-slot .slot-icon {
@@ -130,14 +144,7 @@
     text-transform: uppercase;
   }
 
-  .item-image-slot img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-  }
+  /* placeholder icon and hash text inside slot */
 
   .item-name-label {
     font-family: 'Cinzel', serif;
@@ -335,7 +342,7 @@
 // ============================================================
 //  CONFIGURATION
 //  Same Sheet ID and API key as chargen.html.
-//  Tab named "Loot" — Column A: Item Name, Column B: Description
+//  Tab named "Loot" — Column A: Item Name, Column B: Description, Column C: Image (data URI)
 // ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
@@ -416,7 +423,7 @@ async function loadData() {
   }
   try {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
-              + `/values/${encodeURIComponent(CONFIG.TAB)}!A:B?key=${CONFIG.API_KEY}`;
+              + `/values/${encodeURIComponent(CONFIG.TAB)}!A:C?key=${CONFIG.API_KEY}`;
     const res = await fetch(url);
     if (!res.ok) {
       // Read the full API error body so we can show it on screen
@@ -434,6 +441,7 @@ async function loadData() {
     ITEMS = rows.map(r => ({
       name:    (r[0] || '').trim(),
       flavour: (r[1] || '').trim(),
+      image:   (r[2] || '').trim(),
       hash:    itemHash((r[0] || '').trim()),
     }));
     dataSource = 'live';
@@ -449,6 +457,7 @@ function buildItemsFromFallback() {
   ITEMS = FALLBACK_ITEMS.map(([name, flavour]) => ({
     name,
     flavour,
+    image:   '',
     hash: itemHash(name),
   }));
 }
@@ -492,15 +501,24 @@ function sourceBadgeHTML() {
 // ============================================================
 //  RENDER
 // ============================================================
+function imgSlotHTML(item) {
+  if (item.image) {
+    return `<div class="item-image-slot has-image" id="img-slot">
+      <img src="${item.image}" alt="${escHtml(item.name)}" />
+    </div>`;
+  }
+  return `<div class="item-image-slot" id="img-slot">
+    <span class="slot-icon">&#10024;</span>
+    <span class="slot-hash">${item.hash}</span>
+  </div>`;
+}
+
 function render(item) {
   current = item;
   const m = document.getElementById('main');
   m.innerHTML = `
     <div class="loot-card" id="loot-card">
-      <div class="item-image-slot" id="img-slot">
-        <span class="slot-icon">&#10024;</span>
-        <span class="slot-hash">${item.hash}</span>
-      </div>
+      ${imgSlotHTML(item)}
       <div>
         <div class="item-name-label">Magic Item</div>
         <div class="item-name" id="item-name">${escHtml(item.name)}</div>
@@ -540,9 +558,7 @@ function doPull() {
     nameEl.textContent = next.name;
     flavEl.textContent = next.flavour;
 
-    imgSlot.innerHTML = `
-      <span class="slot-icon">&#10024;</span>
-      <span class="slot-hash">${next.hash}</span>`;
+    imgSlot.outerHTML = imgSlotHTML(next);
 
     nameEl.classList.remove('fading');
     flavEl.classList.remove('fading');

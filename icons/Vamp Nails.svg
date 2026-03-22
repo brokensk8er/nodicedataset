@@ -1,0 +1,13 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- hand silhouette -->
+  <path d="M22 70 L22 44 Q22 40 26 40 L26 28 Q26 24 30 24 Q34 24 34 28 L34 38 L38 38 L38 22 Q38 18 42 18 Q46 18 46 22 L46 38 L50 38 L50 26 Q50 22 54 22 Q58 22 58 26 L58 38 L58 44 Q58 50 54 52 L54 70 Z" stroke-width="1.6" fill="#e8e4dc"/>
+  <!-- long sharp nail extensions -->
+  <path d="M26 24 Q22 16 20 8" stroke-width="1.8"/>
+  <path d="M30 24 Q28 14 28 6" stroke-width="1.8"/>
+  <path d="M42 18 Q40 8 40 4" stroke-width="1.8"/>
+  <path d="M54 22 Q54 12 56 6" stroke-width="1.8"/>
+  <!-- bat drawn on one nail -->
+  <path d="M20 10 Q18 6 16 8 Q18 10 20 10 Q22 8 24 8 Q22 10 22 12 Z" stroke-width="1.1"/>
+  <!-- blood drop on sharp tip -->
+  <path d="M28 8 Q30 12 28 14 Q26 12 28 8 Z" stroke-width="1.1" fill="#e8e4dc"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- left hemisphere pauldron -->
+  <path d="M12 44 Q10 28 22 24 Q34 22 36 38 Q34 50 20 52 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- right hemisphere pauldron -->
+  <path d="M68 44 Q70 28 58 24 Q46 22 44 38 Q46 50 60 52 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- vacuum sphere in middle (dashed) -->
+  <ellipse cx="40" cy="40" rx="18" ry="20" stroke-width="1.4" stroke-dasharray="3,2"/>
+  <!-- horse harness hanging from each -->
+  <path d="M14 52 Q12 60 16 66 L22 64" stroke-width="1.4"/>
+  <path d="M66 52 Q68 60 64 66 L58 64" stroke-width="1.4"/>
+  <!-- copper rivets on pauldrons -->
+  <circle cx="20" cy="36" r="2" stroke-width="1.2" fill="#e8e4dc"/>
+  <circle cx="60" cy="36" r="2" stroke-width="1.2" fill="#e8e4dc"/>
+</svg>

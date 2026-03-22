@@ -1,0 +1,27 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ruler / spear -->
+  <rect x="36" y="8" width="8" height="64" rx="1" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- ruler markings -->
+  <line x1="40" y1="14" x2="44" y2="14" stroke-width="1"/>
+  <line x1="40" y1="19" x2="44" y2="19" stroke-width="1"/>
+  <line x1="40" y1="24" x2="44" y2="24" stroke-width="1"/>
+  <line x1="40" y1="29" x2="44" y2="29" stroke-width="1"/>
+  <line x1="40" y1="34" x2="43" y2="34" stroke-width="0.9"/>
+  <!-- spear tip -->
+  <path d="M36 8 L40 2 L44 8" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- tall person at left -->
+  <circle cx="18" cy="20" r="5" stroke-width="1.3" fill="#e8e4dc"/>
+  <line x1="18" y1="25" x2="18" y2="52" stroke-width="1.6"/>
+  <line x1="12" y1="36" x2="24" y2="36" stroke-width="1.4"/>
+  <line x1="14" y1="52" x2="18" y2="44" stroke-width="1.3"/>
+  <line x1="22" y1="52" x2="18" y2="44" stroke-width="1.3"/>
+  <!-- arrow shrinking the person -->
+  <line x1="28" y1="36" x2="34" y2="36" stroke-width="1.2"/>
+  <path d="M32 33 L36 36 L32 39" stroke-width="1.1"/>
+  <!-- short person at right -->
+  <circle cx="62" cy="38" r="4" stroke-width="1.3" fill="#e8e4dc"/>
+  <line x1="62" y1="42" x2="62" y2="58" stroke-width="1.4"/>
+  <line x1="57" y1="48" x2="67" y2="48" stroke-width="1.3"/>
+  <line x1="59" y1="58" x2="62" y2="52" stroke-width="1.2"/>
+  <line x1="65" y1="58" x2="62" y2="52" stroke-width="1.2"/>
+</svg>

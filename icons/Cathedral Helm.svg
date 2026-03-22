@@ -1,0 +1,19 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- helmet base -->
+  <path d="M20 50 Q18 36 28 28 Q40 20 52 28 Q62 36 60 50 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <line x1="20" y1="50" x2="60" y2="50" stroke-width="1.8"/>
+  <!-- visor slot -->
+  <path d="M28 44 Q40 46 52 44" stroke-width="1.4"/>
+  <!-- cathedral spire on top -->
+  <path d="M36 28 L40 10 L44 28" stroke-width="1.6" fill="#e8e4dc"/>
+  <!-- rose window in spire -->
+  <circle cx="40" cy="22" r="3" stroke-width="1.2"/>
+  <!-- small buttresses -->
+  <line x1="34" y1="28" x2="30" y2="36" stroke-width="1.2"/>
+  <line x1="46" y1="28" x2="50" y2="36" stroke-width="1.2"/>
+  <!-- music notes floating -->
+  <path d="M62 26 Q64 22 68 24 L68 30" stroke-width="1.2"/>
+  <circle cx="68" cy="31" r="2" stroke-width="1.1" fill="#e8e4dc"/>
+  <path d="M12 26 Q10 22 6 24 L6 30" stroke-width="1.2"/>
+  <circle cx="6" cy="31" r="2" stroke-width="1.1" fill="#e8e4dc"/>
+</svg>

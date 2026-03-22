@@ -1,0 +1,24 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- dumbbell bar -->
+  <line x1="20" y1="44" x2="60" y2="44" stroke-width="2.4"/>
+  <!-- left weight (grimoire book) -->
+  <rect x="10" y="32" width="16" height="24" rx="2" stroke-width="1.8" fill="#e8e4dc"/>
+  <line x1="14" y1="38" x2="22" y2="38" stroke-width="1.1"/>
+  <line x1="14" y1="42" x2="22" y2="42" stroke-width="1.1"/>
+  <line x1="14" y1="46" x2="22" y2="46" stroke-width="1.1"/>
+  <line x1="14" y1="50" x2="22" y2="50" stroke-width="1.1"/>
+  <!-- right weight (grimoire book) -->
+  <rect x="54" y="32" width="16" height="24" rx="2" stroke-width="1.8" fill="#e8e4dc"/>
+  <line x1="58" y1="38" x2="66" y2="38" stroke-width="1.1"/>
+  <line x1="58" y1="42" x2="66" y2="42" stroke-width="1.1"/>
+  <line x1="58" y1="46" x2="66" y2="46" stroke-width="1.1"/>
+  <line x1="58" y1="50" x2="66" y2="50" stroke-width="1.1"/>
+  <!-- brain glow above centre -->
+  <path d="M32 28 Q32 20 40 18 Q48 20 48 28 Q48 34 40 36 Q32 34 32 28 Z" stroke-width="1.4" fill="#e8e4dc"/>
+  <!-- brain wrinkle lines -->
+  <path d="M34 24 Q38 22 42 24 Q40 26 36 26 Q38 28 42 28" stroke-width="1"/>
+  <!-- intelligence sparkles -->
+  <line x1="28" y1="16" x2="26" y2="12" stroke-width="1.2"/>
+  <line x1="40" y1="14" x2="40" y2="10" stroke-width="1.2"/>
+  <line x1="52" y1="16" x2="54" y2="12" stroke-width="1.2"/>
+</svg>

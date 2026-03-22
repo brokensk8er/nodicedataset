@@ -1,0 +1,19 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- door panel -->
+  <rect x="16" y="12" width="32" height="60" rx="2" stroke-width="1.6" fill="#e8e4dc"/>
+  <rect x="20" y="18" width="24" height="22" rx="1" stroke-width="1.1"/>
+  <rect x="20" y="46" width="24" height="20" rx="1" stroke-width="1.1"/>
+  <!-- grinning moon face knob -->
+  <circle cx="56" cy="44" r="12" stroke-width="1.8" fill="#e8e4dc"/>
+  <!-- crescent on the moon knob face -->
+  <path d="M50 38 Q44 44 50 50 Q56 54 62 50 Q68 44 62 38 Q56 34 50 38 Z" stroke-width="1.2" fill="#e8e4dc"/>
+  <!-- grinning eyes -->
+  <circle cx="52" cy="42" r="1.5" fill="#1a1a2e" stroke="none"/>
+  <circle cx="60" cy="42" r="1.5" fill="#1a1a2e" stroke="none"/>
+  <!-- grinning mouth -->
+  <path d="M50 46 Q56 52 62 46" stroke-width="1.4"/>
+  <!-- magic glow lines around knob -->
+  <line x1="66" y1="36" x2="70" y2="32" stroke-width="1.2" stroke-dasharray="1.5,1.5"/>
+  <line x1="68" y1="44" x2="74" y2="44" stroke-width="1.2" stroke-dasharray="1.5,1.5"/>
+  <line x1="66" y1="52" x2="70" y2="56" stroke-width="1.2" stroke-dasharray="1.5,1.5"/>
+</svg>

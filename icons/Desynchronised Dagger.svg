@@ -1,0 +1,13 @@
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" stroke="#1a1a2e" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ghost wound (offset, dashed) -->
+  <path d="M22 22 L52 52" stroke-width="1.4" stroke-dasharray="3,3" opacity="0.45"/>
+  <path d="M52 22 L22 52" stroke-width="1.4" stroke-dasharray="3,3" opacity="0.45"/>
+  <!-- real dagger -->
+  <path d="M36 16 L44 16 L58 52 L40 62 L22 52 Z" stroke-width="1.8" fill="#e8e4dc"/>
+  <line x1="36" y1="16" x2="44" y2="16" stroke-width="2"/>
+  <line x1="40" y1="16" x2="40" y2="62" stroke-width="1.2"/>
+  <!-- crossguard -->
+  <line x1="28" y1="36" x2="52" y2="36" stroke-width="2"/>
+  <!-- handle -->
+  <rect x="36" y="62" width="8" height="12" rx="2" stroke-width="1.6" fill="#e8e4dc"/>
+</svg>
