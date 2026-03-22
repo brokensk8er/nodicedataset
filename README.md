@@ -12,6 +12,7 @@ A mobile-friendly web app for live improv Dungeons & Dragons shows. Players scan
 | Character Generator | ✅ Complete    | `chargen.html`  |
 | Fate's Flip (coin)  | ✅ Complete    | `coinflip.html` |
 | Loot Table          | ✅ Complete    | `loot.html`     |
+| The Poll            | ✅ Complete    | `poll.html`     |
 | Scenario Generator  | 🔜 Planned     | `scenario.html` |
 | NPC Generator       | 🔜 Planned     | `npc.html`      |
 
@@ -25,7 +26,9 @@ The loot table pulls item names and flavour text from a dedicated Google Sheet t
 
 The coin flip tool gives a binary pass/fail result with a 3D animated coin, confetti on a pass, and Web Audio sound effects — no external dependencies.
 
-If the Google Sheet is unreachable for any reason, all tools fall back silently to built-in hardcoded data so players never see a broken screen.
+The poll tool uses Firebase Realtime Database to sync votes across all devices simultaneously. The showrunner opens `poll.html?admin` to create and control polls; the audience votes anonymously through the standard `poll.html` URL. Results are hidden until the showrunner reveals them.
+
+If the Google Sheet is unreachable for any reason, all tools that use it fall back silently to built-in hardcoded data so players never see a broken screen.
 
 ---
 
@@ -37,10 +40,12 @@ If the Google Sheet is unreachable for any reason, all tools fall back silently 
 ├── chargen.html        — Character generator
 ├── coinflip.html       — Coin flip / pass-fail tool
 ├── loot.html           — Loot table generator
+├── poll.html           — Audience poll tool
 ├── scenario.html       — Scenario generator (planned)
 ├── npc.html            — NPC generator (planned)
 ├── design-system.css   — Visual design reference (not linked, docs only)
 ├── character-data.csv  — Starter data for Google Sheets import
+├── FIREBASE_SETUP.md   — Step-by-step Firebase setup guide for poll.html
 └── README.md           — This file
 ```
 
@@ -80,6 +85,37 @@ Pulls magic item names and flavour text from a `Loot` tab in the Google Sheet (C
 - Animated fade swap on each pull
 - Source badge shows live/fallback status; if the sheet is unreachable the full API error is shown in the badge for debugging
 - All content (button, source badge) lives inside a single white content card, consistent with chargen
+
+### The Poll (`poll.html`)
+A real-time audience voting tool powered by Firebase Realtime Database. Requires a free Firebase project — see `FIREBASE_SETUP.md` for full setup instructions.
+
+**How it works:**
+- Showrunner opens `poll.html?admin` on their device to create and manage polls
+- Audience members open `poll.html` (via the hub or a direct QR code) to vote
+- Votes sync in real time across all devices
+- Results are hidden from the audience until the showrunner explicitly reveals them
+- Once a poll is closed and cleared, audience screens return to the "Standing by…" state automatically
+
+**Features:**
+- 2–5 vote options per poll (admin can add/remove options in the form)
+- Anonymous voting — each browser session gets a UUID stored in `sessionStorage`; no login, no PII
+- Votes are tied to the poll's timestamp so a cleared poll can't be accidentally recast
+- Live vote count updates on the admin screen while results are still hidden
+- Winning option highlighted in green after reveal
+- If Firebase config isn't filled in, a clear setup screen is shown (no broken states)
+- No Google Sheets dependency — this tool is entirely Firebase-driven
+
+**Access pattern:**
+| URL | Who uses it | What they see |
+|-----|------------|---------------|
+| `poll.html` | Audience | Vote buttons → waiting screen → results |
+| `poll.html?admin` | Showrunner | Poll builder → live vote counts → reveal controls |
+
+### Scenario Generator (`scenario.html`) — Planned
+Will generate drop-in quest hooks, locations, and inciting incidents for when the GM blanks mid-session. Intended to follow the `chargen.html` multi-field card pattern, pulling from a Google Sheet with silent fallback. Accent colour override planned (teal: `--gold: #2d7a5e`) to distinguish it visually from other tools.
+
+### NPC Generator (`npc.html`) — Planned
+Will generate instant strangers with names, motivations, and inconvenient timing. Likely to share data tabs with `chargen.html` (first names, last names) and add NPC-specific fields (role, motivation, complication). Intended to follow the same card layout pattern.
 
 ---
 
@@ -162,6 +198,20 @@ Just open the Google Sheet and edit any tab. Add rows, delete rows, change wordi
 
 ---
 
+## Firebase Setup (Poll Tool)
+
+`poll.html` requires a free Firebase Realtime Database. See **`FIREBASE_SETUP.md`** for a full step-by-step walkthrough. In short:
+
+1. Create a free Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+2. Enable Realtime Database in test mode
+3. Register a web app and copy the config object
+4. Paste the config values into the `FIREBASE_CONFIG` block in `poll.html`
+5. Test with two browser tabs before show night
+
+The free Firebase Spark plan is more than sufficient — 100 simultaneous connections, 1 GB storage, no billing required.
+
+---
+
 ## GitHub Pages Deployment
 
 1. Push all files to a GitHub repo (e.g. `improv-dnd`)
@@ -201,7 +251,7 @@ Full reference lives in `design-system.css`. Summary:
 - Cards animate in on load (`slideUp`, cubic-bezier easing)
 - Parchment background with fractal noise texture overlay and gold radial gradients
 - Source badge: green dot = live Google Sheets data, amber dot = fallback built-in data
-- No external JS dependencies on any page — vanilla HTML/CSS/JS only
+- No external JS dependencies on any page except `poll.html` (Firebase SDK loaded via CDN ESM import)
 
 ---
 
@@ -233,7 +283,7 @@ The Google Sheets wiring, source badge, card layout, footer nav, and fallback be
 
 When starting a new Claude conversation to continue this project, paste this at the top:
 
-> *I'm building an improv D&D random generator suite on GitHub Pages called "No Dice". Current tools: hub (`index.html`), character generator (`chargen.html`), coin flip (`coinflip.html`), loot table (`loot.html`). Uses Cinzel/Lato design system with a parchment colour palette. Data is pulled live from Google Sheets (Sheet ID and API key are already wired in). chargen has a 3-mulligan shared reroll system with 1-hour lockout and localStorage session persistence. All content lives in single white cards with a `.card-footer` strip. `overflow: hidden` is intentionally absent to preserve Android pull-to-refresh. I'd like to continue building [describe what you need].*
+> *I'm building an improv D&D random generator suite on GitHub Pages called "No Dice". Current tools: hub (`index.html`), character generator (`chargen.html`), coin flip (`coinflip.html`), loot table (`loot.html`), audience poll (`poll.html`). Uses Cinzel/Lato design system with a parchment colour palette. chargen and loot pull from Google Sheets (Sheet ID and API key already wired in). poll.html uses Firebase Realtime Database for real-time vote syncing (config already wired in); showrunner accesses it via `?admin`. chargen has a 3-mulligan shared reroll system with 1-hour lockout and localStorage session persistence. All content lives in single white cards with a `.card-footer` strip. `overflow: hidden` is intentionally absent to preserve Android pull-to-refresh. I'd like to continue building [describe what you need].*
 
 Then paste in the relevant file(s) for context.
 
@@ -243,10 +293,13 @@ Then paste in the relevant file(s) for context.
 
 - [ ] Google Sheet is up to date with any new or edited variables
 - [ ] Loot tab has both columns filled (Column A: name, Column B: flavour text)
-- [ ] GitHub Pages site is live and loading correctly
+- [ ] GitHub Pages site is live and loading correctly on a real phone
 - [ ] QR code tested on at least one phone
 - [ ] Fallback data is reasonably current (matches sheet content roughly)
 - [ ] API key restrictions include the live GitHub Pages URL
+- [ ] Firebase Realtime Database rules are not expired (test mode expires after 30 days — check the Rules tab)
+- [ ] Poll tool tested: open `poll.html?admin` on showrunner device, run a dummy poll, confirm audience screen updates, clear it
+- [ ] Showrunner has `poll.html?admin` bookmarked on their device
 - [ ] Test all active tools on the actual show device before the night
 - [ ] Consider hiding or removing the dev Reset button in chargen if players shouldn't see it
 
