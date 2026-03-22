@@ -142,15 +142,36 @@
     animation: cardIn .45s cubic-bezier(.22,1,.36,1) both;
   }
 
+  /* Scrollable field area inside the card */
+  .fields-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    /* thin, unobtrusive scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .fields-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .fields-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .fields-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+
   /* ── Each field row inside the card ── */
   .field-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     padding: 0 14px;
-    flex: 1;
-    min-height: 0;
+    min-height: 52px;
     position: relative;
-    /* subtle alternating tint */
   }
 
   .field-row:nth-child(even) {
@@ -189,11 +210,6 @@
     line-height: 1.3;
     color: var(--ink);
     transition: opacity 0.15s;
-    /* clamp to 2 lines */
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 
   .field-value.fading { opacity: 0; }
@@ -202,6 +218,7 @@
   .reroll-btn {
     flex-shrink: 0;
     margin-left: 10px;
+    margin-top: 18px;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -689,7 +706,9 @@ function render() {
       Mulligans &nbsp;<div class="pip-row">${pips}</div>
     </div>
     <div class="character-card">
-      ${rows}
+      <div class="fields-scroll">
+        ${rows}
+      </div>
       <div class="card-footer">
         ${ctaBtn}
         ${sourceBadgeHTML()}
