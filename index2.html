@@ -341,6 +341,39 @@
   .cg-roll-btn:active { transform: scale(.98); }
   .cg-roll-btn:disabled { opacity: .35; cursor: not-allowed; }
 
+  .cg-quick-sep {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px 4px; border-top: 1px solid var(--border);
+  }
+  .cg-quick-sep::before, .cg-quick-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .cg-quick-sep span {
+    font-family: 'Cinzel', serif; font-size: .5rem; font-weight: 600;
+    color: var(--gold-dim); letter-spacing: .18em; text-transform: uppercase; white-space: nowrap;
+  }
+  .cg-quick-rows { padding: 2px 12px 10px; display: flex; flex-direction: column; }
+  .cg-quick-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+  }
+  .cg-quick-row:last-child { border-bottom: none; }
+  .cg-quick-label {
+    font-family: 'Cinzel', serif; font-size: .55rem; font-weight: 600;
+    color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
+    width: 58px; flex-shrink: 0;
+  }
+  .cg-quick-val {
+    flex: 1; font-size: .78rem; color: var(--ink); line-height: 1.3;
+    transition: opacity .18s;
+  }
+  .cg-quick-val.fading { opacity: 0; }
+  .cg-quick-btn {
+    flex-shrink: 0; font-size: .55rem; color: var(--muted);
+    background: none; border: 1px solid var(--border); border-radius: 5px;
+    padding: 3px 6px; cursor: pointer;
+    transition: border-color .15s, color .15s; white-space: nowrap;
+  }
+  .cg-quick-btn:hover { border-color: var(--gold); color: var(--gold-dim); }
+
   /* ─────────────────────────────────────────
      LOOT TABLE
   ───────────────────────────────────────── */
@@ -636,6 +669,10 @@
         <div class="shelf-body-inner">
           <div class="shelf-content">
             <div id="cg-inner"><!-- rendered by JS --></div>
+            <div id="cg-quick" style="display:none">
+              <div class="cg-quick-sep"><span>Quick Pull</span></div>
+              <div class="cg-quick-rows" id="cg-quick-rows"><!-- rendered by JS --></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1216,6 +1253,27 @@ window.cgRerollField = function(key) {
   }, 180);
 };
 
+function cgQuickRender() {
+  document.getElementById('cg-quick-rows').innerHTML = CHARGEN_CATS.map(c => `
+    <div class="cg-quick-row">
+      <span class="cg-quick-label">${esc(c.label)}</span>
+      <span class="cg-quick-val" id="cgq-${c.key}"></span>
+      <button class="cg-quick-btn" onclick="cgQuickPick('${c.key}')">⚄ Roll</button>
+    </div>`).join('');
+  document.getElementById('cg-quick').style.display = '';
+}
+
+window.cgQuickPick = function(key) {
+  const el = document.getElementById('cgq-' + key);
+  if (!el) return;
+  el.classList.add('fading');
+  setTimeout(() => {
+    const cat = CHARGEN_CATS.find(c => c.key === key);
+    el.textContent = key === 'name' ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
+    el.classList.remove('fading');
+  }, 180);
+};
+
 async function initChargen() {
   chargenInitialised = true;
   document.getElementById('cg-inner').innerHTML =
@@ -1227,6 +1285,7 @@ async function initChargen() {
   } else {
     cgDoRoll();
   }
+  cgQuickRender();
 }
 
 // ═══════════════════════════════════════════════
