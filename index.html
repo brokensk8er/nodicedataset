@@ -7,37 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<!-- Shared styles (colours, fonts, buttons, badges, animations) -->
+<link rel="stylesheet" href="styles.css">
 <style>
-  :root {
-    --ink:       #1a1a2e;
-    --parchment: #faf7f2;
-    --gold:      #c9a84c;
-    --gold-dim:  #a07c2e;
-    --gold-bg:   #fffdf5;
-    --card-bg:   #ffffff;
-    --border:    #e8e2d9;
-    --muted:     #6b6676;
-    --shadow:    rgba(26,26,46,.09);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  /* ── Page layout ── */
   body {
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    background-color: var(--parchment);
-    color: var(--ink);
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
-  /* ── Page frame ── */
   .page-wrap {
     width: 100%;
     max-width: 480px;
@@ -53,16 +33,6 @@
     padding: 1.6rem 0 .8rem;
   }
 
-  .site-label {
-    font-family: 'Cinzel', serif;
-    font-size: .6rem;
-    font-weight: 400;
-    letter-spacing: .28em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: .35rem;
-  }
-
   h1 {
     font-family: 'Cinzel', serif;
     font-size: clamp(1.5rem, 5vw, 2rem);
@@ -72,7 +42,7 @@
     letter-spacing: .04em;
   }
 
-  h1 span { color: var(--gold); }
+  /* h1 span colour (gold) comes from styles.css */
 
   .tagline {
     margin-top: .35rem;
@@ -82,14 +52,10 @@
     letter-spacing: .05em;
   }
 
-  .divider {
-    width: 50px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: .75rem auto 0;
-  }
+  /* Width override — gradient rule comes from styles.css .divider */
+  .divider { width: 50px; margin-top: .75rem; }
 
-  /* ── Main ── */
+  /* ── Main content area ── */
   main {
     flex: 1;
     display: flex;
@@ -98,7 +64,7 @@
     padding: .9rem 0 1rem;
   }
 
-  /* ── Section labels ── */
+  /* ── Section labels ("Ready to play", "In the forge") ── */
   .section-label {
     font-family: 'Cinzel', serif;
     font-size: .55rem;
@@ -109,7 +75,9 @@
     margin-bottom: .5rem;
   }
 
-  /* ── Live tools — full-width horizontal card stack ── */
+  /* ── Live tools — full-width horizontal card stack ──
+     To add a tool: copy one <a class="tool-card"> block,
+     update href, .tool-icon emoji, .tool-name, .tool-desc  */
   .live-grid {
     display: flex;
     flex-direction: column;
@@ -130,6 +98,8 @@
     transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
     position: relative;
     overflow: hidden;
+    /* Entry animation — stagger delays set below */
+    animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
   }
 
   .tool-card::before {
@@ -160,10 +130,7 @@
     filter: drop-shadow(0 1px 3px rgba(26,26,46,.12));
   }
 
-  .tool-text {
-    flex: 1;
-    min-width: 0;
-  }
+  .tool-text { flex: 1; min-width: 0; }
 
   .tool-name {
     font-family: 'Cinzel', serif;
@@ -213,7 +180,10 @@
     margin: .1rem 0 .75rem;
   }
 
-  /* ── Coming soon — compact two-column grid ── */
+  /* ── Coming soon — compact two-column grid ──
+     These are <div> elements (not <a>), so not clickable.
+     To promote one to live: wrap it in <a href="...">,
+     change class to tool-card, and move to .live-grid    */
   .soon-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -230,6 +200,7 @@
     gap: 3px;
     opacity: .52;
     cursor: default;
+    animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
   }
 
   .soon-icon {
@@ -281,15 +252,8 @@
     text-transform: uppercase;
   }
 
-  /* ── Animations ── */
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .tool-card { animation: slideUp .4s cubic-bezier(.22,1,.36,1) both; }
-  .soon-card  { animation: slideUp .4s cubic-bezier(.22,1,.36,1) both; }
-
+  /* ── Animation stagger delays ──
+     Each tool card enters slightly after the previous one. */
   .tool-card:nth-child(1) { animation-delay: .06s; }
   .tool-card:nth-child(2) { animation-delay: .10s; }
   .tool-card:nth-child(3) { animation-delay: .14s; }
@@ -303,6 +267,12 @@
 
 <div class="page-wrap">
 
+  <!-- ============================================
+       HEADER
+       Edit: site-label eyebrow text, h1 title,
+       tagline. The gold word in h1 is wrapped in
+       a <span>.
+       ============================================ -->
   <header>
     <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
     <h1>The <span>Vault</span></h1>
@@ -312,9 +282,17 @@
 
   <main>
 
-    <!-- ══════════════════════════════════════
-         LIVE TOOLS
-    ══════════════════════════════════════ -->
+    <!-- ============================================
+         LIVE TOOLS — READY TO PLAY
+         Each <a class="tool-card"> is one clickable
+         tool link.
+
+         To add a new tool:
+           1. Copy one <a class="tool-card"> block
+           2. Update href="yourfile.html"
+           3. Change .tool-icon emoji
+           4. Change .tool-name and .tool-desc text
+         ============================================ -->
     <div>
       <p class="section-label">Ready to play</p>
       <div class="live-grid">
@@ -367,9 +345,17 @@
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════
-         COMING SOON
-    ══════════════════════════════════════ -->
+    <!-- ============================================
+         COMING SOON — IN THE FORGE
+         These are <div> elements (not <a>), so
+         they are NOT clickable.
+
+         To promote one to live:
+           1. Change <div class="soon-card"> to
+              <a class="tool-card" href="yourfile.html">
+           2. Move it into the .live-grid above
+           3. Add a .tool-arrow div inside it
+         ============================================ -->
     <div>
       <div class="section-rule"></div>
       <p class="section-label">In the forge</p>
@@ -394,6 +380,11 @@
 
   </main>
 
+  <!-- ============================================
+       FOOTER
+       Plain text credit line. No nav link needed
+       on the hub page — this IS the hub.
+       ============================================ -->
   <footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
 
 </div>

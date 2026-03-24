@@ -7,34 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Shared styles (colours, fonts, buttons, badges, animations) -->
+<link rel="stylesheet" href="styles.css">
 <style>
-  :root {
-    --ink:       #1a1a2e;
-    --parchment: #faf7f2;
-    --gold:      #c9a84c;
-    --gold-dim:  #a07c2e;
-    --gold-bg:   #fffdf5;
-    --card-bg:   #ffffff;
-    --border:    #e8e2d9;
-    --muted:     #6b6676;
-    --shadow:    rgba(26,26,46,.12);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    height: 100%;
-  }
+  /* ── Page layout ── */
+  html, body { height: 100%; }
 
   body {
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    background-color: var(--parchment);
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    color: var(--ink);
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -66,6 +45,7 @@
   }
 
   /* ── Header ── */
+  /* .site-label comes from styles.css */
   header {
     text-align: center;
     padding: 10px 16px 6px;
@@ -73,16 +53,6 @@
     flex-shrink: 0;
     position: relative;
     background-color: var(--parchment);
-  }
-
-  .site-label {
-    font-family: 'Cinzel', serif;
-    font-size: .6rem;
-    font-weight: 400;
-    letter-spacing: .25em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 2px;
   }
 
   header h1 {
@@ -94,41 +64,17 @@
     line-height: 1.2;
   }
 
-  header h1 span { color: var(--gold); }
+  /* h1 span gold colour comes from styles.css */
 
   header .subtitle {
-    font-size: 0.68rem;
+    font-size: .68rem;
     color: var(--muted);
-    letter-spacing: 0.08em;
+    letter-spacing: .08em;
     text-transform: uppercase;
     margin-top: 2px;
   }
 
-  /* ── Mulligan bar ── */
-  .mulligan-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 5px 0 3px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    flex-shrink: 0;
-    background-color: var(--parchment);
-  }
-
-  .pip-row { display: flex; gap: 5px; }
-
-  .pip {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--gold);
-    transition: background 0.3s, transform 0.2s;
-  }
-  .pip.spent { background: var(--border); transform: scale(0.85); }
+  /* .mulligan-bar, .pip-row, .pip, .pip.spent come from styles.css */
 
   /* ── Main scrollable area ── */
   #app {
@@ -141,20 +87,7 @@
     background-color: var(--parchment);
   }
 
-  /* Loading state */
-  .loading {
-    text-align: center;
-    padding: 40px 24px;
-    color: var(--muted);
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-  }
-  .loading .spinner {
-    font-size: 2rem;
-    margin-bottom: 12px;
-    display: inline-block;
-    animation: spin 1.2s linear infinite;
-  }
+  /* .loading + .loading .spinner come from styles.css */
 
   /* ── Single white card that holds everything ── */
   .character-card {
@@ -263,114 +196,18 @@
   .reroll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .reroll-btn .die { font-size: 0.82rem; }
 
-  /* ── Card footer ── */
-  .card-footer {
-    flex-shrink: 0;
-    border-top: 1px solid var(--border);
-    padding: 9px 14px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    align-items: center;
-    background: rgba(201,168,76,.02);
-  }
-
-  .roll-btn {
-    width: 100%;
-    background: var(--ink);
-    color: var(--parchment);
-    border: none;
-    border-radius: 8px;
-    padding: 11px;
-    font-family: 'Cinzel', serif;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .roll-btn:hover:not(:disabled) { background: #2e2e4a; }
-  .roll-btn:active { transform: scale(0.98); }
-  .roll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* ── Lock notice ── */
-  .lock-notice {
-    width: 100%;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    cursor: default;
-  }
-
-  .lock-notice .lock-msg {
-    font-family: 'Lato', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    color: var(--muted);
-  }
-
-  .lock-notice .lock-countdown {
-    font-family: 'Cinzel', serif;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    color: var(--ink);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  /* ── Source badge ── */
-  .source-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.62rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2px 8px;
-  }
-
-  .source-badge .dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .source-badge.live .dot     { background: #2d7a5e; }
-  .source-badge.fallback .dot { background: #b8860b; }
+  /* .card-footer comes from styles.css */
+  /* .roll-btn, .roll-btn:hover, :active, :disabled come from styles.css */
+  /* .lock-notice + children come from styles.css */
+  /* .source-badge + .dot + .live/.fallback come from styles.css */
 
   /* ── Footer nav ── */
+  /* .nav-link comes from styles.css */
   footer {
     text-align: center;
     padding: 5px 0 7px;
     flex-shrink: 0;
     background-color: var(--parchment);
-  }
-
-  .nav-link {
-    font-family: 'Cinzel', serif;
-    font-size: 0.58rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color .2s, color .2s;
-  }
-  .nav-link:hover {
-    color: var(--gold);
-    border-color: var(--gold);
   }
 
   /* ── Dev reset button ── */
@@ -395,17 +232,7 @@
   }
   .reset-btn:hover { opacity: 1; }
 
-  /* ── Animations ── */
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
+  /* @keyframes cardIn and @keyframes spin come from styles.css */
   .die.spinning { animation: spin 0.35s ease; }
 </style>
 </head>
@@ -413,12 +240,24 @@
 
 <div class="page-frame">
 
+  <!-- ============================================
+       HEADER
+       Edit: site-label eyebrow text, h1 title,
+       subtitle. The gold word in h1 is in <span>.
+       ============================================ -->
   <header>
     <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
     <h1>Roll Your <span>Character</span></h1>
     <p class="subtitle">Fate is waiting</p>
   </header>
 
+  <!-- ============================================
+       APP ROOT
+       JavaScript injects the .mulligan-bar and
+       .character-card here via render().
+       The loading spinner shows until data loads.
+       Do not put static content in this div.
+       ============================================ -->
   <div id="app">
     <div class="loading">
       <span class="spinner">🎲</span><br>
@@ -426,6 +265,10 @@
     </div>
   </div>
 
+  <!-- ============================================
+       FOOTER
+       ← Back to the Vault nav link.
+       ============================================ -->
   <footer>
     <a class="nav-link" href="index.html">← Back to the Vault</a>
   </footer>
@@ -435,6 +278,9 @@
 <script>
 // ============================================================
 //  CONFIGURATION
+//  ► Change SHEET_ID + API_KEY to point to your own sheet.
+//  ► TABS maps each character field to a Sheet tab name.
+//    Add/remove entries here to change what fields are rolled.
 // ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
@@ -453,6 +299,9 @@ const CONFIG = {
 
 // ============================================================
 //  FALLBACK DATA
+//  Used when the Google Sheets API is unreachable (offline,
+//  wrong key, etc.). Edit these arrays to change what the
+//  tool rolls when it can't reach the live sheet.
 // ============================================================
 const FALLBACK = {
   firstNames: [
@@ -561,6 +410,10 @@ const FALLBACK = {
 
 // ============================================================
 //  FIELD CONFIG
+//  The 6 rows shown on the character card.
+//  label: text shown in the card header for that row.
+//  pool:  key in FALLBACK (and in DATA from Sheets) to draw from.
+//  null pool = name field, generated from firstNames + lastNames.
 // ============================================================
 const FIELDS = [
   { key: 'name',      label: 'Name',              pool: null          },
@@ -582,6 +435,8 @@ let countdownInterval = null;
 
 // ============================================================
 //  SESSION PERSISTENCE
+//  Saves/loads roll state to localStorage so players can
+//  close the tab and return within the 1-hour window.
 // ============================================================
 function saveSession() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
@@ -610,6 +465,8 @@ function clearSession() {
 
 // ============================================================
 //  DATA LOADING
+//  Fetches each character field from its own Google Sheets tab.
+//  Falls back to FALLBACK arrays if the API call fails.
 // ============================================================
 function isConfigured() {
   return CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
@@ -642,6 +499,9 @@ async function loadData() {
 
 // ============================================================
 //  HELPERS
+//  pick()       — returns a random element from an array.
+//  generateAll() — builds a full set of character field values.
+//  sourceBadgeHTML() — returns the live/fallback badge markup.
 // ============================================================
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function generateName() { return pick(DATA.firstNames) + ' ' + pick(DATA.lastNames); }
@@ -670,6 +530,8 @@ function formatCountdown(ms) {
 
 // ============================================================
 //  COUNTDOWN
+//  Runs a 1-second interval ticking down the lock timer.
+//  When it hits zero, clears the session and auto-rolls.
 // ============================================================
 function startCountdown() {
   if (countdownInterval) clearInterval(countdownInterval);
@@ -690,6 +552,9 @@ function startCountdown() {
 
 // ============================================================
 //  RENDER
+//  Builds the entire card DOM from the current state object
+//  and writes it into #app. Called after every state change.
+//  To change the card layout, edit the template literals here.
 // ============================================================
 function render() {
   const app    = document.getElementById('app');
@@ -755,6 +620,9 @@ function render() {
 
 // ============================================================
 //  ACTIONS
+//  doRoll()       — rolls a fresh full character.
+//  rerollField()  — rerolls one field, spends one mulligan.
+//  devReset()     — dev-only: wipes session and re-rolls.
 // ============================================================
 function doRoll() {
   if (isLocked()) return;
@@ -810,6 +678,8 @@ function devReset() {
 
 // ============================================================
 //  BOOT
+//  Entry point. Loads data, then either restores the previous
+//  session from localStorage or auto-rolls a fresh character.
 // ============================================================
 loadData().then(() => {
   const restored = loadSession();
