@@ -609,85 +609,6 @@
   .soon-desc { font-size: .65rem; font-weight: 300; color: var(--muted); line-height: 1.35; }
   .soon-badge { display: inline-block; font-family: 'Cinzel', serif; font-size: .48rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); border-radius: 20px; padding: 2px 7px; margin-top: 3px; align-self: flex-start; }
 
-  /* ─────────────────────────────────────────
-     POLL ADMIN FORM
-  ───────────────────────────────────────── */
-
-  .poll-admin-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
-    letter-spacing: .14em; text-transform: uppercase;
-    color: var(--gold); border: 1px solid rgba(201,168,76,.35);
-    background: rgba(201,168,76,.07); border-radius: 20px;
-    padding: 3px 10px; margin-bottom: 10px; align-self: flex-start;
-  }
-
-  .poll-form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-
-  .poll-form-label {
-    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
-    color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
-  }
-
-  .poll-form-input {
-    width: 100%; background: var(--parchment);
-    border: 1.5px solid var(--border); border-radius: 8px;
-    padding: 9px 11px; font-family: 'Lato', sans-serif;
-    font-size: .88rem; font-weight: 400; color: var(--ink);
-    outline: none; transition: border-color .18s;
-  }
-  .poll-form-input:focus { border-color: var(--gold); }
-  .poll-form-input::placeholder { color: var(--muted); opacity: .7; }
-
-  .poll-opts-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 6px;
-  }
-  .poll-opts-hint { font-size: .62rem; color: var(--muted); letter-spacing: .04em; }
-
-  .poll-opt-row {
-    display: flex; align-items: center; gap: 7px; margin-bottom: 6px;
-  }
-  .poll-opt-letter {
-    font-family: 'Cinzel', serif; font-size: .68rem; font-weight: 700;
-    color: var(--gold); flex-shrink: 0; min-width: 16px; text-align: center;
-  }
-
-  .poll-rm-btn {
-    flex-shrink: 0; width: 26px; height: 26px;
-    background: none; border: 1px solid var(--border); border-radius: 6px;
-    color: var(--muted); font-size: .7rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: border-color .18s, color .18s;
-  }
-  .poll-rm-btn:hover { border-color: var(--fail-red); color: var(--fail-red); }
-
-  .poll-add-btn {
-    width: 100%; background: none; border: 1.5px dashed var(--border);
-    border-radius: 8px; padding: 8px; margin-top: 2px;
-    font-family: 'Cinzel', serif; font-size: .68rem; font-weight: 600;
-    color: var(--muted); letter-spacing: .06em; cursor: pointer;
-    transition: border-color .18s, color .18s;
-  }
-  .poll-add-btn:hover { border-color: var(--gold); color: var(--gold-dim); }
-
-  .poll-admin-results-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
-  }
-  .poll-live-indicator {
-    display: flex; align-items: center; gap: 5px;
-    font-size: .62rem; color: var(--success); letter-spacing: .05em; text-transform: uppercase;
-  }
-
-  .poll-danger-btn {
-    width: 100%; background: none; border: 1.5px solid rgba(192,57,43,.35);
-    border-radius: 8px; padding: 9px;
-    font-family: 'Cinzel', serif; font-size: .78rem; font-weight: 600;
-    color: var(--fail-red); letter-spacing: .06em; cursor: pointer;
-    transition: background .18s, border-color .18s;
-  }
-  .poll-danger-btn:hover { background: rgba(192,57,43,.06); border-color: var(--fail-red); }
-
   footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 
   @keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -854,31 +775,6 @@
 </div>
 
 <!-- ── Firebase ── -->
-<!-- SHELF NAVIGATION — plain script so onclick handlers resolve immediately -->
-<script>
-  window._shelfInited = { loot: false, poll: false, trait: false, chargen: false };
-  window._activeShelf = null;
-
-  window.toggleShelf = function(id) {
-    if (window._activeShelf === id) {
-      document.getElementById('shelf-' + id).classList.remove('open');
-      window._activeShelf = null;
-      return;
-    }
-    if (window._activeShelf) {
-      document.getElementById('shelf-' + window._activeShelf).classList.remove('open');
-    }
-    document.getElementById('shelf-' + id).classList.add('open');
-    window._activeShelf = id;
-
-    var key = '_init_' + id;
-    if (!window._shelfInited[id] && typeof window[key] === 'function') {
-      window._shelfInited[id] = true;
-      window[key]();
-    }
-  };
-</script>
-
 <script type="module">
 import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, get, onValue }
@@ -985,7 +881,26 @@ function pick(arr)  { return arr[Math.floor(Math.random() * arr.length)]; }
 function esc(s)     { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function isConfigured() { return SHEETS_CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' && SHEETS_CONFIG.API_KEY !== 'YOUR_API_KEY_HERE'; }
 
-// ── Register lazy-init handlers (called by plain-script toggleShelf) ──
+// ═══════════════════════════════════════════════
+//  SHELF TOGGLE — one open at a time
+// ═══════════════════════════════════════════════
+let activeShelf = null;
+
+window.toggleShelf = function(id) {
+  if (activeShelf === id) {
+    document.getElementById('shelf-' + id).classList.remove('open');
+    activeShelf = null;
+    return;
+  }
+  if (activeShelf) document.getElementById('shelf-' + activeShelf).classList.remove('open');
+  document.getElementById('shelf-' + id).classList.add('open');
+  activeShelf = id;
+
+  if (id === 'loot'    && !lootInitialised)    initLoot();
+  if (id === 'poll'    && !pollInitialised)    initPoll();
+  if (id === 'trait'   && !traitInitialised)   initTrait();
+  if (id === 'chargen' && !chargenInitialised) initChargen();
+};
 
 // ═══════════════════════════════════════════════
 //  COIN FLIP
@@ -1029,22 +944,30 @@ window.doFlip = function() {
   const iters   = flips - 0.5;
 
   setFaceMystery();
-  coin.style.setProperty('--half-dur',   halfDur + 's');
-  coin.style.setProperty('--flip-count', iters);
-  coin.classList.remove('spinning', 'wobbling');
+
+  // Each keyframe cycle = halfDur seconds; iters = number of cycles
+  const totalDur = halfDur * iters;
+
+  // Apply animation directly on style — avoids CSS custom property
+  // iteration-count parsing bugs across browsers
+  coin.style.animation = 'none';
   void coin.offsetWidth;
-  coin.classList.add('spinning');
+  coin.style.animation = `coinFlipMini ${halfDur}s ease-in-out ${iters} forwards`;
 
   playFlipSound();
 
-  coin.addEventListener('animationend', function onEnd() {
-    coin.removeEventListener('animationend', onEnd);
-    coin.classList.remove('spinning');
+  // Use both animationend AND a setTimeout fallback — whichever fires first
+  let finished = false;
+  function onFlipDone() {
+    if (finished) return;
+    finished = true;
+    coin.style.animation = 'none';
+    void coin.offsetWidth;
 
     if (result === 'pass') setFacePass(); else setFaceFail();
 
     setTimeout(() => {
-      coin.classList.add('wobbling');
+      coin.style.animation = 'wobbleMini .45s ease-out forwards';
       if (result === 'pass') {
         banner.textContent = 'Go Time';
         banner.className   = 'coin-result-banner visible pass';
@@ -1060,12 +983,20 @@ window.doFlip = function() {
         playWompWomp();
       }
       setTimeout(() => {
-        coin.classList.remove('wobbling');
+        coin.style.animation = '';
         coinSpinning = false;
         btn.disabled = false;
       }, 500);
     }, halfDur * 1000);
+  }
+
+  coin.addEventListener('animationend', function onEnd() {
+    coin.removeEventListener('animationend', onEnd);
+    onFlipDone();
   });
+
+  // Fallback: if animationend doesn't fire within expected time + 200ms buffer, proceed anyway
+  setTimeout(onFlipDone, totalDur * 1000 + 300);
 };
 
 // Confetti
@@ -1317,210 +1248,35 @@ async function initLoot() {
 }
 
 // ═══════════════════════════════════════════════
-//  POLL — ADMIN MODE
+//  POLL
 // ═══════════════════════════════════════════════
-let pollInitialised  = false;
-const POLL_LETTERS   = ['A','B','C','D','E'];
-const POLL_MIN_OPTS  = 2;
-const POLL_MAX_OPTS  = 5;
-const POLL_PLACEHOLDERS = ['The first option…','The second option…','A third choice…','Or maybe this…','One more possibility…'];
-let   pollOptCount   = POLL_MIN_OPTS;
+let pollInitialised = false;
+const POLL_LETTERS  = ['A','B','C','D','E'];
+const POLL_VOTER_KEY = 'nodice_vault_voter_id';
+
+function pollGetVoterId() {
+  let id = sessionStorage.getItem(POLL_VOTER_KEY);
+  if (!id) { id = 'v_' + Math.random().toString(36).slice(2,22); sessionStorage.setItem(POLL_VOTER_KEY, id); }
+  return id;
+}
 
 function pollBadge(live) {
   return `<div class="source-badge ${live?'live':'fallback'}"><span class="dot"></span>${live?'Connected':'Firebase not configured'}</div>`;
 }
 
-// ── Shared render helpers ──
-function pollSetInner(html)  { document.getElementById('poll-inner').innerHTML  = html; }
-function pollSetFooter(html) { document.getElementById('poll-footer').innerHTML = html; }
-
-// ── Admin: build-poll form ──
-function pollRenderAdminForm(preserve) {
-  const rowsHtml = POLL_LETTERS.slice(0, pollOptCount).map((L, i) => {
-    const required = i < POLL_MIN_OPTS;
-    const rmBtn = required
-      ? `<div style="width:28px;"></div>`
-      : `<button class="poll-rm-btn" onclick="pollRemoveOption(${i})" title="Remove">✕</button>`;
-    const val = preserve && preserve[i] ? esc(preserve[i]) : '';
-    return `<div class="poll-opt-row" id="poll-opt-row-${i}">
-      <span class="poll-opt-letter">${L}</span>
-      <input class="poll-form-input" id="poll-opt-${i}" type="text"
-        placeholder="${POLL_PLACEHOLDERS[i]}" maxlength="80" autocomplete="off" value="${val}">
-      ${rmBtn}
-    </div>`;
-  }).join('');
-
-  const addBtn = pollOptCount < POLL_MAX_OPTS
-    ? `<button class="poll-add-btn" onclick="pollAddOption()">＋ Add option (${pollOptCount}/${POLL_MAX_OPTS})</button>`
-    : '';
-
-  const qVal = preserve && preserve.question ? esc(preserve.question) : '';
-  pollSetInner(`
-    <div class="poll-section">
-      <div class="poll-admin-badge">⚔ Showrunner</div>
-      <div class="poll-form-group">
-        <label class="poll-form-label" for="poll-q-input">Question</label>
-        <input class="poll-form-input" id="poll-q-input" type="text"
-          placeholder="What does the crowd choose?" maxlength="120" autocomplete="off" value="${qVal}">
-      </div>
-      <div class="poll-opts-header">
-        <span class="poll-form-label">Options</span>
-        <span class="poll-opts-hint">Min 2 · Max 5</span>
-      </div>
-      <div id="poll-opts-container">${rowsHtml}</div>
-      ${addBtn}
-    </div>`);
-  pollSetFooter(`
-    <button class="btn-pull" onclick="pollLaunch()" id="poll-launch-btn">⚔ Launch Poll</button>
-    ${pollBadge(true)}`);
-
-  // Enter key navigation
-  document.getElementById('poll-q-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('poll-opt-0')?.focus();
-  });
-  for (let i = 0; i < pollOptCount; i++) {
-    document.getElementById(`poll-opt-${i}`)?.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') return;
-      const next = document.getElementById(`poll-opt-${i+1}`);
-      next ? next.focus() : pollLaunch();
-    });
-  }
-}
-
-// ── Admin: live vote counts (pre-reveal) ──
-function pollRenderAdminPreReveal(poll, votes) {
-  const opts   = poll.options||[];
-  const counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
-  const total  = counts.reduce((a,b)=>a+b,0);
-  const pcts   = counts.map(c=>total?Math.round(c/total*100):0);
-  const maxC   = Math.max(...counts);
-
-  const bars = opts.map((o,i)=>`
-    <div class="poll-result-row">
-      <div class="poll-result-label-row">
-        <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span>
-        <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]} vote${counts[i]!==1?'s':''}</span></span>
-      </div>
-      <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
-    </div>`).join('');
-
-  pollSetInner(`
-    <div class="poll-section">
-      <div class="poll-admin-badge">⚔ Showrunner</div>
-      <div class="poll-admin-results-header">
-        <div class="poll-question-label">Active Poll</div>
-        <div class="poll-live-indicator"><span class="live-dot"></span>Votes incoming</div>
-      </div>
-      <p class="poll-question-text">${esc(poll.question)}</p>
-      <div class="poll-result-wrap">${bars}</div>
-      <p class="total-votes">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
-    </div>`);
-  pollSetFooter(`
-    <button class="btn-pull" onclick="pollReveal()" id="poll-reveal-btn">🎲 Reveal Results to Audience</button>
-    <div style="height:1px;background:var(--border);width:100%;"></div>
-    <button class="poll-danger-btn" onclick="pollClear()">Close Poll &amp; Clear</button>
-    ${pollBadge(true)}`);
-}
-
-// ── Admin: post-reveal ──
-function pollRenderAdminPostReveal(poll, votes) {
-  const opts   = poll.options||[];
-  const counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
-  const total  = counts.reduce((a,b)=>a+b,0);
-  const pcts   = counts.map(c=>total?Math.round(c/total*100):0);
-  const maxC   = Math.max(...counts);
-
-  const bars = opts.map((o,i)=>`
-    <div class="poll-result-row">
-      <div class="poll-result-label-row">
-        <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span>
-        <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]} vote${counts[i]!==1?'s':''}</span></span>
-      </div>
-      <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
-    </div>`).join('');
-
-  pollSetInner(`
-    <div class="poll-section">
-      <div class="poll-admin-badge" style="border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.12);">⚔ Results Revealed</div>
-      <div class="poll-admin-results-header">
-        <div class="poll-question-label">Results</div>
-        <div class="poll-live-indicator" style="color:var(--gold);"><span class="live-dot" style="background:var(--gold);"></span>Visible to audience</div>
-      </div>
-      <p class="poll-question-text">${esc(poll.question)}</p>
-      <div class="poll-result-wrap">${bars}</div>
-      <p class="total-votes">${total} vote${total!==1?'s':''} cast</p>
-    </div>`);
-  pollSetFooter(`
-    <button class="btn-pull" onclick="pollClear()">New Poll</button>
-    <button class="poll-danger-btn" onclick="pollClear()">Close Poll &amp; Clear</button>
-    ${pollBadge(true)}`);
-}
-
-// ── Admin actions (exposed on window for inline onclick) ──
-window.pollLaunch = async function() {
-  const q = document.getElementById('poll-q-input')?.value.trim();
-  const options = [];
-  for (let i=0; i<pollOptCount; i++) options.push((document.getElementById(`poll-opt-${i}`)?.value||'').trim());
-
-  let err = false;
-  if (!q) { const el=document.getElementById('poll-q-input'); el.style.borderColor='#c0392b'; el.focus(); setTimeout(()=>el.style.borderColor='',1200); err=true; }
-  options.forEach((v,i) => { if (!v) { const el=document.getElementById(`poll-opt-${i}`); if(el){el.style.borderColor='#c0392b'; if(!err)el.focus(); setTimeout(()=>el.style.borderColor='',1200);} err=true; } });
-  if (err) return;
-
-  const btn = document.getElementById('poll-launch-btn');
-  if (btn) { btn.disabled=true; btn.textContent='Launching…'; }
-  await set(pollRef2, { question:q, options, active:true, revealed:false, ts:Date.now() });
-  await set(votesRef2, {});
-  pollOptCount = POLL_MIN_OPTS;
-};
-
-window.pollReveal = async function() {
-  const btn = document.getElementById('poll-reveal-btn');
-  if (btn) { btn.disabled=true; btn.textContent='Revealing…'; }
-  await set(ref(db2,'nodice/poll/revealed'), true);
-};
-
-window.pollClear = async function() {
-  await set(pollRef2, { active:false });
-  await set(votesRef2, {});
-  pollOptCount = POLL_MIN_OPTS;
-};
-
-window.pollAddOption = function() {
-  const vals = pollGatherForm();
-  pollOptCount++;
-  pollRenderAdminForm(vals);
-  setTimeout(()=>document.getElementById(`poll-opt-${pollOptCount-1}`)?.focus(), 50);
-};
-
-window.pollRemoveOption = function(idx) {
-  const vals = pollGatherForm();
-  vals.splice(idx, 1);
-  pollOptCount--;
-  pollRenderAdminForm(vals);
-};
-
-function pollGatherForm() {
-  const vals = [];
-  vals.question = document.getElementById('poll-q-input')?.value || '';
-  for (let i=0; i<pollOptCount; i++) vals.push(document.getElementById(`poll-opt-${i}`)?.value||'');
-  return vals;
-}
-
 function initPoll() {
   pollInitialised = true;
   if (IS_DEMO) {
-    pollSetInner(`
+    document.getElementById('poll-inner').innerHTML = `
       <div class="poll-setup-notice">
         <div class="notice-icon">🔧</div>
         <div class="notice-title">Firebase Setup Needed</div>
         <div class="notice-body">The Poll needs a free Firebase project.<br>See <a href="FIREBASE_SETUP.md">FIREBASE_SETUP.md</a> or open <a href="poll.html">poll.html</a>.</div>
-      </div>`);
-    pollSetFooter(pollBadge(false));
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(false);
     return;
   }
-  pollSetInner(`<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`);
-  pollSetFooter('');
+  document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`;
 }
 
 // ═══════════════════════════════════════════════
@@ -1611,54 +1367,108 @@ async function initTrait() {
 }
 
 // ═══════════════════════════════════════════════
-//  FIREBASE POLL LISTENER — admin mode only
+//  FIREBASE POLL LIVE LISTENER
 // ═══════════════════════════════════════════════
-let app2, db2, pollRef2, votesRef2;
-
 if (!IS_DEMO) {
+  let app2, db2, pollRef2, votesRef2;
   try {
     app2      = initializeApp(FIREBASE_CONFIG, 'vault-poll');
     db2       = getDatabase(app2);
     pollRef2  = ref(db2, 'nodice/poll');
     votesRef2 = ref(db2, 'nodice/votes');
-  } catch(e) { console.warn('Firebase init error', e); }
+  } catch(e) {}
 
-  // Override initPoll stub to start the real listener
-  const _origInitPoll = initPoll;
+  const isAdmin       = new URLSearchParams(window.location.search).has('admin');
+  const pollVoterId   = pollGetVoterId();
+  let pollCurrentSnap = null;
+  let pollUnsubVotes  = null;
+
+  function pollRenderWaiting() {
+    document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">🎲</span><br>No poll active right now.<br><small>The showrunner will start one.</small></p></div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  function pollRenderVote(poll) {
+    const opts = (poll.options||[]);
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="vote-options">${opts.map((o,i)=>`<button class="vote-btn" id="pvbtn-${i}" onclick="pollCastVote(${i})"><span class="opt-letter">${POLL_LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  function pollRenderAwaiting(poll, myIdx) {
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <p class="voted-chip" style="margin-top:4px;">✔ Voted — ${POLL_LETTERS[myIdx]}: ${esc((poll.options||[])[myIdx]||'')}</p>
+        <p class="poll-waiting" style="margin-top:8px;"><span class="poll-waiting-pulse">⚔</span><br>Waiting for reveal…</p>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  function pollRenderResults(poll, votes, myIdx) {
+    const opts   = poll.options||[], counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
+    const total  = counts.reduce((a,b)=>a+b,0), pcts = counts.map(c=>total?Math.round(c/total*100):0), maxC = Math.max(...counts);
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-section">
+        <div class="poll-question-label">Results</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        ${myIdx!==null?`<p class="voted-chip" style="margin-top:2px;">✔ You voted ${POLL_LETTERS[myIdx]}</p>`:''}
+        <div class="poll-result-wrap" style="margin-top:8px;">${opts.map((o,i)=>`<div class="poll-result-row"><div class="poll-result-label-row"><span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span><span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span></div><div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div></div>`).join('')}</div>
+        <p class="total-votes" style="margin-top:6px;">${total} vote${total!==1?'s':''}</p>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  window.pollCastVote = async function(index) {
+    const poll = pollCurrentSnap; if (!poll) return;
+    sessionStorage.setItem('nodice_vault_vote_ts', poll.ts);
+    sessionStorage.setItem('nodice_vault_vote_choice', String(index));
+    (poll.options||[]).forEach((_,i)=>{ const b=document.getElementById('pvbtn-'+i); if(b) b.disabled=true; });
+    const vref = ref(db2, `nodice/votes/${pollVoterId}`);
+    await set(vref, String(index));
+    pollRenderAwaiting(poll, index);
+    if (pollUnsubVotes) pollUnsubVotes();
+    pollUnsubVotes = onValue(votesRef2, snap => {
+      if (pollCurrentSnap && pollCurrentSnap.revealed) pollRenderResults(pollCurrentSnap, snap.val()||{}, index);
+    });
+  };
+
+  // Override initPoll to start listener
+  const _orig = initPoll;
   initPoll = function() {
     pollInitialised = true;
-    pollSetInner(`<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`);
-    pollSetFooter('');
+    document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`;
+    document.getElementById('poll-footer').innerHTML = '';
 
     onValue(pollRef2, snap => {
-      pollCurrentSnap = snap.val();
-      const poll = pollCurrentSnap;
-
-      if (!poll || !poll.active) {
-        if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
-        pollOptCount = POLL_MIN_OPTS;
-        pollRenderAdminForm();
+      const poll = snap.val(); pollCurrentSnap = poll;
+      if (isAdmin) {
+        get(votesRef2).then(vs => {
+          const votes = vs.val()||{};
+          const total = poll&&poll.active ? (poll.options||[]).map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length).reduce((a,b)=>a+b,0) : 0;
+          document.getElementById('poll-inner').innerHTML = `<div class="poll-section">${poll&&poll.active?`<p class="poll-question-text">${esc(poll.question)}</p><p class="poll-status-line"><span class="live-dot"></span>${total} vote${total!==1?'s':''} · ${poll.revealed?'Revealed':'Not revealed'}</p>`:'<p class="poll-waiting"><span class="poll-waiting-pulse">🎲</span><br>No active poll.</p>'}</div>`;
+          document.getElementById('poll-footer').innerHTML = `<a href="poll.html?admin" class="full-link-btn">Open Showrunner Controls <span>→</span></a>${pollBadge(true)}`;
+        });
         return;
       }
-
-      if (pollUnsubVotes) pollUnsubVotes();
-      pollUnsubVotes = onValue(votesRef2, vsSnap => {
-        const votes = vsSnap.val() || {};
-        if (pollCurrentSnap && pollCurrentSnap.revealed) {
-          pollRenderAdminPostReveal(pollCurrentSnap, votes);
-        } else {
-          pollRenderAdminPreReveal(pollCurrentSnap, votes);
-        }
-      });
+      if (!poll||!poll.active) { if(pollUnsubVotes){pollUnsubVotes();pollUnsubVotes=null;} sessionStorage.removeItem('nodice_vault_vote_ts'); sessionStorage.removeItem('nodice_vault_vote_choice'); pollRenderWaiting(); return; }
+      const ts=sessionStorage.getItem('nodice_vault_vote_ts'), choice=sessionStorage.getItem('nodice_vault_vote_choice');
+      if (ts && parseInt(ts)===poll.ts && choice!==null) {
+        const idx=parseInt(choice);
+        if (poll.revealed) { get(votesRef2).then(vs=>pollRenderResults(poll,vs.val()||{},idx)); }
+        else { pollRenderAwaiting(poll,idx); if(!pollUnsubVotes){pollUnsubVotes=onValue(votesRef2,vs=>{if(pollCurrentSnap&&pollCurrentSnap.revealed) pollRenderResults(pollCurrentSnap,vs.val()||{},idx);});} }
+        return;
+      }
+      if(pollUnsubVotes){pollUnsubVotes();pollUnsubVotes=null;}
+      pollRenderVote(poll);
     });
   };
 }
-
-// Register init handlers for the plain-script shelf toggle
-window._init_loot    = initLoot;
-window._init_trait   = initTrait;
-window._init_chargen = initChargen;
-window._init_poll    = initPoll;
 
 </script>
 </body>
