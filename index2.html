@@ -294,85 +294,52 @@
   ───────────────────────────────────────── */
 
   /* Category button row — single-line segmented control */
-  .chargen-cat-row {
-    display: flex;
+  /* ── Inline full chargen card ─────────────────── */
+  .cg-fields {
+    display: flex; flex-direction: column;
+    padding: 10px 12px 4px;
     gap: 0;
-    padding: 10px 12px 8px;
+  }
+  .cg-field-row {
+    display: flex; align-items: baseline;
+    justify-content: space-between; gap: 8px;
+    padding: 6px 0;
     border-bottom: 1px solid var(--border);
   }
-
-  /* Each segment: equal width, no right border (shared with neighbour's left) */
-  .chargen-cat-btn {
-    flex: 1;
-    font-family: 'Cinzel', serif;
-    font-size: .6rem; font-weight: 600;
-    letter-spacing: .05em; text-transform: uppercase;
-    color: var(--ink);
-    background: var(--parchment);
-    border: 1.5px solid var(--border);
-    border-right: none;
-    border-radius: 0;
-    padding: 8px 2px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .18s, background .18s, color .18s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: relative;
-  }
-  /* Round the outer corners only */
-  .chargen-cat-btn:first-child { border-radius: 8px 0 0 8px; }
-  .chargen-cat-btn:last-child  { border-right: 1.5px solid var(--border); border-radius: 0 8px 8px 0; }
-
-  .chargen-cat-btn:hover:not(.active) {
-    background: var(--gold-bg);
-    border-color: var(--gold);
-    color: var(--gold-dim);
-    z-index: 1;
-  }
-  /* Active segment: gold fill, gold border on all sides, sits on top */
-  .chargen-cat-btn.active {
-    background: var(--gold);
-    border-color: var(--gold);
-    border-right: 1.5px solid var(--gold);
-    color: var(--ink);
-    z-index: 1;
-  }
-
-  /* Result display area */
-  .chargen-result-area {
-    padding: 12px 14px 14px;
-    min-height: 64px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 3px;
-  }
-
-  .chargen-result-label {
-    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+  .cg-field-row:last-child { border-bottom: none; }
+  .cg-field-text { flex: 1; min-width: 0; }
+  .cg-field-label {
+    font-family: 'Cinzel', serif; font-size: .5rem; font-weight: 600;
     color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
-    opacity: 0; transition: opacity .2s;
-    min-height: .9rem;
+    line-height: 1.2; margin-bottom: 1px;
   }
-  .chargen-result-label.visible { opacity: 1; }
-
-  .chargen-result-value {
-    font-size: .95rem; font-weight: 400;
-    color: var(--ink); line-height: 1.4;
-    opacity: 0; transform: translateY(4px);
-    transition: opacity .25s, transform .25s;
-    min-height: 1.25rem;
+  .cg-field-value {
+    font-size: .8rem; color: var(--ink); line-height: 1.35;
+    transition: opacity .18s; min-height: 1rem;
   }
-  .chargen-result-value.visible { opacity: 1; transform: translateY(0); }
-  .chargen-result-value.fading  { opacity: 0; transform: translateY(4px); }
-
-  .chargen-result-hint {
-    font-size: .68rem; color: var(--muted);
-    font-weight: 300; letter-spacing: .03em;
-    min-height: 1rem;
+  .cg-field-value.fading { opacity: 0; }
+  .cg-reroll-btn {
+    flex-shrink: 0; align-self: center;
+    font-size: .55rem; color: var(--muted);
+    background: none; border: 1px solid var(--border); border-radius: 5px;
+    padding: 3px 6px; cursor: pointer;
+    transition: border-color .15s, color .15s; white-space: nowrap;
   }
+  .cg-reroll-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-dim); }
+  .cg-reroll-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .cg-footer {
+    padding: 8px 12px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .cg-roll-btn {
+    width: 100%; background: var(--ink); color: var(--parchment); border: none;
+    border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; transition: background .2s, transform .1s;
+  }
+  .cg-roll-btn:hover:not(:disabled) { background: var(--ink-hover); }
+  .cg-roll-btn:active { transform: scale(.98); }
+  .cg-roll-btn:disabled { opacity: .35; cursor: not-allowed; }
 
   /* ─────────────────────────────────────────
      LOOT TABLE
@@ -668,21 +635,7 @@
       <div class="shelf-body" id="shelf-body-chargen">
         <div class="shelf-body-inner">
           <div class="shelf-content">
-            <!-- Full tool link at top -->
-            <div class="shelf-topbar">
-              <a href="chargen.html" class="full-link-btn">Open Full Character Generator <span>→</span></a>
-            </div>
-            <!-- Category buttons row -->
-            <div class="chargen-cat-row" id="chargen-cat-row">
-              <!-- rendered by JS -->
-            </div>
-            <!-- Single result display -->
-            <div class="chargen-result-area">
-              <div class="chargen-result-label" id="cg-result-label"></div>
-              <div class="chargen-result-value" id="cg-result-value"></div>
-              <div class="chargen-result-hint"  id="cg-result-hint">Tap a category above to roll it.</div>
-            </div>
-            <div id="chargen-source-wrap" style="padding:0 12px 10px;display:flex;justify-content:center;"></div>
+            <div id="cg-inner"><!-- rendered by JS --></div>
           </div>
         </div>
       </div>
@@ -1131,7 +1084,6 @@ window.launchConfetti = launchConfetti;
 let chargenInitialised = false;
 let CHARGEN_DATA = null;
 let chargenDataSource = 'fallback';
-let chargenActiveKey  = null;
 
 function chargenGenName() {
   return pick(CHARGEN_DATA.firstNames) + ' ' + pick(CHARGEN_DATA.lastNames);
@@ -1150,57 +1102,131 @@ async function chargenFetchData() {
   } catch(e) { CHARGEN_DATA = CHARGEN_FALLBACK; chargenDataSource = 'fallback'; }
 }
 
-function chargenRenderButtons() {
-  const row = document.getElementById('chargen-cat-row');
-  row.innerHTML = CHARGEN_CATS.map(c => `
-    <button class="chargen-cat-btn${chargenActiveKey === c.key ? ' active' : ''}"
-      id="cgbtn-${c.key}" onclick="chargenPick('${c.key}')">
-      ${esc(c.label)}
-    </button>`).join('');
+// ── Mulligan state (in-session; separate key avoids conflicts with chargen.html) ──
+const CG_MAX_MULLIGANS  = 3;
+const CG_LOCK_DURATION  = 60 * 60 * 1000;
+const CG_STORAGE_KEY    = 'nodice_vault_chargen_session';
+let cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
+let cgCountdownInterval = null;
+
+function cgSaveSession() {
+  try { localStorage.setItem(CG_STORAGE_KEY, JSON.stringify(cgState)); } catch(e) {}
+}
+function cgLoadSession() {
+  try {
+    const raw = localStorage.getItem(CG_STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved.values || typeof saved.mulligans !== 'number') return false;
+    if (saved.lockedAt && Date.now() - saved.lockedAt >= CG_LOCK_DURATION) {
+      localStorage.removeItem(CG_STORAGE_KEY); return false;
+    }
+    cgState = saved; return true;
+  } catch(e) { return false; }
 }
 
-window.chargenPick = function(key) {
-  chargenActiveKey = key;
+function cgIsLocked() { return cgState.lockedAt !== null; }
+function cgFormatCountdown(ms) {
+  if (ms <= 0) return '00:00';
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
 
-  const cat      = CHARGEN_CATS.find(c => c.key === key);
-  const labelEl  = document.getElementById('cg-result-label');
-  const valueEl  = document.getElementById('cg-result-value');
-  const hintEl   = document.getElementById('cg-result-hint');
+function cgRender() {
+  const locked = cgIsLocked();
+  const pips = Array.from({length: CG_MAX_MULLIGANS}, (_,i) =>
+    `<div class="pip${i >= cgState.mulligans ? ' spent' : ''}"></div>`
+  ).join('');
 
-  // Fade out
-  valueEl.classList.add('fading');
-  valueEl.classList.remove('visible');
+  const rows = CHARGEN_CATS.map(c => {
+    const canReroll = cgState.mulligans > 0 && !locked && cgState.rolled;
+    return `
+      <div class="cg-field-row">
+        <div class="cg-field-text">
+          <div class="cg-field-label">${esc(c.label)}</div>
+          <div class="cg-field-value" id="cgv-${c.key}">${esc(cgState.values[c.key] || '—')}</div>
+        </div>
+        <button class="cg-reroll-btn" onclick="cgRerollField('${c.key}')"
+          ${canReroll ? '' : 'disabled'}>⚄ Reroll</button>
+      </div>`;
+  }).join('');
 
+  const ctaBtn = cgIsLocked()
+    ? `<div class="lock-bar">
+         <span class="lock-msg">Out of rolls! Back in</span>
+         <span class="lock-cd" id="cg-lock-cd">${cgFormatCountdown(CG_LOCK_DURATION - (Date.now() - cgState.lockedAt))}</span>
+       </div>`
+    : `<button class="cg-roll-btn" onclick="cgDoRoll()"
+         ${(!cgState.rolled || cgState.mulligans > 0) ? '' : 'disabled'}>
+         🎲 ${cgState.rolled ? 'Roll New Character' : 'Roll Character'}
+       </button>`;
+
+  document.getElementById('cg-inner').innerHTML = `
+    <div class="mulligan-bar">Mulligans &nbsp;<div class="pip-row">${pips}</div></div>
+    <div class="cg-fields">${rows}</div>
+    <div class="cg-footer">
+      ${ctaBtn}
+      <div class="source-badge ${chargenDataSource}"><span class="dot"></span>${chargenDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>
+    </div>`;
+
+  if (cgIsLocked()) cgStartCountdown();
+}
+
+function cgStartCountdown() {
+  if (cgCountdownInterval) clearInterval(cgCountdownInterval);
+  cgCountdownInterval = setInterval(() => {
+    const el = document.getElementById('cg-lock-cd');
+    if (!el) { clearInterval(cgCountdownInterval); return; }
+    const remaining = CG_LOCK_DURATION - (Date.now() - cgState.lockedAt);
+    if (remaining <= 0) {
+      clearInterval(cgCountdownInterval);
+      localStorage.removeItem(CG_STORAGE_KEY);
+      cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
+      cgDoRoll();
+    } else {
+      el.textContent = cgFormatCountdown(remaining);
+    }
+  }, 1000);
+}
+
+window.cgDoRoll = function() {
+  if (cgIsLocked()) return;
+  if (cgState.rolled && cgState.mulligans <= 0) return;
+  if (cgState.rolled) cgState.mulligans--;
+  cgState.rolled = true;
+  const v = { name: chargenGenName() };
+  CHARGEN_CATS.forEach(c => { if (c.pool) v[c.key] = pick(CHARGEN_DATA[c.pool]); });
+  cgState.values = v;
+  if (cgState.mulligans === 0) cgState.lockedAt = Date.now();
+  cgSaveSession();
+  cgRender();
+};
+
+window.cgRerollField = function(key) {
+  if (cgIsLocked() || cgState.mulligans <= 0) return;
+  cgState.mulligans--;
+  const valEl = document.getElementById('cgv-' + key);
+  if (valEl) valEl.classList.add('fading');
   setTimeout(() => {
-    const value = (key === 'name') ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
-
-    labelEl.textContent = cat.label;
-    labelEl.className = 'chargen-result-label visible';
-    valueEl.textContent = value;
-    valueEl.classList.remove('fading');
-    hintEl.textContent = 'Tap the same button again to re-roll.';
-
-    // Small settle then animate in
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        valueEl.classList.add('visible');
-      });
-    });
-
-    // Update active button styling
-    chargenRenderButtons();
-  }, 200);
+    const cat = CHARGEN_CATS.find(c => c.key === key);
+    cgState.values[key] = key === 'name' ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
+    if (cgState.mulligans === 0) cgState.lockedAt = Date.now();
+    cgSaveSession();
+    cgRender();
+  }, 180);
 };
 
 async function initChargen() {
   chargenInitialised = true;
-  // Show loading state in cat row
-  document.getElementById('chargen-cat-row').innerHTML = `<span style="font-size:.72rem;color:var(--muted);padding:4px 2px;">Loading…</span>`;
+  document.getElementById('cg-inner').innerHTML =
+    `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
   await chargenFetchData();
-  chargenRenderButtons();
-  // Source badge
-  document.getElementById('chargen-source-wrap').innerHTML =
-    `<div class="source-badge ${chargenDataSource}"><span class="dot"></span>${chargenDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>`;
+  const restored = cgLoadSession();
+  if (restored && cgState.rolled) {
+    cgRender();
+  } else {
+    cgDoRoll();
+  }
 }
 
 // ═══════════════════════════════════════════════
