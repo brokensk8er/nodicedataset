@@ -1,34 +1,38 @@
-# 🎲 No Dice — Improv D&D Tool Suite
+# NO DICE — THE TOOLSET
+### Improv D&D · Static GitHub Pages · Mobile-First
 
-A mobile-friendly web app for live improv Dungeons & Dragons shows. Players scan a QR code and instantly get tools to shape their session. Built as a static GitHub Pages site with Google Sheets as a live editable data backend.
+*A suite of tools for live improv D&D shows. Players scan a QR code. Fate does the rest. No actual dice required or permitted.*
 
 ---
 
-## Project Status
+## The Vault — Current Status
 
-| Tool                | Status         | File            |
-|--------------------|----------------|-----------------|
-| Hub / Vault         | ✅ Complete    | `index.html`    |
-| Character Generator | ✅ Complete    | `chargen.html`  |
-| Fate's Flip (coin)  | ✅ Complete    | `coinflip.html` |
-| Loot Table          | ✅ Complete    | `loot.html`     |
-| The Poll            | ✅ Complete    | `poll.html`     |
-| Scenario Generator  | 🔜 Planned     | `scenario.html` |
-| NPC Generator       | 🔜 Planned     | `npc.html`      |
+| Tool | Status | File |
+|------|--------|------|
+| Hub / Vault | ✅ Complete | `index.html` |
+| Character Generator | ✅ Complete | `chargen.html` |
+| Fate's Flip (coin) | ✅ Complete | `coinflip.html` |
+| Loot Table | ✅ Complete | `loot.html` |
+| The Poll | ✅ Complete | `poll.html` |
+| Trait Generator | ✅ Complete | `traitgen.html` |
+| Scenario Generator | 🔜 Planned | `scenario.html` |
+| NPC Generator | 🔜 Planned | `npc.html` |
 
 ---
 
 ## How It Works
 
-Players scan a QR code at the show and land on the hub page, where they choose a tool. The character generator fetches the latest variable data from a Google Sheet and rolls a random character. Players get **3 mulligans** shared across all fields — they can spend them rerolling individual fields or the entire character, but once they're gone, the dice have spoken. After all mulligans are spent, a **1-hour lockout** begins; the page shows a live countdown and auto-resets when the timer expires.
+Players scan a QR code at the show and land on the hub. Each tool is a self-contained page backed by the same Google Sheet. Data loads live on each visit; if the Sheet is unreachable, every tool falls back silently to hardcoded data so nobody sees a broken screen mid-session.
 
-The loot table pulls item names and flavour text from a dedicated Google Sheet tab and uses a shuffle-bag algorithm so no item repeats until the full list has been seen.
+The **Character Generator** fetches six field pools from Google Sheets and rolls a complete absurd adventurer. Players get **3 shared mulligans** — spend them on individual rerolls or the whole character. Once spent, a **1-hour lockout** begins with a live countdown. Session state persists in `localStorage` so a refresh restores the existing character rather than burning a mulligan.
 
-The coin flip tool gives a binary pass/fail result with a 3D animated coin, confetti on a pass, and Web Audio sound effects — no external dependencies.
+The **Loot Table** pulls item names and flavour text from a `Loot` sheet tab (Col A: name, Col B: text, Col C: image data URI). A shuffle-bag algorithm ensures no item repeats until the full list has been seen.
 
-The poll tool uses Firebase Realtime Database to sync votes across all devices simultaneously. The showrunner opens `poll.html?admin` to create and control polls; the audience votes anonymously through the standard `poll.html` URL. Results are hidden until the showrunner reveals them.
+The **Trait Generator** discovers every tab in the linked Sheet automatically, then draws one random entry from Column A of any eligible tab. Rolling a Loot entry triggers the full item card — name, flavour text, and SVG artwork. Two config arrays in the script control which tabs are included: `EXCLUDE_TABS` (skip these entirely) and `LOOT_TAB` (fetch this one with the full A:C treatment). Adding a new trait category is as simple as adding a new tab to the Sheet — no code changes needed.
 
-If the Google Sheet is unreachable for any reason, all tools that use it fall back silently to built-in hardcoded data so players never see a broken screen.
+The **Coin Flip** is fully self-contained — no Sheet dependency, no external JS. CSS `scaleX` animation, face-swap at zero width, Web Audio sound effects, confetti on a pass.
+
+The **Poll** uses Firebase Realtime Database for live vote sync across all devices. The showrunner opens `poll.html?admin` to build and control polls; the audience votes at `poll.html`. Results stay hidden until the showrunner reveals them. Supports 2–5 options per poll. Votes are anonymous, tied to a `sessionStorage` UUID that clears when the tab closes.
 
 ---
 
@@ -36,17 +40,18 @@ If the Google Sheet is unreachable for any reason, all tools that use it fall ba
 
 ```
 /
-├── index.html          — Hub / tool vault (links to all tools)
+├── index.html          — Hub (links to all tools)
 ├── chargen.html        — Character generator
-├── coinflip.html       — Coin flip / pass-fail tool
-├── loot.html           — Loot table generator
-├── poll.html           — Audience poll tool
+├── coinflip.html       — Coin flip / pass-fail
+├── loot.html           — Loot table
+├── poll.html           — Audience poll (Firebase)
+├── traitgen.html       — Single trait generator
 ├── scenario.html       — Scenario generator (planned)
 ├── npc.html            — NPC generator (planned)
-├── design-system.css   — Visual design reference (not linked, docs only)
+├── design-system.css   — Visual reference (not linked, docs only)
 ├── character-data.csv  — Starter data for Google Sheets import
-├── FIREBASE_SETUP.md   — Step-by-step Firebase setup guide for poll.html
-└── README.md           — This file
+├── FIREBASE_SETUP.md   — Firebase setup guide for poll.html
+└── README.md           — You are here
 ```
 
 ---
@@ -54,254 +59,188 @@ If the Google Sheet is unreachable for any reason, all tools that use it fall ba
 ## Tool Details
 
 ### Hub (`index.html`)
-A 2-column card grid linking to all tools. Active tools are `<a>` tags; coming-soon tools are styled `<div>` cards with an amber badge. Add new tools here as they're built.
+Two-column card grid. Active tools are `<a>` tags; coming-soon tools are styled `<div>` cards with an amber badge.
 
 ### Character Generator (`chargen.html`)
-Generates a full character across six fields, all displayed inside a single white content card. Fields are separated by hairline gold dividers; every other row has a faint gold tint for at-a-glance readability.
-
-| Field             | Description                              |
-|------------------|------------------------------------------|
-| Name              | Ridiculous first + last name combo       |
-| Race / Species    | D&D race with a comedic twist            |
-| Class             | Standard class with a silly caveat       |
-| Backstory         | One-line absurd origin story             |
-| Personality Quirk | A behavioural trait to play into         |
-| Secret / Flaw     | Something they'd rather you didn't know  |
-
-Fits on one phone screen without scrolling. Pulls live data from Google Sheets with silent fallback to built-in data. Session state (current character, mulligans remaining, lockout timer) is persisted in `localStorage` so a page refresh restores the player's session.
+Six fields in a single scrollable white card: Name, Race/Species, Class, Backstory, Personality Quirk, Secret/Flaw. Name is assembled from separate `First Names` and `Last Names` pools. Every other row has a faint gold tint for scan-ability. 3 shared mulligans → 1-hour lockout → countdown → auto-reset.
 
 ### Fate's Flip (`coinflip.html`)
-A binary pass/fail coin flip tool. Features:
-- 3D coin flip animation (CSS `scaleX` squish, face swap at the edge — zero gap between spin end and face reveal)
-- Custom pass/fail coin face artwork embedded as base64 PNGs (no external image requests)
-- Confetti burst on a pass (5-cannon spread, Web Audio coin chime)
-- Womp-womp trombone sound on a fail
-- Sassy flavour text on every result (16 pass lines, 16 fail lines)
-- No external JS dependencies — all audio synthesised via Web Audio API
+Binary pass/fail. Custom coin face artwork embedded as base64 PNGs. Confetti + Web Audio coin chime on pass, womp-womp trombone on fail. 16 flavour lines per outcome. Zero external dependencies.
 
 ### Loot Table (`loot.html`)
-Pulls magic item names and flavour text from a `Loot` tab in the Google Sheet (Column A: name, Column B: flavour text). Features:
-- Shuffle-bag pick system — no item repeats until the full list has been seen
-- Animated fade swap on each pull
-- Source badge shows live/fallback status; if the sheet is unreachable the full API error is shown in the badge for debugging
-- All content (button, source badge) lives inside a single white content card, consistent with chargen
+Single white card. Sheet tab: `Loot` — Col A: name, Col B: flavour, Col C: image data URI. Shuffle-bag ensures full list coverage before any repeat. Animated fade swap on each pull.
 
 ### The Poll (`poll.html`)
-A real-time audience voting tool powered by Firebase Realtime Database. Requires a free Firebase project — see `FIREBASE_SETUP.md` for full setup instructions.
+Requires a free Firebase project — see `FIREBASE_SETUP.md`.
 
-**How it works:**
-- Showrunner opens `poll.html?admin` on their device to create and manage polls
-- Audience members open `poll.html` (via the hub or a direct QR code) to vote
-- Votes sync in real time across all devices
-- Results are hidden from the audience until the showrunner explicitly reveals them
-- Once a poll is closed and cleared, audience screens return to the "Standing by…" state automatically
+| URL | Who | What |
+|-----|-----|------|
+| `poll.html` | Audience | Vote → waiting screen → results |
+| `poll.html?admin` | Showrunner | Build poll → watch live vote counts → reveal |
 
-**Features:**
-- 2–5 vote options per poll (admin can add/remove options in the form)
-- Anonymous voting — each browser session gets a UUID stored in `sessionStorage`; no login, no PII
-- Votes are tied to the poll's timestamp so a cleared poll can't be accidentally recast
-- Live vote count updates on the admin screen while results are still hidden
-- Winning option highlighted in green after reveal
-- If Firebase config isn't filled in, a clear setup screen is shown (no broken states)
-- No Google Sheets dependency — this tool is entirely Firebase-driven
+2–5 options per poll. Results hidden until the showrunner taps reveal. Audience screens auto-return to standby when a poll is cleared.
 
-**Access pattern:**
-| URL | Who uses it | What they see |
-|-----|------------|---------------|
-| `poll.html` | Audience | Vote buttons → waiting screen → results |
-| `poll.html?admin` | Showrunner | Poll builder → live vote counts → reveal controls |
+### Trait Generator (`traitgen.html`)
+Draws one random entry from Column A of any eligible Sheet tab — the full pool in a single roll. Adding a new trait category means adding a new Sheet tab and nothing else.
+
+**Tab control lives in two CONFIG constants:**
+```js
+EXCLUDE_TABS: ['First Names', 'Last Names'],  // skip these entirely
+LOOT_TAB: 'Loot',                             // fetch A:C, show full item card
+```
+
+When the rolled entry comes from the Loot tab, the display upgrades to the full loot card layout: image slot (SVG artwork or placeholder), item name, gold divider, flavour text, source tag. All other tabs show the standard large centred trait text. The card is scrollable so long flavour text doesn't overflow; scroll position resets to top on each roll. Same 3-mulligan / 1-hour lockout system as the Character Generator, stored separately under `nodice_traitgen_session`.
 
 ### Scenario Generator (`scenario.html`) — Planned
-Will generate drop-in quest hooks, locations, and inciting incidents for when the GM blanks mid-session. Intended to follow the `chargen.html` multi-field card pattern, pulling from a Google Sheet with silent fallback. Accent colour override planned (teal: `--gold: #2d7a5e`) to distinguish it visually from other tools.
+Drop-in quest hooks, locations, and inciting incidents. Multi-field card pattern matching `chargen.html`. Planned accent colour override: teal (`--gold: #2d7a5e`).
 
 ### NPC Generator (`npc.html`) — Planned
-Will generate instant strangers with names, motivations, and inconvenient timing. Likely to share data tabs with `chargen.html` (first names, last names) and add NPC-specific fields (role, motivation, complication). Intended to follow the same card layout pattern.
+Instant strangers with names, motivations, and inconvenient timing. Likely to share Name pools with `chargen.html` and add NPC-specific fields.
 
 ---
 
-## Mulligan System (Character Generator)
+## Mulligan System
 
-- Players start with **3 mulligans** shared across all fields
-- Each mulligan can be spent rerolling any individual field, or on "Roll New Character" (costs 1 mulligan, rerolls everything)
-- The very first roll on page load is always free (doesn't cost a mulligan)
-- Once all 3 are spent, a **1-hour lockout** begins — all reroll buttons disable and a countdown timer is shown inside the card
-- When the countdown expires the page auto-resets to a fresh free roll
-- A dev **Reset** button appears in the header during the lockout period (small, red-bordered) for testing — remove or hide this before a live show if preferred
-- The pip counter (gold dots, top of page) shows remaining mulligans at a glance; spent pips shrink and go grey
-- Full session state is saved to `localStorage` on every change — **pull-to-refresh on Android safely restores the existing session** rather than starting fresh
+*The dice gods giveth three chances. After that, they want you to sit with your choices.*
+
+- First roll on page load is always free
+- Each subsequent reroll (individual field or full character) costs 1 mulligan
+- 0 mulligans → 1-hour lockout → countdown timer → auto-reset to fresh free roll
+- Gold pip dots in the header show remaining mulligans at a glance; spent pips shrink and grey out
+- Full session state saved to `localStorage` on every change — pull-to-refresh on Android restores the existing session
 
 ---
 
-## Layout & Navigation Standards
+## Page Structure
 
-All tool pages follow the same structural pattern:
+Every tool follows the same pattern:
 
 ```
-<header>   — site label, page title, subtitle (compact, border-bottom)
-<main>     — tool content (flex: 1, fills remaining viewport height)
-<footer>   — "← Back to the Vault" nav link only (outside the white card)
+<header>   — site label · h1 · subtitle · border-bottom
+<main>     — white rounded card (flex: 1, fills viewport)
+<footer>   — "← Back to the Vault" nav link only
 ```
 
-The "Back to the Vault" footer nav uses `color: var(--gold-dim)`, `font-family: Cinzel`, `font-size: .65rem`, `letter-spacing: .18em`. It sits below the white content card with `padding-bottom: 1.5rem`.
-
-White content cards use `border-radius: 16–18px`, `box-shadow: 0 4–6px 24–32px var(--shadow)`, and a `.card-footer` strip at the bottom (border-top, faint gold tint) that holds the primary action button and source badge.
+White cards: `border-radius: 16–18px`, `box-shadow: 0 4–6px 24–32px var(--shadow)`. Card footer strip holds the primary CTA button and source badge.
 
 ---
 
 ## Google Sheets Setup
 
-### One-time setup
+### Tabs required
 
-1. Create a new Google Sheet
-2. Create tabs named **exactly** as listed below (case-sensitive):
+**For `chargen.html`:** `First Names` · `Last Names` · `Races` · `Classes` · `Backstories` · `Quirks` · `Secrets`
 
-**For chargen.html:**
-- `First Names`
-- `Last Names`
-- `Races`
-- `Classes`
-- `Backstories`
-- `Quirks`
-- `Secrets`
+**For `loot.html` and `traitgen.html`:** `Loot` — Col A: item name, Col B: flavour text, Col C: image data URI
 
-**For loot.html:**
-- `Loot` — Column A: item name, Column B: flavour text description
+Any additional tabs added to the Sheet will be auto-discovered by `traitgen.html` unless listed in `EXCLUDE_TABS`.
 
-3. Import `character-data.csv` to populate starter chargen data (File → Import → Insert new sheet(s))
-4. Set sharing to **Anyone with the link can view**
+### API key
+1. [console.cloud.google.com](https://console.cloud.google.com) → Enable **Google Sheets API** → Create API Key
+2. Restrict to: Google Sheets API + your GitHub Pages URL (`https://yourusername.github.io/*`)
 
-### Google Sheets API key
-
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a project → Enable the **Google Sheets API**
-3. Credentials → Create → **API Key**
-4. Restrict the key to: Google Sheets API only
-5. Add your GitHub Pages URL as a website restriction (e.g. `https://yourusername.github.io/*`)
-
-### Wire it up
-
-Every tool that reads from Google Sheets has a `CONFIG` block near the top of its `<script>`. Fill in the same Sheet ID and API key in each file:
-
+### Wiring it up
+Each tool has a `CONFIG` block near the top of its `<script>`:
 ```js
 const CONFIG = {
-  SHEET_ID: 'paste-your-sheet-id-here',
-  API_KEY:  'paste-your-api-key-here',
+  SHEET_ID: 'the-long-string-between-/d/-and-/edit',
+  API_KEY:  'your-api-key',
   ...
 }
 ```
-
-The Sheet ID is the long string in your Google Sheet URL between `/d/` and `/edit`.
-
-### Editing variables
-
-Just open the Google Sheet and edit any tab. Add rows, delete rows, change wording — changes are live immediately. No code edits required.
 
 ---
 
 ## Firebase Setup (Poll Tool)
 
-`poll.html` requires a free Firebase Realtime Database. See **`FIREBASE_SETUP.md`** for a full step-by-step walkthrough. In short:
-
-1. Create a free Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+See **`FIREBASE_SETUP.md`** for the full walkthrough. Short version:
+1. Free project at [console.firebase.google.com](https://console.firebase.google.com)
 2. Enable Realtime Database in test mode
-3. Register a web app and copy the config object
-4. Paste the config values into the `FIREBASE_CONFIG` block in `poll.html`
-5. Test with two browser tabs before show night
+3. Register a web app, copy the config object
+4. Paste values into the `FIREBASE_CONFIG` block in `poll.html`
 
-The free Firebase Spark plan is more than sufficient — 100 simultaneous connections, 1 GB storage, no billing required.
-
----
-
-## GitHub Pages Deployment
-
-1. Push all files to a GitHub repo (e.g. `improv-dnd`)
-2. Go to Settings → Pages
-3. Set source to `main` branch, root folder
-4. Your URL will be `https://yourusername.github.io/improv-dnd`
-5. Generate a QR code pointing at that URL and display it at the show
+Free Spark plan is sufficient: 100 simultaneous connections, 1 GB storage, no billing.
 
 ---
 
 ## Design System
 
-Full reference lives in `design-system.css`. Summary:
+*Parchment and gold. Cinzel for anything that needs gravitas. Lato for anything that needs to be readable on a phone at arm's length in a dark theatre.*
 
-**Fonts**
-- `Cinzel 400/600/700` — headings, field labels, buttons, nav links (D&D serif flavour)
-- `Lato 300/400` — body text and generated values (clean, phone-readable)
+**Fonts:** Cinzel 400/600/700 (headings, labels, buttons) · Lato 300/400 (body, values)
 
-**Colour tokens**
+**Colour tokens:**
 ```css
 --ink:       #1a1a2e   /* text, dark buttons */
---ink-hover: #2e2e4a   /* button hover */
 --parchment: #faf7f2   /* page background */
---gold:      #c9a84c   /* accent — labels, pips, hover states */
+--gold:      #c9a84c   /* accent — labels, pips, hover */
 --gold-dim:  #a07c2e   /* subdued gold — site labels, back links */
---gold-bg:   #fffdf5   /* tinted surface on hover */
---card-bg:   #ffffff   /* white content card background */
+--gold-bg:   #fffdf5   /* tinted hover surface */
+--card-bg:   #ffffff   /* white card */
 --border:    #e8e2d9   /* all borders and dividers */
 --muted:     #6b6676   /* secondary text */
---shadow:    rgba(26,26,46,.10–.12)  /* card drop shadows */
+--shadow:    rgba(26,26,46,.10–.12)
 ```
 
-**Design principles**
-- Mobile-first, `100dvh` layouts — designed to fit one phone screen without scrolling
-- `overflow: hidden` is intentionally **not** set on `html/body` — this preserves Android pull-to-refresh
-- All tool content lives inside a single white rounded card; buttons and source badge sit in a `.card-footer` strip at the bottom of the card
-- Cards animate in on load (`slideUp`, cubic-bezier easing)
-- Parchment background with fractal noise texture overlay and gold radial gradients
-- Source badge: green dot = live Google Sheets data, amber dot = fallback built-in data
-- No external JS dependencies on any page except `poll.html` (Firebase SDK loaded via CDN ESM import)
+**Key rules:**
+- `overflow: hidden` is **intentionally absent** from `html/body` — preserves Android pull-to-refresh
+- Source badge: green dot = live Sheet data · amber dot = fallback built-in data
+- No external JS dependencies on any page except `poll.html` (Firebase SDK via CDN ESM import)
+- All layouts use `clamp()` for type scaling; no explicit breakpoints needed
 
 ---
 
-## Building Future Generators
+## GitHub Pages Deployment
 
-Each new generator (scenario, NPC) follows the same pattern:
+1. Push all files to a GitHub repo
+2. Settings → Pages → source: `main` branch, root folder
+3. Your URL: `https://yourusername.github.io/your-repo-name`
+4. Generate a QR code pointing there and display it at the show
 
-1. Copy `chargen.html` (multi-field) or `loot.html` (single-item display) as your starting point depending on the UI shape needed
-2. Update `CONFIG.TABS` (or `CONFIG.TAB`) to point at the new sheet tab names
-3. Update `FIELDS` / `FALLBACK` with the new categories and starter data
-4. Change `<title>`, `<h1>`, and `.subtitle` text
-5. Update `index.html`: change the tool card from `class="coming-soon"` to `class="active"` and wrap the `<div>` in an `<a href="yourtool.html">`
-6. Optionally override `--gold` and `--gold-dim` in a `:root` block for a different accent colour per tool:
+---
+
+## Building Future Tools
+
+*Copy, rename, update CONFIG, ship. The scaffold is already laid.*
+
+1. Copy `chargen.html` (multi-field) or `loot.html` (single-item) as your base
+2. Update `CONFIG.TABS` / `CONFIG.TAB`, `FIELDS`, and `FALLBACK`
+3. Update `<title>`, `<h1>`, `.subtitle`
+4. Promote the card in `index.html` from `coming-soon div` to `active anchor`
+5. Optionally override the gold tokens for a distinct visual flavour per tool:
 
 ```css
-/* Example: teal accent for a scenario generator */
+/* Example: teal for a scenario generator */
 :root {
-  --gold:    #2d7a5e;
+  --gold:     #2d7a5e;
   --gold-dim: #1e5a44;
-  --gold-bg: #f0fff8;
+  --gold-bg:  #f0fff8;
 }
 ```
-
-The Google Sheets wiring, source badge, card layout, footer nav, and fallback behaviour all carry over unchanged.
 
 ---
 
 ## Resuming Work With Claude
 
-When starting a new Claude conversation to continue this project, paste this at the top:
+Paste this at the top of a new conversation:
 
-> *I'm building an improv D&D random generator suite on GitHub Pages called "No Dice". Current tools: hub (`index.html`), character generator (`chargen.html`), coin flip (`coinflip.html`), loot table (`loot.html`), audience poll (`poll.html`). Uses Cinzel/Lato design system with a parchment colour palette. chargen and loot pull from Google Sheets (Sheet ID and API key already wired in). poll.html uses Firebase Realtime Database for real-time vote syncing (config already wired in); showrunner accesses it via `?admin`. chargen has a 3-mulligan shared reroll system with 1-hour lockout and localStorage session persistence. All content lives in single white cards with a `.card-footer` strip. `overflow: hidden` is intentionally absent to preserve Android pull-to-refresh. I'd like to continue building [describe what you need].*
+> *I'm building an improv D&D tool suite on GitHub Pages called "No Dice." Live tools: hub (`index.html`), character generator (`chargen.html`), coin flip (`coinflip.html`), loot table (`loot.html`), audience poll (`poll.html`), trait generator (`traitgen.html`). Cinzel/Lato design system, parchment palette. chargen, loot, and traitgen pull from Google Sheets (already wired). traitgen auto-discovers all Sheet tabs, excludes via `EXCLUDE_TABS`, and shows a full loot card when a Loot tab entry is rolled. poll.html uses Firebase Realtime Database (already wired); showrunner via `?admin`. chargen and traitgen share the same 3-mulligan / 1-hour lockout / localStorage pattern. overflow:hidden intentionally absent from html/body. I'd like to continue building [describe what you need].*
 
-Then paste in the relevant file(s) for context.
+Then paste in the relevant file(s).
 
 ---
 
 ## Show Night Checklist
 
-- [ ] Google Sheet is up to date with any new or edited variables
-- [ ] Loot tab has both columns filled (Column A: name, Column B: flavour text)
-- [ ] GitHub Pages site is live and loading correctly on a real phone
-- [ ] QR code tested on at least one phone
-- [ ] Fallback data is reasonably current (matches sheet content roughly)
-- [ ] API key restrictions include the live GitHub Pages URL
-- [ ] Firebase Realtime Database rules are not expired (test mode expires after 30 days — check the Rules tab)
-- [ ] Poll tool tested: open `poll.html?admin` on showrunner device, run a dummy poll, confirm audience screen updates, clear it
+- [ ] Google Sheet is current; Loot tab has all three columns filled
+- [ ] GitHub Pages live and loading on a real phone
+- [ ] QR code tested on at least one device
+- [ ] Firebase rules not expired (test mode expires 30 days after setup — check the Rules tab)
+- [ ] Poll tested: dummy poll created, audience screen updates, poll cleared
 - [ ] Showrunner has `poll.html?admin` bookmarked on their device
-- [ ] Test all active tools on the actual show device before the night
-- [ ] Consider hiding or removing the dev Reset button in chargen if players shouldn't see it
+- [ ] Dev Reset buttons in `chargen.html` and `traitgen.html` hidden or removed if players shouldn't see them
+- [ ] API key restrictions include the live GitHub Pages URL
+- [ ] All active tools tested on the actual show device
 
 ---
 
