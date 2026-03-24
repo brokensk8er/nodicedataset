@@ -644,7 +644,6 @@ function formatCountdown(ms) {
 function innerContentHTML() {
   if (!state.value) {
     return `<div class="trait-display">
-      <div class="trait-label">Your Trait</div>
       <div class="trait-value">&nbsp;</div>
       <div class="trait-divider"></div>
       <div class="trait-source">&nbsp;</div>
@@ -682,7 +681,6 @@ function innerContentHTML() {
 
   // ── Standard trait entry: big centred text ────────────
   return `<div class="trait-display">
-    <div class="trait-label">Your Trait</div>
     <div class="trait-value">${escHtml(state.value)}</div>
     <div class="trait-divider"></div>
     <div class="trait-source">from: ${escHtml(state.sheet)}</div>

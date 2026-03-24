@@ -1342,7 +1342,7 @@ function traitRenderItem(item) {
 
   let content;
   if (!item) {
-    content = `<div class="trait-wide"><div class="trait-display-label">Your Trait</div><div class="trait-big-value">&nbsp;</div></div>`;
+    content = `<div class="trait-wide"><div class="trait-big-value">&nbsp;</div></div>`;
   } else if (isLoot) {
     const imgHtml = item.image ? `<div class="loot-image-slot" style="width:64px;height:64px;"><img src="${item.image}" alt="" /></div>` : `<div class="loot-image-slot" style="width:64px;height:64px;"><span class="loot-slot-icon">✨</span></div>`;
     content = `<div class="trait-wide">
@@ -1358,7 +1358,6 @@ function traitRenderItem(item) {
     </div>`;
   } else {
     content = `<div class="trait-wide">
-      <div class="trait-display-label">Your Trait</div>
       <div class="trait-big-value">${esc(item.value)}</div>
       <div class="trait-source-tag">from: ${esc(item.sheet)}</div>
     </div>`;
