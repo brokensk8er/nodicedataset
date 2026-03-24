@@ -293,53 +293,51 @@
      CHARACTER GENERATOR
   ───────────────────────────────────────── */
 
-  /* Category button row — vertical stack of full-width buttons */
+  /* Category button row — single-line segmented control */
   .chargen-cat-row {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 8px 12px;
+    gap: 0;
+    padding: 10px 12px 8px;
     border-bottom: 1px solid var(--border);
   }
 
+  /* Each segment: equal width, no right border (shared with neighbour's left) */
   .chargen-cat-btn {
+    flex: 1;
     font-family: 'Cinzel', serif;
-    font-size: .65rem; font-weight: 600;
-    letter-spacing: .07em; text-transform: uppercase;
+    font-size: .6rem; font-weight: 600;
+    letter-spacing: .05em; text-transform: uppercase;
     color: var(--ink);
     background: var(--parchment);
     border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 9px 14px;
-    width: 100%;
-    text-align: left;
+    border-right: none;
+    border-radius: 0;
+    padding: 8px 2px;
+    text-align: center;
     cursor: pointer;
-    transition: border-color .18s, background .18s, color .18s, box-shadow .18s;
+    transition: border-color .18s, background .18s, color .18s;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     position: relative;
   }
-  .chargen-cat-btn:hover {
-    border-color: var(--gold);
+  /* Round the outer corners only */
+  .chargen-cat-btn:first-child { border-radius: 8px 0 0 8px; }
+  .chargen-cat-btn:last-child  { border-right: 1.5px solid var(--border); border-radius: 0 8px 8px 0; }
+
+  .chargen-cat-btn:hover:not(.active) {
     background: var(--gold-bg);
-    color: var(--gold-dim);
-  }
-  .chargen-cat-btn.active {
     border-color: var(--gold);
-    background: var(--gold);
-    color: var(--ink);
-    box-shadow: 0 2px 8px rgba(201,168,76,.3);
+    color: var(--gold-dim);
+    z-index: 1;
   }
-  /* active indicator dot — centred on right edge */
-  .chargen-cat-btn.active::after {
-    content: '';
-    position: absolute; top: 50%; right: 12px;
-    transform: translateY(-50%);
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--ink);
-    opacity: .4;
+  /* Active segment: gold fill, gold border on all sides, sits on top */
+  .chargen-cat-btn.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    border-right: 1.5px solid var(--gold);
+    color: var(--ink);
+    z-index: 1;
   }
 
   /* Result display area */
