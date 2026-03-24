@@ -17,7 +17,7 @@
     --card-bg:   #ffffff;
     --border:    #e8e2d9;
     --muted:     #6b6676;
-    --shadow:    rgba(26,26,46,.10);
+    --shadow:    rgba(26,26,46,.09);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,26 +37,35 @@
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
-  header {
+  /* ── Page frame ── */
+  .page-wrap {
     width: 100%;
-    max-width: 520px;
-    padding: 2.5rem 1.5rem 1rem;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0 14px;
+  }
+
+  /* ── Header ── */
+  header {
     text-align: center;
+    padding: 1.6rem 0 .8rem;
   }
 
   .site-label {
     font-family: 'Cinzel', serif;
-    font-size: .65rem;
+    font-size: .6rem;
     font-weight: 400;
     letter-spacing: .28em;
     text-transform: uppercase;
     color: var(--gold-dim);
-    margin-bottom: .5rem;
+    margin-bottom: .35rem;
   }
 
   h1 {
     font-family: 'Cinzel', serif;
-    font-size: clamp(2rem, 6vw, 2.8rem);
+    font-size: clamp(1.5rem, 5vw, 2rem);
     font-weight: 700;
     color: var(--ink);
     line-height: 1.1;
@@ -66,265 +75,328 @@
   h1 span { color: var(--gold); }
 
   .tagline {
-    margin-top: .55rem;
-    font-size: .82rem;
+    margin-top: .35rem;
+    font-size: .75rem;
     font-weight: 300;
     color: var(--muted);
-    letter-spacing: .06em;
-    line-height: 1.6;
+    letter-spacing: .05em;
   }
 
   .divider {
-    width: 60px;
+    width: 50px;
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 1.1rem auto 0;
+    margin: .75rem auto 0;
   }
 
+  /* ── Main ── */
   main {
-    width: 100%;
-    max-width: 520px;
-    padding: 2rem 1.25rem 3rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    padding: .9rem 0 1rem;
   }
 
-  .tools-label {
+  /* ── Section labels ── */
+  .section-label {
     font-family: 'Cinzel', serif;
-    font-size: .6rem;
+    font-size: .55rem;
     font-weight: 600;
-    letter-spacing: .2em;
+    letter-spacing: .22em;
     text-transform: uppercase;
     color: var(--gold-dim);
-    margin-bottom: 1rem;
-    text-align: center;
+    margin-bottom: .5rem;
   }
 
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+  /* ── Live tools — full-width horizontal card stack ── */
+  .live-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .tool-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.6rem 1.2rem 1.4rem;
+    border-radius: 14px;
+    padding: 11px 14px 11px 12px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: .75rem;
+    gap: 12px;
     text-decoration: none;
     color: var(--ink);
-    box-shadow: 0 3px 18px var(--shadow);
-    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    box-shadow: 0 2px 12px var(--shadow);
+    transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
     position: relative;
     overflow: hidden;
-    cursor: pointer;
   }
 
   .tool-card::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, transparent 70%);
+    background: linear-gradient(110deg, rgba(201,168,76,.06) 0%, transparent 60%);
     opacity: 0;
-    transition: opacity .2s;
+    transition: opacity .18s;
   }
 
   .tool-card:hover::before { opacity: 1; }
 
-  .tool-card.active:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 28px rgba(201,168,76,.22), 0 3px 18px var(--shadow);
-    border-color: rgba(201,168,76,.45);
+  .tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(201,168,76,.18), 0 2px 12px var(--shadow);
+    border-color: rgba(201,168,76,.4);
   }
 
-  .tool-card.coming-soon {
-    cursor: default;
-    opacity: .6;
-  }
+  .tool-card:active { transform: translateY(0); }
 
   .tool-icon {
-    font-size: 2.4rem;
+    font-size: 1.5rem;
     line-height: 1;
-    filter: drop-shadow(0 2px 4px rgba(26,26,46,.15));
+    flex-shrink: 0;
+    width: 36px;
+    text-align: center;
+    filter: drop-shadow(0 1px 3px rgba(26,26,46,.12));
+  }
+
+  .tool-text {
+    flex: 1;
+    min-width: 0;
   }
 
   .tool-name {
     font-family: 'Cinzel', serif;
-    font-size: .82rem;
+    font-size: .8rem;
     font-weight: 600;
-    letter-spacing: .1em;
+    letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--ink);
-    text-align: center;
-    line-height: 1.3;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .tool-desc {
-    font-size: .72rem;
+    font-size: .7rem;
     font-weight: 300;
     color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-    letter-spacing: .02em;
+    line-height: 1.35;
+    letter-spacing: .01em;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .tool-badge {
-    font-family: 'Cinzel', serif;
-    font-size: .55rem;
-    font-weight: 600;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 20px;
-    margin-top: .1rem;
-  }
-
-  .badge-ready {
+  .tool-arrow {
+    font-size: .9rem;
     color: var(--gold);
-    border: 1px solid rgba(201,168,76,.4);
-    background: rgba(201,168,76,.08);
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .15s, transform .15s;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
   }
 
-  .badge-soon {
-    color: var(--muted);
+  .tool-card:hover .tool-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── Section rule ── */
+  .section-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    margin: .1rem 0 .75rem;
+  }
+
+  /* ── Coming soon — compact two-column grid ── */
+  .soon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .soon-card {
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    background: transparent;
-  }
-
-  /* Wide card spans full width */
-  .tool-card.wide {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    gap: 1.1rem;
-    padding: 1.3rem 1.6rem;
-    align-items: center;
-    text-align: left;
-  }
-
-  .tool-card.wide .tool-name { text-align: left; }
-  .tool-card.wide .tool-desc { text-align: left; }
-
-  .tool-card.wide .tool-text {
+    border-radius: 12px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: .35rem;
-    flex: 1;
+    gap: 3px;
+    opacity: .52;
+    cursor: default;
   }
 
-  .tool-card.wide .tool-icon {
-    font-size: 2.8rem;
-    flex-shrink: 0;
+  .soon-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    margin-bottom: 3px;
   }
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .soon-name {
+    font-family: 'Cinzel', serif;
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.2;
   }
 
-  .tool-card {
-    animation: slideUp .45s cubic-bezier(.22,1,.36,1) both;
+  .soon-desc {
+    font-size: .65rem;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.35;
+    letter-spacing: .01em;
   }
 
-  .tool-card:nth-child(1) { animation-delay: .08s; }
-  .tool-card:nth-child(2) { animation-delay: .14s; }
-  .tool-card:nth-child(3) { animation-delay: .20s; }
-  .tool-card:nth-child(4) { animation-delay: .26s; }
-  .tool-card:nth-child(5) { animation-delay: .32s; }
-  .tool-card:nth-child(6) { animation-delay: .38s; }
-  .tool-card:nth-child(7) { animation-delay: .44s; }
-  .tool-card:nth-child(8) { animation-delay: .50s; }
+  .soon-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: .48rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 7px;
+    margin-top: 3px;
+    align-self: flex-start;
+  }
 
+  /* ── Footer ── */
   footer {
     text-align: center;
-    padding-bottom: 1.5rem;
-    font-size: .65rem;
+    padding-bottom: 1rem;
+    font-size: .58rem;
     color: var(--muted);
     letter-spacing: .08em;
     text-transform: uppercase;
   }
+
+  /* ── Animations ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tool-card { animation: slideUp .4s cubic-bezier(.22,1,.36,1) both; }
+  .soon-card  { animation: slideUp .4s cubic-bezier(.22,1,.36,1) both; }
+
+  .tool-card:nth-child(1) { animation-delay: .06s; }
+  .tool-card:nth-child(2) { animation-delay: .10s; }
+  .tool-card:nth-child(3) { animation-delay: .14s; }
+  .tool-card:nth-child(4) { animation-delay: .18s; }
+  .tool-card:nth-child(5) { animation-delay: .22s; }
+  .soon-card:nth-child(1) { animation-delay: .28s; }
+  .soon-card:nth-child(2) { animation-delay: .31s; }
 </style>
 </head>
 <body>
 
-<header>
-  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
-  <h1>The <span>Vault</span></h1>
-  <p class="tagline">Tools for when the dice aren't doing their job.<br>Pick your poison.</p>
-  <div class="divider"></div>
-</header>
+<div class="page-wrap">
 
-<main>
-  <p class="tools-label">Choose a tool</p>
-  <div class="tools-grid">
+  <header>
+    <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+    <h1>The <span>Vault</span></h1>
+    <p class="tagline">Tools for when the dice aren't doing their job.</p>
+    <div class="divider"></div>
+  </header>
 
-    <!-- Coin Flip — ACTIVE -->
-    <a class="tool-card active" href="coinflip.html">
-      <div class="tool-icon">✨</div>
-      <div class="tool-name">Fate's Flip</div>
-      <div class="tool-desc">Pass or fail. One coin. No appeal.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+  <main>
 
-    <!-- Character Generator — ACTIVE -->
-    <a class="tool-card active" href="chargen.html">
-      <div class="tool-icon">🎲</div>
-      <div class="tool-name">Character Gen</div>
-      <div class="tool-desc">Roll a whole person in seconds.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+    <!-- ══════════════════════════════════════
+         LIVE TOOLS
+    ══════════════════════════════════════ -->
+    <div>
+      <p class="section-label">Ready to play</p>
+      <div class="live-grid">
 
-    <!-- Loot Table — ACTIVE -->
-    <a class="tool-card active" href="loot.html">
-      <div class="tool-icon">💰</div>
-      <div class="tool-name">Loot Table</div>
-      <div class="tool-desc">Reach into the pile. See what fate provides.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+        <a class="tool-card" href="coinflip.html">
+          <div class="tool-icon">✨</div>
+          <div class="tool-text">
+            <div class="tool-name">Fate's Flip</div>
+            <div class="tool-desc">Pass or fail. One coin. No appeal.</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
 
-    <!-- The Poll — ACTIVE -->
-    <a class="tool-card active" href="poll.html">
-      <div class="tool-icon">🗳️</div>
-      <div class="tool-name">The Poll</div>
-      <div class="tool-desc">The crowd decides. Showrunner reveals.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+        <a class="tool-card" href="chargen.html">
+          <div class="tool-icon">🎲</div>
+          <div class="tool-text">
+            <div class="tool-name">Character Gen</div>
+            <div class="tool-desc">Roll a whole person in seconds.</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
 
-    <!-- Trait Generator — ACTIVE -->
-    <a class="tool-card active wide" href="traitgen.html">
-      <div class="tool-icon">🎭</div>
-      <div class="tool-text">
-        <div class="tool-name">Trait Gen</div>
-        <div class="tool-desc">One roll. One truth. A single defining trait pulled from the whole pile.</div>
-        <span class="tool-badge badge-ready">Ready</span>
-      </div>
-    </a>
+        <a class="tool-card" href="loot.html">
+          <div class="tool-icon">💰</div>
+          <div class="tool-text">
+            <div class="tool-name">Loot Table</div>
+            <div class="tool-desc">Reach in. See what fate provides.</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
 
-    <!-- Scenario Generator — COMING SOON (wide) -->
-    <div class="tool-card coming-soon wide">
-      <div class="tool-icon">🗺️</div>
-      <div class="tool-text">
-        <div class="tool-name">Scenario Gen</div>
-        <div class="tool-desc">Drop-in quest hooks, locations, and inciting incidents for when the GM blanks.</div>
-        <span class="tool-badge badge-soon">Coming Soon</span>
-      </div>
-    </div>
+        <a class="tool-card" href="poll.html">
+          <div class="tool-icon">🗳️</div>
+          <div class="tool-text">
+            <div class="tool-name">The Poll</div>
+            <div class="tool-desc">The crowd decides. Showrunner reveals.</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
 
-    <!-- NPC Generator — COMING SOON (wide) -->
-    <div class="tool-card coming-soon wide">
-      <div class="tool-icon">🧙</div>
-      <div class="tool-text">
-        <div class="tool-name">NPC Gen</div>
-        <div class="tool-desc">Instant strangers with agendas and terrible timing.</div>
-        <span class="tool-badge badge-soon">Coming Soon</span>
+        <a class="tool-card" href="traitgen.html">
+          <div class="tool-icon">🎭</div>
+          <div class="tool-text">
+            <div class="tool-name">Trait Gen</div>
+            <div class="tool-desc">One roll. One truth. From the whole pile.</div>
+          </div>
+          <div class="tool-arrow">→</div>
+        </a>
+
       </div>
     </div>
 
-  </div>
-</main>
+    <!-- ══════════════════════════════════════
+         COMING SOON
+    ══════════════════════════════════════ -->
+    <div>
+      <div class="section-rule"></div>
+      <p class="section-label">In the forge</p>
+      <div class="soon-grid">
 
-<footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
+        <div class="soon-card">
+          <div class="soon-icon">🗺️</div>
+          <div class="soon-name">Scenario Gen</div>
+          <div class="soon-desc">Drop-in quest hooks for when the GM blanks.</div>
+          <span class="soon-badge">Coming Soon</span>
+        </div>
+
+        <div class="soon-card">
+          <div class="soon-icon">🧙</div>
+          <div class="soon-name">NPC Gen</div>
+          <div class="soon-desc">Instant strangers with terrible timing.</div>
+          <span class="soon-badge">Coming Soon</span>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
+
+</div>
 
 </body>
 </html>
