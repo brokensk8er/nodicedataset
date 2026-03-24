@@ -55,7 +55,7 @@
     .page-frame {
       width: 420px;
       height: 92dvh;
-      max-height: 720px;
+      max-height: 820px;
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 8px 48px rgba(26,26,46,.18), 0 2px 8px rgba(26,26,46,.08);
@@ -168,16 +168,32 @@
     animation: cardIn .45s cubic-bezier(.22,1,.36,1) both;
   }
 
-  /* ── Trait display area ── */
-  .trait-display {
+  /* ── Scrollable inner area (needed when loot expands the card) ── */
+  .trait-scroll {
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .trait-scroll::-webkit-scrollbar { width: 4px; }
+  .trait-scroll::-webkit-scrollbar-track { background: transparent; }
+  .trait-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── Standard trait display (non-loot) ── */
+  .trait-display {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 32px 28px;
     gap: 16px;
+    min-height: 100%;
+    transition: opacity 0.2s ease;
   }
+
+  .trait-display.fading { opacity: 0; }
 
   .trait-label {
     font-family: 'Cinzel', serif;
@@ -197,19 +213,17 @@
     line-height: 1.3;
     letter-spacing: 0.02em;
     text-align: center;
-    transition: opacity 0.2s ease;
   }
-
-  .trait-value.fading { opacity: 0; }
 
   /* Gold divider under the trait text */
   .trait-divider {
     width: 60px;
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    flex-shrink: 0;
   }
 
-  /* Sheet source label — small text showing which sheet the trait came from */
+  /* Sheet source label */
   .trait-source {
     font-family: 'Lato', sans-serif;
     font-size: 0.65rem;
@@ -219,10 +233,110 @@
     text-transform: uppercase;
     text-align: center;
     min-height: 1rem;
+  }
+
+  /* ── Loot display ──────────────────────────────────────────
+     Rendered instead of .trait-display when the rolled entry
+     comes from CONFIG.LOOT_TAB. Mirrors loot.html exactly.
+  ────────────────────────────────────────────────────────── */
+  .loot-display {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 20px 16px;
+    gap: 12px;
     transition: opacity 0.2s ease;
   }
 
-  .trait-source.fading { opacity: 0; }
+  .loot-display.fading { opacity: 0; }
+
+  /* Image slot — mirrors loot.html .item-image-slot */
+  .loot-image-slot {
+    width: 100%;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f0ebe3 0%, #e8e2d9 100%);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    overflow: hidden;
+    min-height: 60px;
+  }
+
+  .loot-image-slot.has-image {
+    background: none;
+    padding: 8px;
+  }
+
+  .loot-image-slot.has-image img {
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .loot-image-slot .slot-icon {
+    font-size: 2rem;
+    opacity: 0.5;
+    line-height: 1;
+  }
+
+  /* Item name — large, matches .trait-value prominence */
+  .loot-name-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .loot-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.2rem, 4.5vw, 1.6rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+    letter-spacing: .02em;
+  }
+
+  .loot-card-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* Flavour text — mirrors loot.html .item-flavour */
+  .loot-flavour-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .loot-flavour {
+    font-size: .93rem;
+    font-weight: 300;
+    line-height: 1.55;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  /* Source tag at foot of loot block */
+  .loot-source {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+  }
 
   /* ── Card footer ── */
   .card-footer {
@@ -337,8 +451,8 @@
   /* ================================================================
      DEV RESET BUTTON
      Remove or hide this before a live show — it is for testing only.
-     In header, positioned absolute top-right, same as chargen.html.
-     To remove: delete the .reset-btn rule and the devReset() call below.
+     To remove: delete the .reset-btn rule below AND the
+     devReset() function AND the injection block inside render().
   ================================================================ */
   .reset-btn {
     position: absolute;
@@ -405,64 +519,87 @@
 <script>
 // ============================================================
 //  CONFIGURATION
-//  Same Sheet ID and API key as chargen.html and loot.html.
-//  The tool fetches ALL sheet tab names automatically,
-//  then pulls every row from Column A on every tab.
-//  Add new tabs to the Google Sheet and they are picked up
-//  on the next page load — no code changes needed.
 // ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
   API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+
+  // ── Tab exclusion list ──────────────────────────────────
+  // Any tab whose name appears here is skipped entirely.
+  // Names are case-sensitive and must match the Sheet tab exactly.
+  // Add more tab names here as needed — no other code changes required.
+  EXCLUDE_TABS: [
+    'First Names',
+    'Last Names',
+  ],
+
+  // ── Loot tab name ───────────────────────────────────────
+  // This tab is fetched differently from all others:
+  // columns A (name), B (flavour text), and C (SVG/image data URI)
+  // are all read, and rolling a loot entry shows the full
+  // item card layout instead of the standard big-text trait view.
+  // Change this string if your loot tab has a different name.
+  LOOT_TAB: 'Loot',
 };
 
 // ============================================================
 //  FALLBACK DATA
 //  Used when the Google Sheet is unreachable.
-//  Format: array of { value: string, sheet: string }
-//  Drawn from across the existing chargen pools so there's
-//  a meaningful spread of trait types in offline mode.
+//  Each entry: { value, sheet, flavour?, image? }
+//  Loot entries carry flavour so the offline loot card still works.
 // ============================================================
 const FALLBACK_TRAITS = [
-  { value: "Cannot physically leave a room without saying goodbye to furniture",      sheet: "Quirks" },
-  { value: "Narrates their own actions in third person at dramatic moments",           sheet: "Quirks" },
-  { value: "Cannot resist correcting people's grammar mid-combat",                    sheet: "Quirks" },
-  { value: "Insists on taking meeting minutes during every dungeon encounter",         sheet: "Quirks" },
-  { value: "Has given a nickname to every door they've ever opened",                  sheet: "Quirks" },
-  { value: "Always speaks in rhyme when they lie, completely unaware of it",          sheet: "Quirks" },
-  { value: "Refuses to be surprised. Will loudly claim they knew about this",         sheet: "Quirks" },
-  { value: "Applauds after every spell, including enemies'",                           sheet: "Quirks" },
-  { value: "Has never once walked into a room without pausing for effect",            sheet: "Quirks" },
-  { value: "Maintains extremely strong opinions about inn ratings",                   sheet: "Quirks" },
-  { value: "Asks 'but what's their motivation?' about every monster",                 sheet: "Quirks" },
-  { value: "Dramatically misremembers every adventure they've been on",               sheet: "Quirks" },
-  { value: "Their mortal enemy is a duck. They don't want to talk about it",          sheet: "Secrets" },
-  { value: "Has never actually read the spell they claim is their signature move",    sheet: "Secrets" },
-  { value: "The legendary sword was found in a bin",                                  sheet: "Secrets" },
-  { value: "Owes money to a god. Not a lot of money. Still very inconvenient",        sheet: "Secrets" },
-  { value: "Cannot actually read maps. Has been winging it the entire time",          sheet: "Secrets" },
-  { value: "Was once a villain. Briefly. Didn't care for it",                         sheet: "Secrets" },
-  { value: "Secretly writes a serialised adventure novel featuring the party",        sheet: "Secrets" },
-  { value: "Has a wanted poster — looks nothing like them, but they're still worried", sheet: "Secrets" },
-  { value: "Once accidentally became mayor of a small village and never resigned",    sheet: "Secrets" },
-  { value: "Their weapon has a name. The weapon does not like the name they gave it", sheet: "Secrets" },
-  { value: "A Halfling who insists they're actually a Gnome",                         sheet: "Races"   },
-  { value: "A very small Dragon in a trenchcoat",                                     sheet: "Races"   },
-  { value: "A Skeleton who hasn't told anyone yet",                                   sheet: "Races"   },
-  { value: "A Were-Accountant (transforms at quarter-end, not full moon)",            sheet: "Races"   },
-  { value: "A Vampire who is very lactose intolerant",                                sheet: "Races"   },
-  { value: "A Rock Golem who has recently discovered feelings",                       sheet: "Races"   },
-  { value: "Barbarian (specialises in strongly-worded letters)",                      sheet: "Classes" },
-  { value: "Bard (knows three chords, extremely confident)",                          sheet: "Classes" },
-  { value: "Ranger who gets lost indoors",                                             sheet: "Classes" },
-  { value: "Rogue who is an absolutely terrible liar",                                sheet: "Classes" },
-  { value: "Wizard who still hasn't returned their library books",                    sheet: "Classes" },
-  { value: "Warlock in a very awkward contractual situation",                         sheet: "Classes" },
-  { value: "Joined the adventure after losing a bet to a seagull. Long story",        sheet: "Backstories" },
-  { value: "Inherited a map to treasure, but the treasure turned out to be 'self-belief'", sheet: "Backstories" },
-  { value: "Started adventuring to return a borrowed book; it escalated",             sheet: "Backstories" },
-  { value: "Woke up one day knowing sword skills with no memory of learning them",    sheet: "Backstories" },
-  { value: "Was turned into a frog for three years. Won't say by whom. Still angry", sheet: "Backstories" },
+  { value: "Cannot physically leave a room without saying goodbye to furniture",       sheet: "Quirks"      },
+  { value: "Narrates their own actions in third person at dramatic moments",            sheet: "Quirks"      },
+  { value: "Cannot resist correcting people's grammar mid-combat",                     sheet: "Quirks"      },
+  { value: "Insists on taking meeting minutes during every dungeon encounter",          sheet: "Quirks"      },
+  { value: "Always speaks in rhyme when they lie, completely unaware of it",           sheet: "Quirks"      },
+  { value: "Refuses to be surprised. Will loudly claim they knew about this",          sheet: "Quirks"      },
+  { value: "Applauds after every spell, including enemies'",                            sheet: "Quirks"      },
+  { value: "Has never once walked into a room without pausing for effect",             sheet: "Quirks"      },
+  { value: "Maintains extremely strong opinions about inn ratings",                    sheet: "Quirks"      },
+  { value: "Asks 'but what's their motivation?' about every monster",                  sheet: "Quirks"      },
+  { value: "Dramatically misremembers every adventure they've been on",                sheet: "Quirks"      },
+  { value: "Their mortal enemy is a duck. They don't want to talk about it",           sheet: "Secrets"     },
+  { value: "Has never actually read the spell they claim is their signature move",     sheet: "Secrets"     },
+  { value: "The legendary sword was found in a bin",                                   sheet: "Secrets"     },
+  { value: "Owes money to a god. Not a lot of money. Still very inconvenient",         sheet: "Secrets"     },
+  { value: "Cannot actually read maps. Has been winging it the entire time",           sheet: "Secrets"     },
+  { value: "Was once a villain. Briefly. Didn't care for it",                          sheet: "Secrets"     },
+  { value: "Has a wanted poster — looks nothing like them, but they're still worried", sheet: "Secrets"     },
+  { value: "Once accidentally became mayor of a small village and never resigned",     sheet: "Secrets"     },
+  { value: "Their weapon has a name. The weapon does not like the name they gave it",  sheet: "Secrets"     },
+  { value: "A very small Dragon in a trenchcoat",                                      sheet: "Races"       },
+  { value: "A Skeleton who hasn't told anyone yet",                                    sheet: "Races"       },
+  { value: "A Were-Accountant (transforms at quarter-end, not full moon)",             sheet: "Races"       },
+  { value: "A Vampire who is very lactose intolerant",                                 sheet: "Races"       },
+  { value: "A Rock Golem who has recently discovered feelings",                        sheet: "Races"       },
+  { value: "Ranger who gets lost indoors",                                              sheet: "Classes"     },
+  { value: "Rogue who is an absolutely terrible liar",                                 sheet: "Classes"     },
+  { value: "Wizard who still hasn't returned their library books",                     sheet: "Classes"     },
+  { value: "Warlock in a very awkward contractual situation",                          sheet: "Classes"     },
+  { value: "Joined the adventure after losing a bet to a seagull. Long story",         sheet: "Backstories" },
+  { value: "Started adventuring to return a borrowed book; it escalated",              sheet: "Backstories" },
+  { value: "Was turned into a frog for three years. Won't say by whom. Still angry",  sheet: "Backstories" },
+  // Loot fallback entries — flavour text included so the loot card renders offline
+  {
+    value:   "The Amulet of Someone Else's Problem",
+    sheet:   "Loot",
+    flavour: "Once per day, the wearer may designate any ongoing situation as definitively someone else's problem. The situation does not change. Their attitude toward it does.",
+    image:   '',
+  },
+  {
+    value:   "Boots of Confident Striding",
+    sheet:   "Loot",
+    flavour: "These boots do not make you faster. They simply make you look like you know exactly where you're going, even when you absolutely do not.",
+    image:   '',
+  },
+  {
+    value:   "The Ring of Plausible Deniability",
+    sheet:   "Loot",
+    flavour: "A plain silver band that, when worn, ensures there is always just enough doubt. Witnesses become uncertain. Evidence becomes ambiguous.",
+    image:   '',
+  },
 ];
 
 // ============================================================
@@ -474,10 +611,21 @@ const STORAGE_KEY   = 'nodice_traitgen_session';
 
 // ============================================================
 //  STATE
+//  flavour and image are populated only when a Loot entry is active.
 // ============================================================
-let ALL_TRAITS  = null;   // flat array of { value, sheet } once loaded
-let dataSource  = 'fallback';
-let state       = { rolled: false, mulligans: MAX_MULLIGANS, value: '', sheet: '', lockedAt: null };
+let ALL_TRAITS = null;
+let dataSource = 'fallback';
+
+let state = {
+  rolled:    false,
+  mulligans: MAX_MULLIGANS,
+  value:     '',
+  sheet:     '',
+  flavour:   '',
+  image:     '',
+  lockedAt:  null,
+};
+
 let countdownInterval = null;
 
 // ============================================================
@@ -510,10 +658,11 @@ function clearSession() {
 
 // ============================================================
 //  DATA LOADING
-//  Step 1: Fetch the spreadsheet metadata to get all sheet tab names.
-//  Step 2: Fetch Column A from every tab.
-//  Step 3: Flatten everything into a single pool of { value, sheet } objects.
-//  Adding a new tab to the Google Sheet is all that's needed to expand the pool.
+//  1. Discover all tab names via the spreadsheet metadata endpoint.
+//  2. Remove any tab in CONFIG.EXCLUDE_TABS.
+//  3. For CONFIG.LOOT_TAB: fetch columns A:C (name, flavour, image).
+//  4. For all other tabs: fetch column A only.
+//  5. Flatten everything into ALL_TRAITS.
 // ============================================================
 function isConfigured() {
   return CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
@@ -538,6 +687,23 @@ async function fetchColumnA(tabName) {
   return (json.values || []).flat().map(v => String(v).trim()).filter(Boolean);
 }
 
+async function fetchLootTab(tabName) {
+  // Fetches columns A:C to capture name, flavour text, and image data URI
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
+            + `/values/${encodeURIComponent(tabName)}!A:C?key=${CONFIG.API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Loot tab "${tabName}" returned HTTP ${res.status}`);
+  const json = await res.json();
+  return (json.values || [])
+    .filter(row => row[0] && String(row[0]).trim())
+    .map(row => ({
+      value:   String(row[0] || '').trim(),
+      sheet:   tabName,
+      flavour: String(row[1] || '').trim(),
+      image:   String(row[2] || '').trim(),
+    }));
+}
+
 async function loadData() {
   if (!isConfigured()) {
     ALL_TRAITS = FALLBACK_TRAITS;
@@ -545,20 +711,38 @@ async function loadData() {
     return;
   }
   try {
-    const tabNames = await fetchSheetNames();
-    if (!tabNames.length) throw new Error('No sheet tabs found');
+    const allTabNames = await fetchSheetNames();
+    if (!allTabNames.length) throw new Error('No sheet tabs found');
 
-    // Fetch all tabs in parallel
-    const results = await Promise.all(tabNames.map(tab => fetchColumnA(tab)));
+    // Apply exclusion list
+    const tabNames = allTabNames.filter(t => !CONFIG.EXCLUDE_TABS.includes(t));
+    if (!tabNames.length) throw new Error('All tabs are excluded');
 
-    // Flatten into a single pool, tagging each entry with its source sheet name
+    // Split into loot tab and regular tabs
+    const lootTabName = tabNames.find(t => t === CONFIG.LOOT_TAB);
+    const otherTabs   = tabNames.filter(t => t !== CONFIG.LOOT_TAB);
+
+    // Fetch everything in parallel
+    const [lootEntries, ...otherResults] = await Promise.all([
+      lootTabName ? fetchLootTab(lootTabName) : Promise.resolve([]),
+      ...otherTabs.map(tab => fetchColumnA(tab)),
+    ]);
+
     ALL_TRAITS = [];
-    tabNames.forEach((tab, i) => {
-      results[i].forEach(val => ALL_TRAITS.push({ value: val, sheet: tab }));
+
+    // Regular tabs — col A only, no extra fields
+    otherTabs.forEach((tab, i) => {
+      otherResults[i].forEach(val =>
+        ALL_TRAITS.push({ value: val, sheet: tab, flavour: '', image: '' })
+      );
     });
 
-    if (ALL_TRAITS.length === 0) throw new Error('All tabs were empty');
+    // Loot tab — already shaped with flavour + image
+    lootEntries.forEach(entry => ALL_TRAITS.push(entry));
+
+    if (ALL_TRAITS.length === 0) throw new Error('All tabs were empty after filtering');
     dataSource = 'live';
+
   } catch (err) {
     console.warn('Sheets fetch failed — using fallback data.', err);
     ALL_TRAITS = FALLBACK_TRAITS;
@@ -571,6 +755,14 @@ async function loadData() {
 // ============================================================
 function pickTrait() {
   return ALL_TRAITS[Math.floor(Math.random() * ALL_TRAITS.length)];
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function sourceBadgeHTML() {
@@ -590,6 +782,60 @@ function formatCountdown(ms) {
 }
 
 // ============================================================
+//  INNER CONTENT HTML
+//  Returns the HTML for inside .trait-scroll.
+//  Switches between the standard big-text layout and the
+//  full loot card layout depending on the current state.sheet.
+// ============================================================
+function innerContentHTML() {
+  if (!state.value) {
+    return `<div class="trait-display">
+      <div class="trait-label">Your Trait</div>
+      <div class="trait-value">&nbsp;</div>
+      <div class="trait-divider"></div>
+      <div class="trait-source">&nbsp;</div>
+    </div>`;
+  }
+
+  if (state.sheet === CONFIG.LOOT_TAB) {
+    // ── Loot entry: show image + name + flavour text ──────
+    const imgSlot = state.image
+      ? `<div class="loot-image-slot has-image">
+           <img src="${state.image}" alt="${escHtml(state.value)}" />
+         </div>`
+      : `<div class="loot-image-slot">
+           <span class="slot-icon">✨</span>
+         </div>`;
+
+    const flavourBlock = state.flavour
+      ? `<div>
+           <div class="loot-flavour-label">Description</div>
+           <div class="loot-flavour">${escHtml(state.flavour)}</div>
+         </div>`
+      : '';
+
+    return `<div class="loot-display">
+      ${imgSlot}
+      <div>
+        <div class="loot-name-label">Magic Item</div>
+        <div class="loot-name">${escHtml(state.value)}</div>
+      </div>
+      <div class="loot-card-divider"></div>
+      ${flavourBlock}
+      <div class="loot-source">from: ${escHtml(state.sheet)}</div>
+    </div>`;
+  }
+
+  // ── Standard trait entry: big centred text ────────────
+  return `<div class="trait-display">
+    <div class="trait-label">Your Trait</div>
+    <div class="trait-value">${escHtml(state.value)}</div>
+    <div class="trait-divider"></div>
+    <div class="trait-source">from: ${escHtml(state.sheet)}</div>
+  </div>`;
+}
+
+// ============================================================
 //  COUNTDOWN — copied exactly from chargen.html
 // ============================================================
 function startCountdown() {
@@ -601,7 +847,7 @@ function startCountdown() {
     if (remaining <= 0) {
       clearInterval(countdownInterval);
       clearSession();
-      state = { rolled: false, mulligans: MAX_MULLIGANS, value: '', sheet: '', lockedAt: null };
+      state = { rolled: false, mulligans: MAX_MULLIGANS, value: '', sheet: '', flavour: '', image: '', lockedAt: null };
       doRoll();
     } else {
       el.textContent = formatCountdown(remaining);
@@ -616,12 +862,10 @@ function render() {
   const app    = document.getElementById('app');
   const locked = isLocked();
 
-  // Mulligan pips
   const pips = Array.from({ length: MAX_MULLIGANS }, (_, i) =>
     `<div class="pip${i >= state.mulligans ? ' spent' : ''}"></div>`
   ).join('');
 
-  // CTA: roll button or lock notice
   let ctaHTML;
   if (locked) {
     const remaining = LOCK_DURATION - (Date.now() - state.lockedAt);
@@ -641,11 +885,8 @@ function render() {
       Mulligans &nbsp;<div class="pip-row">${pips}</div>
     </div>
     <div class="trait-card">
-      <div class="trait-display">
-        <div class="trait-label">Your Trait</div>
-        <div class="trait-value" id="trait-value">${state.value || '&nbsp;'}</div>
-        <div class="trait-divider"></div>
-        <div class="trait-source" id="trait-source">${state.sheet ? 'from: ' + state.sheet : '&nbsp;'}</div>
+      <div class="trait-scroll" id="trait-scroll">
+        ${innerContentHTML()}
       </div>
       <div class="card-footer">
         ${ctaHTML}
@@ -657,14 +898,14 @@ function render() {
     startCountdown();
     // ================================================================
     // DEV: Inject Reset button into header while locked.
-    // To remove: delete this block.
+    // To remove: delete this entire block.
     // ================================================================
     const hdr = document.querySelector('header');
     if (hdr && !hdr.querySelector('.reset-btn')) {
       const btn = document.createElement('button');
-      btn.className  = 'reset-btn';
+      btn.className   = 'reset-btn';
       btn.textContent = 'Reset';
-      btn.onclick    = devReset;
+      btn.onclick     = devReset;
       hdr.appendChild(btn);
     }
     // ================================================================
@@ -683,50 +924,46 @@ function doRoll() {
   if (isLocked()) return;
   if (state.rolled && state.mulligans <= 0) return;
 
-  // First roll is free; subsequent rolls cost a mulligan
   if (state.rolled) state.mulligans--;
 
-  // Animate the trait value out, swap, then back in
-  const traitEl  = document.getElementById('trait-value');
-  const sourceEl = document.getElementById('trait-source');
-  const dieEl    = document.getElementById('die-icon');
+  // Fade out whatever is currently showing, then swap
+  const scrollEl  = document.getElementById('trait-scroll');
+  const fadeTarget = scrollEl
+    ? scrollEl.querySelector('.trait-display, .loot-display')
+    : null;
+  const dieEl = document.getElementById('die-icon');
 
-  if (traitEl) traitEl.classList.add('fading');
-  if (sourceEl) sourceEl.classList.add('fading');
-  if (dieEl)   dieEl.classList.add('spinning');
+  if (fadeTarget) fadeTarget.classList.add('fading');
+  if (dieEl)      dieEl.classList.add('spinning');
 
   setTimeout(() => {
-    const picked = pickTrait();
-    state.rolled = true;
-    state.value  = picked.value;
-    state.sheet  = picked.sheet;
+    const picked  = pickTrait();
+    state.rolled  = true;
+    state.value   = picked.value;
+    state.sheet   = picked.sheet;
+    state.flavour = picked.flavour || '';
+    state.image   = picked.image   || '';
     if (state.mulligans === 0) state.lockedAt = Date.now();
     saveSession();
 
-    if (isLocked()) {
-      // Re-render the whole card so the lock notice replaces the button
-      render();
-    } else {
-      const tv = document.getElementById('trait-value');
-      const ts = document.getElementById('trait-source');
-      if (tv) { tv.textContent = picked.value; tv.classList.remove('fading'); }
-      if (ts) { ts.textContent = 'from: ' + picked.sheet; ts.classList.remove('fading'); }
+    // Full re-render so the layout can switch between trait and loot views
+    render();
 
-      // Update pips
-      document.querySelectorAll('.pip')
-        .forEach((p, i) => p.classList.toggle('spent', i >= state.mulligans));
-    }
-  }, 180);
+    // Scroll back to top in case a loot entry was taller than the screen
+    const newScroll = document.getElementById('trait-scroll');
+    if (newScroll) newScroll.scrollTop = 0;
+
+  }, 200);
 }
 
 // ================================================================
 // DEV RESET FUNCTION
-// Remove this function (and the .reset-btn styles above) before live show.
+// Remove this function (and .reset-btn CSS and injection block) before live show.
 // ================================================================
 function devReset() {
   clearInterval(countdownInterval);
   clearSession();
-  state = { rolled: false, mulligans: MAX_MULLIGANS, value: '', sheet: '', lockedAt: null };
+  state = { rolled: false, mulligans: MAX_MULLIGANS, value: '', sheet: '', flavour: '', image: '', lockedAt: null };
   const existing = document.querySelector('.reset-btn');
   if (existing) existing.remove();
   doRoll();
@@ -742,7 +979,6 @@ loadData().then(() => {
   const restored = loadSession();
   if (restored) {
     render();
-    // If we restored a locked session, start the countdown ticking
     if (isLocked()) startCountdown();
   } else {
     doRoll();
