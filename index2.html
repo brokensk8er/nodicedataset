@@ -341,38 +341,48 @@
   .cg-roll-btn:active { transform: scale(.98); }
   .cg-roll-btn:disabled { opacity: .35; cursor: not-allowed; }
 
-  .cg-quick-sep {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 12px 4px; border-top: 1px solid var(--border);
+  .cg-quick-cats {
+    display: flex; gap: 0; padding: 8px 12px 0;
   }
-  .cg-quick-sep::before, .cg-quick-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .cg-quick-sep span {
-    font-family: 'Cinzel', serif; font-size: .5rem; font-weight: 600;
-    color: var(--gold-dim); letter-spacing: .18em; text-transform: uppercase; white-space: nowrap;
+  .cg-quick-cat-btn {
+    flex: 1; font-family: 'Cinzel', serif;
+    font-size: .58rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--ink); background: var(--parchment);
+    border: 1.5px solid var(--border); border-right: none; border-radius: 0;
+    padding: 7px 2px; text-align: center; cursor: pointer;
+    transition: border-color .18s, background .18s, color .18s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .cg-quick-rows { padding: 2px 12px 10px; display: flex; flex-direction: column; }
-  .cg-quick-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 5px 0; border-bottom: 1px solid var(--border);
+  .cg-quick-cat-btn:first-child { border-radius: 8px 0 0 8px; }
+  .cg-quick-cat-btn:last-child  { border-right: 1.5px solid var(--border); border-radius: 0 8px 8px 0; }
+  .cg-quick-cat-btn:hover:not(.active) { background: var(--gold-bg); border-color: var(--gold); color: var(--gold-dim); z-index: 1; }
+  .cg-quick-cat-btn.active { background: var(--gold); border-color: var(--gold); border-right: 1.5px solid var(--gold); color: var(--ink); z-index: 1; }
+
+  .cg-quick-result {
+    padding: 10px 14px 8px;
+    min-height: 52px; display: flex; flex-direction: column; justify-content: center; gap: 2px;
   }
-  .cg-quick-row:last-child { border-bottom: none; }
-  .cg-quick-label {
-    font-family: 'Cinzel', serif; font-size: .55rem; font-weight: 600;
-    color: var(--muted); letter-spacing: .1em; text-transform: uppercase;
-    width: 58px; flex-shrink: 0;
+  .cg-quick-result-label {
+    font-family: 'Cinzel', serif; font-size: .54rem; font-weight: 600;
+    color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
+    min-height: .85rem; opacity: 0; transition: opacity .2s;
   }
-  .cg-quick-val {
-    flex: 1; font-size: .78rem; color: var(--ink); line-height: 1.3;
-    transition: opacity .18s;
+  .cg-quick-result-label.visible { opacity: 1; }
+  .cg-quick-result-value {
+    font-size: .9rem; color: var(--ink); line-height: 1.4;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity .25s, transform .25s; min-height: 1.2rem;
   }
-  .cg-quick-val.fading { opacity: 0; }
-  .cg-quick-btn {
-    flex-shrink: 0; font-size: .55rem; color: var(--muted);
-    background: none; border: 1px solid var(--border); border-radius: 5px;
-    padding: 3px 6px; cursor: pointer;
-    transition: border-color .15s, color .15s; white-space: nowrap;
+  .cg-quick-result-value.visible { opacity: 1; transform: translateY(0); }
+  .cg-quick-result-value.fading  { opacity: 0; transform: translateY(4px); }
+  .cg-mode-toggle {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 14px; width: 100%;
+    font-family: 'Cinzel', serif; font-size: .72rem; font-weight: 600;
+    letter-spacing: .07em; color: var(--muted);
+    cursor: pointer; transition: border-color .15s, color .15s;
   }
-  .cg-quick-btn:hover { border-color: var(--gold); color: var(--gold-dim); }
+  .cg-mode-toggle:hover { border-color: var(--gold); color: var(--gold-dim); }
 
   /* ─────────────────────────────────────────
      LOOT TABLE
@@ -669,10 +679,7 @@
         <div class="shelf-body-inner">
           <div class="shelf-content">
             <div id="cg-inner"><!-- rendered by JS --></div>
-            <div id="cg-quick" style="display:none">
-              <div class="cg-quick-sep"><span>Quick Pull</span></div>
-              <div class="cg-quick-rows" id="cg-quick-rows"><!-- rendered by JS --></div>
-            </div>
+            <div id="cg-quick" style="display:none"><!-- rendered by JS --></div>
           </div>
         </div>
       </div>
@@ -1145,6 +1152,14 @@ const CG_LOCK_DURATION  = 60 * 60 * 1000;
 const CG_STORAGE_KEY    = 'nodice_vault_chargen_session';
 let cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
 let cgCountdownInterval = null;
+let cgMode = 'full';
+let cgActiveQuickKey = null;
+
+window.cgSetMode = function(mode) {
+  cgMode = mode;
+  document.getElementById('cg-inner').style.display = mode === 'full' ? '' : 'none';
+  document.getElementById('cg-quick').style.display = mode === 'quick' ? '' : 'none';
+};
 
 function cgSaveSession() {
   try { localStorage.setItem(CG_STORAGE_KEY, JSON.stringify(cgState)); } catch(e) {}
@@ -1203,6 +1218,7 @@ function cgRender() {
     <div class="cg-fields">${rows}</div>
     <div class="cg-footer">
       ${ctaBtn}
+      <button class="cg-mode-toggle" onclick="cgSetMode('quick')">Quick Pull →</button>
       <div class="source-badge ${chargenDataSource}"><span class="dot"></span>${chargenDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>
     </div>`;
 
@@ -1254,23 +1270,43 @@ window.cgRerollField = function(key) {
 };
 
 function cgQuickRender() {
-  document.getElementById('cg-quick-rows').innerHTML = CHARGEN_CATS.map(c => `
-    <div class="cg-quick-row">
-      <span class="cg-quick-label">${esc(c.label)}</span>
-      <span class="cg-quick-val" id="cgq-${c.key}"></span>
-      <button class="cg-quick-btn" onclick="cgQuickPick('${c.key}')">⚄ Roll</button>
-    </div>`).join('');
-  document.getElementById('cg-quick').style.display = '';
+  document.getElementById('cg-quick').innerHTML = `
+    <div class="cg-quick-cats">
+      ${CHARGEN_CATS.map(c => `
+        <button class="cg-quick-cat-btn${cgActiveQuickKey === c.key ? ' active' : ''}"
+          onclick="cgQuickPick('${c.key}')">${esc(c.label)}</button>`).join('')}
+    </div>
+    <div class="cg-quick-result">
+      <div class="cg-quick-result-label" id="cg-qr-label"></div>
+      <div class="cg-quick-result-value" id="cg-qr-value"></div>
+    </div>
+    <div class="cg-footer">
+      <button class="cg-roll-btn" onclick="cgSetMode('full')">← Full Character</button>
+    </div>`;
 }
 
 window.cgQuickPick = function(key) {
-  const el = document.getElementById('cgq-' + key);
-  if (!el) return;
-  el.classList.add('fading');
+  cgActiveQuickKey = key;
+  cgSetMode('quick');
+
+  // Update active button state
+  document.querySelectorAll('.cg-quick-cat-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === esc(CHARGEN_CATS.find(c=>c.key===key)?.label||''));
+  });
+
+  const labelEl = document.getElementById('cg-qr-label');
+  const valueEl = document.getElementById('cg-qr-value');
+  if (valueEl) { valueEl.classList.add('fading'); valueEl.classList.remove('visible'); }
+
   setTimeout(() => {
     const cat = CHARGEN_CATS.find(c => c.key === key);
-    el.textContent = key === 'name' ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
-    el.classList.remove('fading');
+    const value = key === 'name' ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
+    if (labelEl) { labelEl.textContent = cat.label; labelEl.className = 'cg-quick-result-label visible'; }
+    if (valueEl) {
+      valueEl.textContent = value;
+      valueEl.classList.remove('fading');
+      requestAnimationFrame(() => requestAnimationFrame(() => valueEl.classList.add('visible')));
+    }
   }, 180);
 };
 
@@ -1280,12 +1316,9 @@ async function initChargen() {
     `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
   await chargenFetchData();
   const restored = cgLoadSession();
-  if (restored && cgState.rolled) {
-    cgRender();
-  } else {
-    cgDoRoll();
-  }
+  if (restored && cgState.rolled) { cgRender(); } else { cgDoRoll(); }
   cgQuickRender();
+  cgSetMode('full');
 }
 
 // ═══════════════════════════════════════════════
