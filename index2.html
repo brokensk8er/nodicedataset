@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No Dice — The Vault (All-In-One)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:          #1a1a2e;
+    --ink-hover:    #2e2e4a;
+    --parchment:    #faf7f2;
+    --gold:         #c9a84c;
+    --gold-dim:     #a07c2e;
+    --gold-bg:      #fffdf5;
+    --card-bg:      #ffffff;
+    --border:       #e8e2d9;
+    --muted:        #6b6676;
+    --shadow:       rgba(26,26,46,.10);
+    --shadow-gold:  rgba(201,168,76,.22);
+    --pass-grn:     #27ae60;
+    --pass-rim:     #1e8449;
+    --fail-red:     #c0392b;
+    --fail-rim:     #922b21;
+    --success:      #2d7a5e;
+    --warning:      #b8860b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    background-color: var(--parchment);
+    color: var(--ink);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* ── Page wrap ── */
+  .page-wrap {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0 14px 32px;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 1.6rem 0 .8rem;
+  }
+
+  .site-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 400;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: .35rem;
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.1;
+    letter-spacing: .04em;
+  }
+
+  h1 span { color: var(--gold); }
+
+  .tagline {
+    margin-top: .35rem;
+    font-size: .75rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: .05em;
+  }
+
+  .header-divider {
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: .75rem auto 0;
+  }
+
+  /* ── Main tool list ── */
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: .9rem 0 1rem;
+  }
+
+  /* ── SHELF — the collapsible tool container ── */
+  .shelf {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 2px 14px var(--shadow);
+    overflow: hidden;
+    transition: box-shadow .25s ease, border-color .25s ease;
+    animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  .shelf.open {
+    box-shadow: 0 6px 28px var(--shadow-gold);
+    border-color: rgba(201,168,76,.35);
+  }
+
+  .shelf:nth-child(1) { animation-delay: .06s; }
+  .shelf:nth-child(2) { animation-delay: .10s; }
+  .shelf:nth-child(3) { animation-delay: .14s; }
+  .shelf:nth-child(4) { animation-delay: .18s; }
+  .shelf:nth-child(5) { animation-delay: .22s; }
+
+  /* ── Shelf header (always visible, clickable) ── */
+  .shelf-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px 11px 12px;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .shelf-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, rgba(201,168,76,.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .18s;
+    pointer-events: none;
+  }
+
+  .shelf.open .shelf-header::after,
+  .shelf-header:hover::after { opacity: 1; }
+
+  .shelf-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 36px;
+    text-align: center;
+    filter: drop-shadow(0 1px 3px rgba(26,26,46,.12));
+  }
+
+  .shelf-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shelf-name {
+    font-family: 'Cinzel', serif;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .shelf-desc {
+    font-size: .7rem;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.35;
+    letter-spacing: .01em;
+    margin-top: 1px;
+  }
+
+  /* Chevron indicator */
+  .shelf-chevron {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-dim);
+    transition: transform .3s cubic-bezier(.22,1,.36,1), color .2s;
+    font-size: .75rem;
+    font-family: 'Lato', sans-serif;
+  }
+
+  .shelf.open .shelf-chevron {
+    transform: rotate(180deg);
+    color: var(--gold);
+  }
+
+  /* ── Shelf body — the sliding-down panel ── */
+  .shelf-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .35s cubic-bezier(.22,1,.36,1);
+  }
+
+  .shelf.open .shelf-body {
+    grid-template-rows: 1fr;
+  }
+
+  .shelf-body-inner {
+    overflow: hidden;
+  }
+
+  .shelf-content {
+    border-top: 1px solid var(--border);
+    background: rgba(201,168,76,.015);
+  }
+
+  /* ── SHARED INNER ELEMENTS ── */
+
+  .inner-section {
+    padding: 14px 14px 10px;
+  }
+
+  .inner-section + .inner-section {
+    border-top: 1px solid var(--border);
+  }
+
+  .inner-label {
+    font-family: 'Cinzel', serif;
+    font-size: .58rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .full-link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: var(--ink);
+    color: var(--parchment);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Cinzel', serif;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s;
+  }
+
+  .full-link-btn:hover { background: var(--ink-hover); }
+  .full-link-btn span { opacity: .6; font-size: .8rem; }
+
+  /* ── Source badge ── */
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .6rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 7px;
+  }
+
+  .source-badge .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .source-badge.live .dot     { background: var(--success); }
+  .source-badge.fallback .dot { background: var(--warning); }
+
+  /* ─────────────────────────────────────────
+     COIN FLIP TOOL
+  ───────────────────────────────────────── */
+
+  .coin-section {
+    padding: 16px 14px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .coin-stage-mini {
+    width: 130px;
+    height: 130px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .coin-mini {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: default;
+  }
+
+  .face-mini {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .face-mini::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.18);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .face-mini-mystery {
+    background: radial-gradient(circle at 38% 32%, #e2bc6a, var(--gold) 55%, var(--gold-dim));
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,.15), 0 4px 18px rgba(201,168,76,.45);
+  }
+
+  .face-mini-fail {
+    background: #000;
+    box-shadow: 0 4px 18px rgba(192,57,43,.45);
+  }
+
+  .face-mini-pass {
+    background: #000;
+    box-shadow: 0 4px 18px rgba(39,174,96,.45);
+  }
+
+  .face-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .face-mini svg {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  @keyframes coinFlipMini {
+    0%   { transform: scaleX(1); }
+    50%  { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+
+  .coin-mini.spinning {
+    animation: coinFlipMini var(--half-dur, .18s) ease-in-out var(--flip-count, 7) forwards;
+  }
+
+  @keyframes wobbleMini {
+    0%   { transform: scaleX(1) rotateZ(0deg); }
+    20%  { transform: scaleX(1) rotateZ(2deg); }
+    40%  { transform: scaleX(1) rotateZ(-1.5deg); }
+    60%  { transform: scaleX(1) rotateZ(1deg); }
+    80%  { transform: scaleX(1) rotateZ(-.5deg); }
+    100% { transform: scaleX(1) rotateZ(0deg); }
+  }
+
+  .coin-mini.wobbling {
+    animation: wobbleMini .45s ease-out forwards;
+  }
+
+  .coin-result-wrap {
+    text-align: center;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .coin-result-banner {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .3s ease, transform .3s ease;
+    min-height: 1.4rem;
+  }
+
+  .coin-result-banner.visible { opacity: 1; transform: translateY(0); }
+  .coin-result-banner.pass { color: var(--pass-grn); }
+  .coin-result-banner.fail { color: var(--fail-red); }
+
+  .coin-result-sub {
+    font-size: .7rem;
+    font-weight: 300;
+    color: #888;
+    letter-spacing: .05em;
+    opacity: 0;
+    transition: opacity .3s .15s ease;
+    min-height: 1rem;
+    text-align: center;
+    max-width: 260px;
+  }
+
+  .coin-result-sub.visible { opacity: 1; }
+
+  .btn-coin-flip {
+    font-family: 'Cinzel', serif;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    border: none;
+    border-radius: 8px;
+    padding: .75rem 1.8rem;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.4);
+    transition: transform .12s ease, box-shadow .12s ease, opacity .2s;
+    width: 100%;
+    max-width: 240px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-coin-flip::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.22) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .btn-coin-flip:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(201,168,76,.4), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+
+  .btn-coin-flip:active:not(:disabled) { transform: translateY(0); }
+  .btn-coin-flip:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Confetti canvas — fixed overlay */
+  #coin-confetti {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─────────────────────────────────────────
+     CHARACTER GENERATOR TOOL
+  ───────────────────────────────────────── */
+
+  .chargen-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .chargen-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 7px 14px;
+    position: relative;
+    gap: 8px;
+  }
+
+  .chargen-row:nth-child(even) {
+    background: rgba(201,168,76,.025);
+  }
+
+  .chargen-row + .chargen-row::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 14px; right: 14px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+
+  .chargen-field-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chargen-field-label {
+    font-family: 'Cinzel', serif;
+    font-size: .6rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .chargen-field-value {
+    font-size: .85rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--ink);
+    transition: opacity .15s;
+    min-height: 1.1rem;
+  }
+
+  .chargen-field-value.fading { opacity: 0; }
+
+  .chargen-reroll-btn {
+    flex-shrink: 0;
+    margin-top: 14px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 7px;
+    font-family: 'Lato', sans-serif;
+    font-size: .6rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    transition: border-color .2s, color .2s, background .2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .chargen-reroll-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-bg);
+  }
+
+  .chargen-reroll-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  .chargen-footer {
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    align-items: center;
+    background: rgba(201,168,76,.02);
+  }
+
+  .btn-roll-all {
+    width: 100%;
+    background: var(--ink);
+    color: var(--parchment);
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+
+  .btn-roll-all:hover:not(:disabled) { background: var(--ink-hover); }
+  .btn-roll-all:active { transform: scale(.98); }
+  .btn-roll-all:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* mulligan pips in chargen */
+  .chargen-mulligan-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px 14px 4px;
+    border-top: 1px solid var(--border);
+    font-size: .68rem;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    background: rgba(201,168,76,.015);
+  }
+
+  .pip-row { display: flex; gap: 4px; }
+  .pip {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    transition: background .3s, transform .2s;
+  }
+  .pip.spent { background: var(--border); transform: scale(.85); }
+
+  /* chargen lock notice */
+  .chargen-lock {
+    width: 100%;
+    background: var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .chargen-lock .lock-msg {
+    font-size: .75rem;
+    color: var(--muted);
+  }
+
+  .chargen-lock .lock-cd {
+    font-family: 'Cinzel', serif;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  /* ─────────────────────────────────────────
+     LOOT TABLE TOOL
+  ───────────────────────────────────────── */
+
+  .loot-section {
+    padding: 14px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .loot-image-slot {
+    width: 100%;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f0ebe3 0%, #e8e2d9 100%);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    overflow: hidden;
+    min-height: 52px;
+  }
+
+  .loot-image-slot.has-image {
+    background: none;
+    padding: 8px;
+  }
+
+  .loot-image-slot.has-image img {
+    width: 100%;
+    max-width: 120px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .loot-slot-icon { font-size: 1.6rem; opacity: .5; }
+
+  .loot-item-name-label {
+    font-family: 'Cinzel', serif;
+    font-size: .58rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .loot-item-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+    transition: opacity .15s;
+  }
+
+  .loot-item-name.fading,
+  .loot-item-flavour.fading { opacity: 0; }
+
+  .loot-card-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  .loot-item-flavour-label {
+    font-family: 'Cinzel', serif;
+    font-size: .58rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .loot-item-flavour {
+    font-size: .85rem;
+    font-weight: 300;
+    line-height: 1.5;
+    color: var(--ink);
+    font-style: italic;
+    transition: opacity .15s;
+  }
+
+  .loot-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--border);
+    background: rgba(201,168,76,.02);
+  }
+
+  .btn-pull {
+    width: 100%;
+    background: var(--ink);
+    color: var(--parchment);
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+
+  .btn-pull:hover { background: var(--ink-hover); }
+  .btn-pull:active { transform: scale(.98); }
+
+  /* ─────────────────────────────────────────
+     POLL TOOL
+  ───────────────────────────────────────── */
+
+  .poll-section {
+    padding: 14px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .poll-question-label {
+    font-family: 'Cinzel', serif;
+    font-size: .58rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .poll-question-text {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+
+  .vote-options {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .vote-btn {
+    width: 100%;
+    background: var(--parchment);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: .02em;
+    transition: border-color .18s, background .18s, transform .1s;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .vote-btn .opt-letter {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--gold);
+    flex-shrink: 0;
+    min-width: 16px;
+  }
+
+  .vote-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: var(--gold-bg);
+  }
+
+  .vote-btn:disabled { cursor: default; }
+
+  /* Result bars */
+  .poll-result-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .poll-result-row { display: flex; flex-direction: column; gap: 3px; }
+
+  .poll-result-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .poll-result-opt-name {
+    font-family: 'Cinzel', serif;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .poll-result-pct {
+    font-family: 'Cinzel', serif;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .poll-result-count {
+    font-size: .62rem;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+
+  .bar-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transition: width .6s cubic-bezier(.22,1,.36,1);
+    width: 0%;
+  }
+
+  .bar-fill.winner {
+    background: linear-gradient(90deg, #1e8449, var(--pass-grn));
+  }
+
+  .voted-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .68rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--pass-grn);
+    font-weight: 700;
+  }
+
+  .total-votes {
+    font-size: .68rem;
+    color: var(--muted);
+    letter-spacing: .04em;
+    text-align: center;
+  }
+
+  .poll-waiting {
+    text-align: center;
+    padding: 10px 0;
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .poll-waiting-pulse {
+    animation: waitPulse 2s ease-in-out infinite;
+    display: inline-block;
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+
+  @keyframes waitPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--pass-grn);
+    display: inline-block;
+    animation: livePulse 1.4s ease-in-out infinite;
+    margin-right: 4px;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .25; }
+  }
+
+  .poll-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--border);
+    background: rgba(201,168,76,.02);
+  }
+
+  .poll-status-line {
+    font-size: .65rem;
+    color: var(--muted);
+    letter-spacing: .04em;
+    text-align: center;
+  }
+
+  .poll-setup-notice {
+    padding: 14px;
+    text-align: center;
+  }
+
+  .poll-setup-notice .notice-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+  .poll-setup-notice .notice-title {
+    font-family: 'Cinzel', serif;
+    font-size: .88rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .poll-setup-notice .notice-body {
+    font-size: .75rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .poll-setup-notice a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(201,168,76,.35);
+  }
+
+  /* ─────────────────────────────────────────
+     TRAIT GENERATOR TOOL
+  ───────────────────────────────────────── */
+
+  .trait-section {
+    padding: 20px 14px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .trait-display-label {
+    font-family: 'Cinzel', serif;
+    font-size: .58rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .trait-big-value {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+    letter-spacing: .02em;
+    transition: opacity .2s;
+    min-height: 1.6rem;
+  }
+
+  .trait-big-value.fading { opacity: 0; }
+
+  .trait-mini-divider {
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    flex-shrink: 0;
+  }
+
+  .trait-source-tag {
+    font-size: .62rem;
+    color: var(--muted);
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    min-height: 1rem;
+  }
+
+  /* loot card within trait */
+  .trait-loot-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+
+  .trait-loot-flavour {
+    font-size: .82rem;
+    font-weight: 300;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .trait-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--border);
+    background: rgba(201,168,76,.02);
+  }
+
+  .btn-draw-trait {
+    width: 100%;
+    background: var(--ink);
+    color: var(--parchment);
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+
+  .btn-draw-trait:hover:not(:disabled) { background: var(--ink-hover); }
+  .btn-draw-trait:active { transform: scale(.98); }
+  .btn-draw-trait:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ─────────────────────────────────────────
+     COMING SOON SECTION
+  ───────────────────────────────────────── */
+
+  .section-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    margin: .2rem 0 .75rem;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: .55rem;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: .5rem;
+  }
+
+  .soon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .soon-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    opacity: .52;
+    cursor: default;
+    animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
+    animation-delay: .3s;
+  }
+
+  .soon-icon { font-size: 1.1rem; line-height: 1; margin-bottom: 3px; }
+
+  .soon-name {
+    font-family: 'Cinzel', serif;
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .soon-desc {
+    font-size: .65rem;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+
+  .soon-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: .48rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 7px;
+    margin-top: 3px;
+    align-self: flex-start;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding-bottom: 1rem;
+    font-size: .58rem;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Animations ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="coin-confetti" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
+
+<div class="page-wrap">
+
+  <header>
+    <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+    <h1>The <span>Vault</span></h1>
+    <p class="tagline">Every tool. One scroll. Zero excuses.</p>
+    <div class="header-divider"></div>
+  </header>
+
+  <main id="main-shelf-list">
+
+    <!-- ══════════════════════════════════════
+         SHELF 1 — FATE'S FLIP
+    ══════════════════════════════════════ -->
+    <div class="shelf" id="shelf-coin">
+      <div class="shelf-header" onclick="toggleShelf('coin')">
+        <div class="shelf-icon">✨</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Fate's Flip</div>
+          <div class="shelf-desc">Pass or fail. One coin. No appeal.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-coin">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div class="coin-section">
+              <div class="coin-stage-mini" aria-live="polite" aria-label="Coin result">
+                <div class="coin-mini" id="coin-mini">
+                  <div class="face-mini face-mini-mystery" id="coin-face-mini">
+                    <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+                        stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+                      <text x="55" y="70" text-anchor="middle"
+                        font-family="Georgia, serif" font-size="52" font-weight="bold"
+                        fill="rgba(26,26,46,0.75)">?</text>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="coin-result-wrap">
+                <div class="coin-result-banner" id="coin-banner">&nbsp;</div>
+                <div class="coin-result-sub" id="coin-sub">&nbsp;</div>
+              </div>
+              <button class="btn-coin-flip" id="btn-flip" onclick="doFlip()">⚔ Flip the Coin</button>
+              <div class="source-badge fallback" style="display:none;" id="coin-badge">
+                <span class="dot"></span>No sheet needed
+              </div>
+            </div>
+            <div style="padding: 0 14px 10px; display:flex; justify-content:center;">
+              <a href="coinflip.html" class="full-link-btn" style="max-width:280px;">
+                Open Full Tool <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SHELF 2 — CHARACTER GENERATOR
+    ══════════════════════════════════════ -->
+    <div class="shelf" id="shelf-chargen">
+      <div class="shelf-header" onclick="toggleShelf('chargen')">
+        <div class="shelf-icon">🎲</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Character Gen</div>
+          <div class="shelf-desc">Roll a whole person in seconds.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-chargen">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div style="padding: 10px 14px 6px; display:flex; justify-content:center;">
+              <a href="chargen.html" class="full-link-btn" style="max-width:100%;">
+                Open Full Character Generator <span>→</span>
+              </a>
+            </div>
+            <div class="chargen-mulligan-bar" id="chargen-mulligan-bar">
+              Mulligans &nbsp;<div class="pip-row" id="chargen-pip-row">
+                <div class="pip" id="cpip0"></div>
+                <div class="pip" id="cpip1"></div>
+                <div class="pip" id="cpip2"></div>
+              </div>
+            </div>
+            <div class="chargen-fields" id="chargen-fields">
+              <!-- Rendered by JS -->
+            </div>
+            <div class="chargen-footer" id="chargen-footer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SHELF 3 — LOOT TABLE
+    ══════════════════════════════════════ -->
+    <div class="shelf" id="shelf-loot">
+      <div class="shelf-header" onclick="toggleShelf('loot')">
+        <div class="shelf-icon">💰</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Loot Table</div>
+          <div class="shelf-desc">Reach in. See what fate provides.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-loot">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div id="loot-inner" style="display:flex;flex-direction:column;">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SHELF 4 — THE POLL
+    ══════════════════════════════════════ -->
+    <div class="shelf" id="shelf-poll">
+      <div class="shelf-header" onclick="toggleShelf('poll')">
+        <div class="shelf-icon">🗳️</div>
+        <div class="shelf-text">
+          <div class="shelf-name">The Poll</div>
+          <div class="shelf-desc">The crowd decides. Showrunner reveals.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-poll">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div id="poll-inner">
+              <!-- Rendered by JS -->
+            </div>
+            <div class="poll-footer" id="poll-footer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SHELF 5 — TRAIT GENERATOR
+    ══════════════════════════════════════ -->
+    <div class="shelf" id="shelf-trait">
+      <div class="shelf-header" onclick="toggleShelf('trait')">
+        <div class="shelf-icon">🎭</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Trait Gen</div>
+          <div class="shelf-desc">One roll. One truth. From the whole pile.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-trait">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div style="padding: 6px 14px 4px; display:flex; justify-content:center;">
+              <a href="traitgen.html" class="full-link-btn" style="max-width:100%;">
+                Open Full Trait Generator <span>→</span>
+              </a>
+            </div>
+            <div id="trait-inner">
+              <!-- Rendered by JS -->
+            </div>
+            <div class="trait-footer" id="trait-footer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         COMING SOON
+    ══════════════════════════════════════ -->
+    <div>
+      <div class="section-rule"></div>
+      <p class="section-label">In the forge</p>
+      <div class="soon-grid">
+        <div class="soon-card">
+          <div class="soon-icon">🗺️</div>
+          <div class="soon-name">Scenario Gen</div>
+          <div class="soon-desc">Drop-in quest hooks.</div>
+          <span class="soon-badge">Coming Soon</span>
+        </div>
+        <div class="soon-card">
+          <div class="soon-icon">🧙</div>
+          <div class="soon-name">NPC Gen</div>
+          <div class="soon-desc">Instant strangers.</div>
+          <span class="soon-badge">Coming Soon</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
+
+</div>
+
+<!-- ============================================================
+     FIREBASE (for Poll)
+     Uses the same config as poll.html — replace with your own.
+============================================================ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, get, onValue }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ============================================================
+//  FIREBASE CONFIG — replace with your project values
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAIwTgubmE9V1XrSF3BS4rxSIr3uNua1a8",
+  authDomain:        "nodicepolls.firebaseapp.com",
+  databaseURL:       "https://nodicepolls-default-rtdb.firebaseio.com",
+  projectId:         "nodicepolls",
+  storageBucket:     "nodicepolls.appspot.com",
+  messagingSenderId: "387258889697",
+  appId:             "1:387258889697:web:5467488ab109ea67b74ea0",
+};
+
+const IS_DEMO = Object.values(FIREBASE_CONFIG).some(v => v.startsWith('YOUR_'));
+
+// ============================================================
+//  GOOGLE SHEETS CONFIG — same as chargen.html / loot.html
+// ============================================================
+const SHEETS_CONFIG = {
+  SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
+  API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+};
+
+const CHARGEN_TABS = [
+  { key: 'firstNames',  tab: 'First Names'  },
+  { key: 'lastNames',   tab: 'Last Names'   },
+  { key: 'races',       tab: 'Races'        },
+  { key: 'classes',     tab: 'Classes'      },
+  { key: 'backstories', tab: 'Backstories'  },
+  { key: 'quirks',      tab: 'Quirks'       },
+  { key: 'secrets',     tab: 'Secrets'      },
+];
+
+const LOOT_TAB = 'Loot';
+const TRAIT_EXCLUDE = ['First Names', 'Last Names'];
+const TRAIT_LOOT_TAB = 'Loot';
+
+// ============================================================
+//  FALLBACK DATA
+// ============================================================
+const CHARGEN_FALLBACK = {
+  firstNames:  ["Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert","Pambula","Gornak","Smitch","Quibble","Florp","Nutwig","Dravox","Grumblina","Zorp","Weeble","Crunchy","Pflop"],
+  lastNames:   ["Puddlesnort","the Adequate","Bonesworth","McFlumps","of the Bog","Cracklefingers","Thunderbutt","Noodlearm","Spigotface","the Slightly Heroic","Wobbleheim","Crumblewick","Snorkleson","Dinglebottom","of Questionable Origin"],
+  races:       ["A Halfling who insists they're actually a Gnome","A very small Dragon in a trenchcoat","An Elf who has never once been on time","A Dwarf with a surprisingly lovely singing voice","A Tiefling who keeps getting mistaken for the villain","A Goblin with an extensive collection of spoons","A Skeleton who hasn't told anyone yet","A Were-Accountant (transforms at quarter-end, not full moon)","A Vampire who is very lactose intolerant"],
+  classes:     ["Barbarian (specialises in strongly-worded letters)","Bard (knows three chords, extremely confident)","Cleric of a god they've never actually met","Druid who mostly just turns into a slightly larger dog","Fighter who brings a clipboard to every battle","Ranger who gets lost indoors","Rogue who is an absolutely terrible liar","Wizard who still hasn't returned their library books","Warlock in a very awkward contractual situation"],
+  backstories: ["Fled their hometown after accidentally winning a yodeling competition","Was raised by wolves, but normal wolves — they were very supportive","Inherited a map to treasure, but the treasure turned out to be 'self-belief'","Joined the adventure after losing a bet to a seagull. Long story","Started adventuring to return a borrowed book; it escalated"],
+  quirks:      ["Narrates their own actions in third person at dramatic moments","Cannot resist correcting people's grammar mid-combat","Always speaks in rhyme when they lie, completely unaware of it","Refuses to be surprised. Will loudly claim they 'knew about this'","Cannot physically leave a room without saying goodbye to furniture"],
+  secrets:     ["Has never actually read the spell they claim is their signature move","The legendary sword was found in a bin","Their mortal enemy is a duck. They don't want to talk about it","Cannot actually read maps. Has been winging it the entire time","Once accidentally became mayor of a small village and never resigned"],
+};
+
+const LOOT_FALLBACK = [
+  { name: "The Sword of Mild Inconvenience",     flavour: "A finely crafted blade that, upon striking an enemy, causes them to briefly remember an embarrassing moment from their past.", image: '' },
+  { name: "Boots of Confident Striding",         flavour: "These boots do not make you faster. They simply make you look like you know exactly where you're going, even when you absolutely do not.", image: '' },
+  { name: "The Amulet of Someone Else's Problem", flavour: "Once per day, the wearer may designate any ongoing situation as definitively someone else's problem. The situation does not change.", image: '' },
+  { name: "Gloves of Excessive Gesturing",       flavour: "Enchanted gauntlets that compel sweeping, dramatic hand movements when speaking. Intimidation checks: advantage. Being taken seriously: disadvantage.", image: '' },
+  { name: "The Ring of Plausible Deniability",   flavour: "A plain silver band that, when worn, ensures there is always just enough doubt. Witnesses become uncertain. Evidence becomes ambiguous.", image: '' },
+  { name: "Cloak of Mild Weatherproofing",       flavour: "Keeps out light drizzle. Completely ineffective in heavy rain. Surprisingly warm. Smells faintly of cinnamon.", image: '' },
+  { name: "The Lantern of Inconvenient Truth",   flavour: "Illuminates the truth in a ten-foot radius. Users report this is significantly less helpful than advertised.", image: '' },
+  { name: "The Pouch of Exact Change",           flavour: "This coin purse always contains the precise amount of money needed for any purchase. It never has more than that.", image: '' },
+];
+
+const TRAIT_FALLBACK = [
+  { value: "Cannot physically leave a room without saying goodbye to furniture", sheet: "Quirks", flavour: '', image: '' },
+  { value: "Narrates their own actions in third person at dramatic moments",     sheet: "Quirks", flavour: '', image: '' },
+  { value: "Their mortal enemy is a duck. They don't want to talk about it",     sheet: "Secrets", flavour: '', image: '' },
+  { value: "A very small Dragon in a trenchcoat",                               sheet: "Races", flavour: '', image: '' },
+  { value: "Ranger who gets lost indoors",                                       sheet: "Classes", flavour: '', image: '' },
+  { value: "Started adventuring to return a borrowed book; it escalated",       sheet: "Backstories", flavour: '', image: '' },
+  { value: "The Amulet of Someone Else's Problem", sheet: "Loot",
+    flavour: "Once per day, the wearer may designate any ongoing situation as definitively someone else's problem.",
+    image: '' },
+];
+
+// ============================================================
+//  COIN FLIP — PASS/FAIL LINES
+// ============================================================
+const PASS_LINES = ["The fates smile upon thee.","Fortune favours the bold.","Against all odds, glory.","A hero's moment — take it.","Not luck. Greatness.","The gods nod in your favour.","Victory tastes sweet today.","Your legend grows."];
+const FAIL_LINES = ["The fates are unmoved.","Even heroes stumble.","Not today, adventurer.","The dice gods demand drama.","The tavern will hear of this.","Boldness penalised. Regroup.","Defeat tastes bitter today.","Your legend… continues building."];
+
+// Coin face base64 images (full resolution from coinflip.html)
+const FAIL_IMG = 'data:image/png;base64,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';
+const PASS_IMG = 'data:image/png;base64,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';
+
+const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+    stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+  <text x="55" y="70" text-anchor="middle"
+    font-family="Georgia, serif" font-size="52" font-weight="bold"
+    fill="rgba(26,26,46,0.75)">?</text>
+</svg>`;
+
+// ============================================================
+//  SHARED HELPERS
+// ============================================================
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function isSheetConfigured() {
+  return SHEETS_CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
+         SHEETS_CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
+}
+
+// ============================================================
+//  SHELF TOGGLE
+//  One tool open at a time — closes others when opening a new one.
+// ============================================================
+const SHELF_IDS = ['coin', 'chargen', 'loot', 'poll', 'trait'];
+let activeShelf = null;
+
+window.toggleShelf = function(id) {
+  if (activeShelf === id) {
+    // Closing the open shelf
+    document.getElementById('shelf-' + id).classList.remove('open');
+    activeShelf = null;
+    return;
+  }
+  // Close the previously open shelf
+  if (activeShelf) {
+    document.getElementById('shelf-' + activeShelf).classList.remove('open');
+  }
+  // Open the new one
+  document.getElementById('shelf-' + id).classList.add('open');
+  activeShelf = id;
+
+  // Lazy-init tools on first open
+  if (id === 'loot'   && !lootInitialised)   initLoot();
+  if (id === 'poll'   && !pollInitialised)   initPoll();
+  if (id === 'trait'  && !traitInitialised)  initTrait();
+  if (id === 'chargen'&& !chargenInitialised) initChargen();
+};
+
+// ============================================================
+//  ── COIN FLIP ──
+// ============================================================
+let coinSpinning = false;
+
+function setCoinFaceMystery() {
+  const f = document.getElementById('coin-face-mini');
+  f.className = 'face-mini face-mini-mystery';
+  f.innerHTML = MYSTERY_SVG;
+}
+
+function setCoinFacePass() {
+  const f = document.getElementById('coin-face-mini');
+  f.className = 'face-mini face-mini-pass';
+  f.innerHTML = `<img src="${PASS_IMG}" alt="pass" />`;
+}
+
+function setCoinFaceFail() {
+  const f = document.getElementById('coin-face-mini');
+  f.className = 'face-mini face-mini-fail';
+  f.innerHTML = `<img src="${FAIL_IMG}" alt="fail" />`;
+}
+
+window.doFlip = function() {
+  if (coinSpinning) return;
+  coinSpinning = true;
+
+  const btn    = document.getElementById('btn-flip');
+  const banner = document.getElementById('coin-banner');
+  const sub    = document.getElementById('coin-sub');
+  const coin   = document.getElementById('coin-mini');
+
+  btn.disabled = true;
+  banner.className = 'coin-result-banner';
+  sub.className    = 'coin-result-sub';
+  banner.textContent = '\u00a0';
+  sub.textContent    = '\u00a0';
+
+  const result   = Math.random() < 0.5 ? 'pass' : 'fail';
+  const flips    = 5 + Math.floor(Math.random() * 4);
+  const halfDur  = 0.13 + Math.random() * 0.04;
+  const iters    = flips - 0.5;
+
+  setCoinFaceMystery();
+
+  coin.style.setProperty('--half-dur', halfDur + 's');
+  coin.style.setProperty('--flip-count', iters);
+  coin.classList.remove('spinning', 'wobbling');
+  void coin.offsetWidth;
+  coin.classList.add('spinning');
+
+  playFlipSound();
+
+  coin.addEventListener('animationend', function onEnd() {
+    coin.removeEventListener('animationend', onEnd);
+    coin.classList.remove('spinning');
+
+    if (result === 'pass') setCoinFacePass(); else setCoinFaceFail();
+
+    setTimeout(() => {
+      coin.classList.add('wobbling');
+
+      if (result === 'pass') {
+        banner.textContent = 'Go Time';
+        banner.className   = 'coin-result-banner visible pass';
+        sub.textContent    = pick(PASS_LINES);
+        sub.className      = 'coin-result-sub visible';
+        launchConfetti();
+        playCoinSound();
+      } else {
+        banner.textContent = 'No Time';
+        banner.className   = 'coin-result-banner visible fail';
+        sub.textContent    = pick(FAIL_LINES);
+        sub.className      = 'coin-result-sub visible';
+        playWompWomp();
+      }
+
+      setTimeout(() => {
+        coin.classList.remove('wobbling');
+        coinSpinning = false;
+        btn.disabled = false;
+      }, 500);
+    }, halfDur * 1000);
+  });
+};
+
+// ── Confetti ────────────────────────────────────────────────
+const canvas  = document.getElementById('coin-confetti');
+const ctx     = canvas.getContext('2d');
+let particles = [];
+let rafId     = null;
+
+const COLORS = ['#c9a84c','#e2bc6a','#27ae60','#2ecc71','#ffffff','#faf7f2'];
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function makeParticle(x, angleDeg) {
+  const a = angleDeg * Math.PI / 180;
+  const spd = 12 + Math.random() * 14;
+  return {
+    x, y: canvas.height,
+    vx: Math.cos(a) * spd, vy: -Math.sin(a) * spd,
+    w: 5 + Math.random() * 7, h: 3 + Math.random() * 4,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    rot: Math.random() * 360, rotV: (Math.random() - .5) * 10,
+    gravity: .25 + Math.random() * .15, life: 1, decay: .005 + Math.random() * .005,
+  };
+}
+
+function launchConfetti() {
+  resizeCanvas();
+  particles = [];
+  const W = canvas.width;
+  const cannons = [
+    { x: 0,        min: 20,  max: 70  },
+    { x: W * .25,  min: 40,  max: 85  },
+    { x: W * .5,   min: 60,  max: 120 },
+    { x: W * .75,  min: 95,  max: 140 },
+    { x: W,        min: 110, max: 160 },
+  ];
+  for (const c of cannons) {
+    for (let i = 0; i < 60; i++) {
+      particles.push(makeParticle(c.x, c.min + Math.random() * (c.max - c.min)));
+    }
+  }
+  if (rafId) cancelAnimationFrame(rafId);
+  animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.life > 0);
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
+    p.rot += p.rotV; p.life -= p.decay;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot * Math.PI / 180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    ctx.restore();
+  }
+  if (particles.length > 0) rafId = requestAnimationFrame(animateConfetti);
+  else ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Coin audio (identical to coinflip.html) ─────────────────
+function playFlipSound() {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const t  = ac.currentTime;
+    const tickBuf  = ac.createBuffer(1, ac.sampleRate * 0.04, ac.sampleRate);
+    const tickData = tickBuf.getChannelData(0);
+    for (let i = 0; i < tickData.length; i++) tickData[i] = (Math.random() * 2 - 1);
+    const tick = ac.createBufferSource(); tick.buffer = tickBuf;
+    const tickHp = ac.createBiquadFilter(); tickHp.type = 'highpass'; tickHp.frequency.value = 3000;
+    const tickGain = ac.createGain();
+    tickGain.gain.setValueAtTime(0.55, t);
+    tickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+    tick.connect(tickHp); tickHp.connect(tickGain); tickGain.connect(ac.destination); tick.start(t);
+    const numClicks = 14;
+    for (let i = 0; i < numClicks; i++) {
+      const progress = i / numClicks;
+      const clickAt  = 0.04 + i * (0.025 + progress * 0.07) - (progress * progress * 0.04);
+      const buf  = ac.createBuffer(1, ac.sampleRate * 0.018, ac.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let j = 0; j < data.length; j++) data[j] = (Math.random() * 2 - 1);
+      const src  = ac.createBufferSource(); src.buffer = buf;
+      const hp   = ac.createBiquadFilter(); hp.type = 'bandpass';
+      hp.frequency.value = 2200 - progress * 800; hp.Q.value = 1.2;
+      const g    = ac.createGain(); const vol = 0.18 * (1 - progress * 0.5);
+      g.gain.setValueAtTime(vol, t + clickAt);
+      g.gain.exponentialRampToValueAtTime(0.001, t + clickAt + 0.016);
+      src.connect(hp); hp.connect(g); g.connect(ac.destination); src.start(t + clickAt);
+    }
+    const thudBuf  = ac.createBuffer(1, ac.sampleRate * 0.12, ac.sampleRate);
+    const thudData = thudBuf.getChannelData(0);
+    for (let i = 0; i < thudData.length; i++) thudData[i] = (Math.random() * 2 - 1);
+    const thud = ac.createBufferSource(); thud.buffer = thudBuf;
+    const thudLp = ac.createBiquadFilter(); thudLp.type = 'lowpass'; thudLp.frequency.value = 280;
+    const thudGain = ac.createGain(); const thudAt = 0.72;
+    thudGain.gain.setValueAtTime(0.5, t + thudAt);
+    thudGain.gain.exponentialRampToValueAtTime(0.001, t + thudAt + 0.09);
+    thud.connect(thudLp); thudLp.connect(thudGain); thudGain.connect(ac.destination); thud.start(t + thudAt);
+    setTimeout(() => ac.close(), 1200);
+  } catch(e) {}
+}
+
+function playCoinSound() {
+  try {
+    const ac  = new (window.AudioContext || window.webkitAudioContext)();
+    const vol = ac.createGain(); vol.gain.setValueAtTime(0.042, ac.currentTime); vol.connect(ac.destination);
+    [{freq: 988, start: 0, dur: .08}, {freq: 1319, start: .07, dur: .18}].forEach(({freq, start, dur}) => {
+      const osc = ac.createOscillator(); const gain = ac.createGain();
+      osc.type = 'square'; osc.frequency.setValueAtTime(freq, ac.currentTime + start);
+      osc.frequency.linearRampToValueAtTime(freq * 1.06, ac.currentTime + start + dur);
+      gain.gain.setValueAtTime(0, ac.currentTime + start);
+      gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + .01);
+      gain.gain.setValueAtTime(1, ac.currentTime + start + dur * .6);
+      gain.gain.exponentialRampToValueAtTime(.001, ac.currentTime + start + dur);
+      osc.connect(gain); gain.connect(vol);
+      osc.start(ac.currentTime + start); osc.stop(ac.currentTime + start + dur + .02);
+    });
+    setTimeout(() => ac.close(), 600);
+  } catch(e) {}
+}
+
+function playWompWomp() {
+  try {
+    const ac  = new (window.AudioContext || window.webkitAudioContext)();
+    const vol = ac.createGain(); vol.gain.setValueAtTime(0.042, ac.currentTime); vol.connect(ac.destination);
+    [{start: 0, freqS: 440, freqE: 220, dur: .55}, {start: .45, freqS: 330, freqE: 110, dur: .75}]
+      .forEach(({start, freqS, freqE, dur}) => {
+        const osc = ac.createOscillator(); const gain = ac.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freqS, ac.currentTime + start);
+        osc.frequency.exponentialRampToValueAtTime(freqE, ac.currentTime + start + dur);
+        const lfo = ac.createOscillator(); const lfoG = ac.createGain();
+        lfo.frequency.value = 5.5; lfoG.gain.value = 8;
+        lfo.connect(lfoG); lfoG.connect(osc.frequency);
+        lfo.start(ac.currentTime + start); lfo.stop(ac.currentTime + start + dur);
+        gain.gain.setValueAtTime(0, ac.currentTime + start);
+        gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + .04);
+        gain.gain.setValueAtTime(1, ac.currentTime + start + dur - .12);
+        gain.gain.linearRampToValueAtTime(0, ac.currentTime + start + dur);
+        osc.connect(gain); gain.connect(vol);
+        osc.start(ac.currentTime + start); osc.stop(ac.currentTime + start + dur + .05);
+      });
+    setTimeout(() => ac.close(), 1600);
+  } catch(e) {}
+}
+
+// ============================================================
+//  ── CHARACTER GENERATOR ──
+// ============================================================
+let chargenInitialised = false;
+let CHARGEN_DATA = null;
+let chargenDataSource = 'fallback';
+
+const CHARGEN_FIELDS_CONFIG = [
+  { key: 'name',      label: 'Name',              pool: null          },
+  { key: 'race',      label: 'Race / Species',    pool: 'races'       },
+  { key: 'class',     label: 'Class',             pool: 'classes'     },
+  { key: 'backstory', label: 'Backstory',         pool: 'backstories' },
+  { key: 'quirk',     label: 'Personality Quirk', pool: 'quirks'      },
+  { key: 'secret',    label: 'Secret / Flaw',     pool: 'secrets'     },
+];
+
+const MAX_MULLIGANS   = 3;
+const LOCK_DURATION   = 60 * 60 * 1000;
+const CHARGEN_STORAGE = 'nodice_chargen_session';
+
+let chargenState = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+let chargenCdInterval = null;
+
+function chargenIsLocked() { return chargenState.lockedAt !== null; }
+
+function chargenSave() {
+  try { localStorage.setItem(CHARGEN_STORAGE, JSON.stringify(chargenState)); } catch(e) {}
+}
+
+function chargenLoad() {
+  try {
+    const raw = localStorage.getItem(CHARGEN_STORAGE);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (typeof s.mulligans !== 'number') return false;
+    if (s.lockedAt && Date.now() - s.lockedAt >= LOCK_DURATION) {
+      localStorage.removeItem(CHARGEN_STORAGE); return false;
+    }
+    chargenState = s; return true;
+  } catch(e) { return false; }
+}
+
+function chargenFormatCd(ms) {
+  if (ms <= 0) return '00:00';
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+
+async function chargenFetchData() {
+  if (!isSheetConfigured()) { CHARGEN_DATA = CHARGEN_FALLBACK; chargenDataSource = 'fallback'; return; }
+  try {
+    const results = await Promise.all(CHARGEN_TABS.map(t => {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}`
+                + `/values/${encodeURIComponent(t.tab)}!A:A?key=${SHEETS_CONFIG.API_KEY}`;
+      return fetch(url).then(r => r.ok ? r.json() : Promise.reject(r.status))
+                       .then(j => (j.values || []).flat().map(v => v.trim()).filter(Boolean));
+    }));
+    CHARGEN_DATA = {};
+    CHARGEN_TABS.forEach((t, i) => { CHARGEN_DATA[t.key] = results[i]; });
+    chargenDataSource = 'live';
+  } catch(e) { CHARGEN_DATA = CHARGEN_FALLBACK; chargenDataSource = 'fallback'; }
+}
+
+function chargenGenName() { return pick(CHARGEN_DATA.firstNames) + ' ' + pick(CHARGEN_DATA.lastNames); }
+
+function chargenGenAll() {
+  const v = { name: chargenGenName() };
+  CHARGEN_FIELDS_CONFIG.forEach(f => { if (f.pool) v[f.key] = pick(CHARGEN_DATA[f.pool]); });
+  return v;
+}
+
+function chargenRenderFields() {
+  const el    = document.getElementById('chargen-fields');
+  const foot  = document.getElementById('chargen-footer');
+  const pips  = document.getElementById('chargen-pip-row');
+  const locked = chargenIsLocked();
+
+  // Update pips
+  for (let i = 0; i < MAX_MULLIGANS; i++) {
+    const p = document.getElementById('cpip' + i);
+    if (p) p.classList.toggle('spent', i >= chargenState.mulligans);
+  }
+
+  // Render rows
+  el.innerHTML = CHARGEN_FIELDS_CONFIG.map(f => `
+    <div class="chargen-row">
+      <div class="chargen-field-text">
+        <div class="chargen-field-label">${esc(f.label)}</div>
+        <div class="chargen-field-value" id="cval-${f.key}">${esc(chargenState.values[f.key] || '')}</div>
+      </div>
+      <button class="chargen-reroll-btn" onclick="chargenReroll('${f.key}')"
+        ${(!locked && chargenState.mulligans > 0) ? '' : 'disabled'}
+        id="cbtn-${f.key}">⚄ Re</button>
+    </div>`).join('');
+
+  // Render footer
+  if (locked) {
+    const remaining = LOCK_DURATION - (Date.now() - chargenState.lockedAt);
+    foot.innerHTML = `
+      <div class="chargen-lock">
+        <span class="lock-msg">Out of rolls! Back in</span>
+        <span class="lock-cd" id="chargen-cd">${chargenFormatCd(remaining)}</span>
+      </div>
+      <div class="source-badge ${chargenDataSource}"><span class="dot"></span>${chargenDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>`;
+    startChargenCd();
+  } else {
+    foot.innerHTML = `
+      <button class="btn-roll-all" onclick="chargenRollAll()">🎲 Roll New Character</button>
+      <div class="source-badge ${chargenDataSource}"><span class="dot"></span>${chargenDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>`;
+  }
+}
+
+function startChargenCd() {
+  if (chargenCdInterval) clearInterval(chargenCdInterval);
+  chargenCdInterval = setInterval(() => {
+    const el = document.getElementById('chargen-cd');
+    if (!el) { clearInterval(chargenCdInterval); return; }
+    const rem = LOCK_DURATION - (Date.now() - chargenState.lockedAt);
+    if (rem <= 0) {
+      clearInterval(chargenCdInterval);
+      localStorage.removeItem(CHARGEN_STORAGE);
+      chargenState = { rolled: false, mulligans: MAX_MULLIGANS, values: {}, lockedAt: null };
+      chargenDoRoll();
+    } else {
+      el.textContent = chargenFormatCd(rem);
+    }
+  }, 1000);
+}
+
+window.chargenRollAll = function() {
+  if (chargenIsLocked() || (!chargenState.rolled ? false : chargenState.mulligans <= 0)) return;
+  if (chargenState.rolled) chargenState.mulligans--;
+  chargenState.rolled = true;
+  chargenState.values = chargenGenAll();
+  if (chargenState.mulligans === 0) chargenState.lockedAt = Date.now();
+  chargenSave();
+  chargenRenderFields();
+};
+
+function chargenDoRoll() {
+  chargenState.rolled  = false;
+  chargenState.mulligans = MAX_MULLIGANS;
+  chargenRollAll();
+}
+
+window.chargenReroll = function(key) {
+  if (chargenIsLocked() || chargenState.mulligans <= 0) return;
+  chargenState.mulligans--;
+
+  const valEl = document.getElementById('cval-' + key);
+  if (valEl) valEl.classList.add('fading');
+
+  setTimeout(() => {
+    chargenState.values[key] = (key === 'name')
+      ? chargenGenName()
+      : pick(CHARGEN_DATA[CHARGEN_FIELDS_CONFIG.find(f => f.key === key).pool]);
+    if (valEl) { valEl.textContent = chargenState.values[key]; valEl.classList.remove('fading'); }
+    if (chargenState.mulligans === 0) chargenState.lockedAt = Date.now();
+    chargenSave();
+    chargenRenderFields();
+  }, 160);
+};
+
+async function initChargen() {
+  chargenInitialised = true;
+  await chargenFetchData();
+  const restored = chargenLoad();
+  if (!restored) chargenDoRoll(); else chargenRenderFields();
+  if (chargenIsLocked()) startChargenCd();
+}
+
+// ============================================================
+//  ── LOOT TABLE ──
+// ============================================================
+let lootInitialised = false;
+let LOOT_ITEMS = null;
+let lootDataSource = 'fallback';
+let lootCurrent = null;
+let lootBag = [];
+
+function lootPick() {
+  if (lootBag.length === 0) {
+    lootBag = LOOT_ITEMS.map((_, i) => i);
+    for (let i = lootBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lootBag[i], lootBag[j]] = [lootBag[j], lootBag[i]];
+    }
+  }
+  if (lootCurrent && lootBag.length > 1 && LOOT_ITEMS[lootBag[lootBag.length - 1]] === lootCurrent) {
+    const idx = lootBag.pop(); lootBag.unshift(idx);
+  }
+  lootCurrent = LOOT_ITEMS[lootBag.pop()];
+  return lootCurrent;
+}
+
+function lootRender(item) {
+  const inner = document.getElementById('loot-inner');
+  const imgSlot = item.image
+    ? `<div class="loot-image-slot has-image"><img src="${item.image}" alt="${esc(item.name)}" /></div>`
+    : `<div class="loot-image-slot"><span class="loot-slot-icon">✨</span></div>`;
+
+  inner.innerHTML = `
+    <div class="loot-section">
+      ${imgSlot}
+      <div>
+        <div class="loot-item-name-label">Magic Item</div>
+        <div class="loot-item-name" id="loot-name">${esc(item.name)}</div>
+      </div>
+      <div class="loot-card-divider"></div>
+      <div>
+        <div class="loot-item-flavour-label">Description</div>
+        <div class="loot-item-flavour" id="loot-flavour">${esc(item.flavour)}</div>
+      </div>
+    </div>
+    <div class="loot-footer">
+      <button class="btn-pull" onclick="lootPull()">💰 Pull Another Item</button>
+      <div class="source-badge ${lootDataSource}"><span class="dot"></span>${lootDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>
+      <a href="loot.html" class="full-link-btn" style="max-width:100%;margin-top:2px;">Open Full Loot Table <span>→</span></a>
+    </div>`;
+}
+
+window.lootPull = function() {
+  const nameEl   = document.getElementById('loot-name');
+  const flavEl   = document.getElementById('loot-flavour');
+  if (nameEl) nameEl.classList.add('fading');
+  if (flavEl) flavEl.classList.add('fading');
+  setTimeout(() => { lootRender(lootPick()); }, 180);
+};
+
+async function initLoot() {
+  lootInitialised = true;
+  const inner = document.getElementById('loot-inner');
+  inner.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+
+  if (!isSheetConfigured()) {
+    LOOT_ITEMS = LOOT_FALLBACK; lootDataSource = 'fallback';
+  } else {
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}`
+                + `/values/${encodeURIComponent(LOOT_TAB)}!A:C?key=${SHEETS_CONFIG.API_KEY}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      const rows = (json.values || []).filter(r => r[0] && r[0].trim());
+      if (!rows.length) throw new Error('Empty');
+      LOOT_ITEMS = rows.map(r => ({ name: (r[0]||'').trim(), flavour: (r[1]||'').trim(), image: (r[2]||'').trim() }));
+      lootDataSource = 'live';
+    } catch(e) { LOOT_ITEMS = LOOT_FALLBACK; lootDataSource = 'fallback'; }
+  }
+  lootRender(lootPick());
+}
+
+// ============================================================
+//  ── POLL TOOL ──
+// ============================================================
+let pollInitialised = false;
+const POLL_LETTERS  = ['A','B','C','D','E'];
+const POLL_VOTER_KEY = 'nodice_vault_voter_id';
+
+function pollGetVoterId() {
+  let id = sessionStorage.getItem(POLL_VOTER_KEY);
+  if (!id) { id = 'v_' + crypto.randomUUID().replace(/-/g,'').slice(0,20); sessionStorage.setItem(POLL_VOTER_KEY, id); }
+  return id;
+}
+
+function pollRenderInner(html, footerHtml) {
+  const inner = document.getElementById('poll-inner');
+  const foot  = document.getElementById('poll-footer');
+  inner.innerHTML = html;
+  foot.innerHTML  = footerHtml || '';
+}
+
+function pollBadge(live) {
+  return `<div class="source-badge ${live ? 'live' : 'fallback'}"><span class="dot"></span>${live ? 'Connected' : 'Firebase not configured'}</div>`;
+}
+
+function initPoll() {
+  pollInitialised = true;
+  const inner = document.getElementById('poll-inner');
+  const foot  = document.getElementById('poll-footer');
+
+  if (IS_DEMO) {
+    inner.innerHTML = `
+      <div class="poll-setup-notice">
+        <div class="notice-icon">🔧</div>
+        <div class="notice-title">Firebase Setup Needed</div>
+        <div class="notice-body">
+          The Poll tool needs a free Firebase Realtime Database.<br>
+          See <a href="FIREBASE_SETUP.md">FIREBASE_SETUP.md</a> for the full guide,
+          or open <a href="poll.html">poll.html</a> directly.
+        </div>
+      </div>`;
+    foot.innerHTML = `
+      <a href="poll.html" class="full-link-btn" style="max-width:100%;">Open Poll Tool <span>→</span></a>
+      ${pollBadge(false)}`;
+    return;
+  }
+
+  // Firebase is configured — initialise
+  try {
+    const { initializeApp } = window.__firebaseMods.app;
+    // already initialised above via module — just use the already-imported refs
+    // (handled below inside the module scope)
+  } catch(e) {}
+
+  // The real poll init is driven by the Firebase module below
+  inner.innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`;
+  foot.innerHTML  = '';
+}
+
+// ── The actual Firebase poll logic runs inside the ES module scope ──
+// (declared below as `startPollListener`)
+
+// ============================================================
+//  ── TRAIT GENERATOR ──
+// ============================================================
+let traitInitialised = false;
+let TRAIT_DATA = null;
+let traitDataSource = 'fallback';
+
+const TRAIT_STORAGE = 'nodice_traitgen_session';
+const TRAIT_MAX_M   = 3;
+const TRAIT_LOCK_MS = 60 * 60 * 1000;
+
+let traitState = { rolled: false, mulligans: TRAIT_MAX_M, value: '', sheet: '', flavour: '', image: '', lockedAt: null };
+let traitCdInterval = null;
+
+function traitIsLocked() { return traitState.lockedAt !== null; }
+
+function traitSave() { try { localStorage.setItem(TRAIT_STORAGE, JSON.stringify(traitState)); } catch(e) {} }
+
+function traitLoad() {
+  try {
+    const raw = localStorage.getItem(TRAIT_STORAGE);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (typeof s.mulligans !== 'number') return false;
+    if (s.lockedAt && Date.now() - s.lockedAt >= TRAIT_LOCK_MS) {
+      localStorage.removeItem(TRAIT_STORAGE); return false;
+    }
+    traitState = s; return true;
+  } catch(e) { return false; }
+}
+
+function traitFormatCd(ms) {
+  if (ms <= 0) return '00:00';
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+
+async function traitFetchData() {
+  if (!isSheetConfigured()) { TRAIT_DATA = TRAIT_FALLBACK; traitDataSource = 'fallback'; return; }
+  try {
+    const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}`
+                  + `?key=${SHEETS_CONFIG.API_KEY}&fields=sheets.properties.title`;
+    const metaRes = await fetch(metaUrl);
+    if (!metaRes.ok) throw new Error('meta ' + metaRes.status);
+    const metaJson = await metaRes.json();
+    const allTabs  = (metaJson.sheets || []).map(s => s.properties.title);
+    const tabs     = allTabs.filter(t => !TRAIT_EXCLUDE.includes(t));
+    const lootTab  = tabs.find(t => t === TRAIT_LOOT_TAB);
+    const others   = tabs.filter(t => t !== TRAIT_LOOT_TAB);
+
+    const [lootRows, ...otherResults] = await Promise.all([
+      lootTab ? fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(lootTab)}!A:C?key=${SHEETS_CONFIG.API_KEY}`).then(r => r.json()).then(j => (j.values||[]).filter(r=>r[0]&&r[0].trim()).map(r => ({ value: r[0].trim(), sheet: lootTab, flavour: (r[1]||'').trim(), image: (r[2]||'').trim() }))) : Promise.resolve([]),
+      ...others.map(t => fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(t)}!A:A?key=${SHEETS_CONFIG.API_KEY}`).then(r=>r.json()).then(j=>(j.values||[]).flat().map(v=>v.trim()).filter(Boolean))),
+    ]);
+
+    TRAIT_DATA = [];
+    others.forEach((t, i) => otherResults[i].forEach(v => TRAIT_DATA.push({ value: v, sheet: t, flavour: '', image: '' })));
+    lootRows.forEach(e => TRAIT_DATA.push(e));
+    if (!TRAIT_DATA.length) throw new Error('empty');
+    traitDataSource = 'live';
+  } catch(e) { TRAIT_DATA = TRAIT_FALLBACK; traitDataSource = 'fallback'; }
+}
+
+function traitRender() {
+  const inner = document.getElementById('trait-inner');
+  const foot  = document.getElementById('trait-footer');
+  const locked = traitIsLocked();
+
+  // pips
+  const pips = Array.from({length: TRAIT_MAX_M}, (_, i) =>
+    `<div class="pip${i >= traitState.mulligans ? ' spent' : ''}"></div>`).join('');
+
+  // content
+  let content;
+  if (!traitState.value) {
+    content = `<div class="trait-section"><div class="trait-display-label">Your Trait</div><div class="trait-big-value">&nbsp;</div></div>`;
+  } else if (traitState.sheet === TRAIT_LOOT_TAB) {
+    const imgSlot = traitState.image
+      ? `<div class="loot-image-slot has-image" style="margin-bottom:6px;"><img src="${traitState.image}" alt="${esc(traitState.value)}" /></div>`
+      : `<div class="loot-image-slot" style="margin-bottom:6px;"><span class="loot-slot-icon">✨</span></div>`;
+    content = `<div class="trait-section" style="text-align:left;padding-top:14px;">
+      ${imgSlot}
+      <div class="loot-item-name-label">Magic Item</div>
+      <div class="trait-loot-name">${esc(traitState.value)}</div>
+      <div class="trait-mini-divider" style="margin:8px 0;"></div>
+      ${traitState.flavour ? `<div class="trait-loot-flavour">${esc(traitState.flavour)}</div>` : ''}
+      <div class="trait-source-tag" style="margin-top:6px;">from: ${esc(traitState.sheet)}</div>
+    </div>`;
+  } else {
+    content = `<div class="trait-section">
+      <div class="trait-display-label">Your Trait</div>
+      <div class="trait-big-value" id="trait-val">${esc(traitState.value)}</div>
+      <div class="trait-mini-divider"></div>
+      <div class="trait-source-tag">from: ${esc(traitState.sheet)}</div>
+    </div>`;
+  }
+
+  inner.innerHTML = `
+    <div class="chargen-mulligan-bar" style="border-top:none;border-bottom:1px solid var(--border);">
+      Mulligans &nbsp;<div class="pip-row">${pips}</div>
+    </div>
+    ${content}`;
+
+  if (locked) {
+    const rem = TRAIT_LOCK_MS - (Date.now() - traitState.lockedAt);
+    foot.innerHTML = `
+      <div class="chargen-lock">
+        <span class="lock-msg">Out of rolls! Back in</span>
+        <span class="lock-cd" id="trait-cd">${traitFormatCd(rem)}</span>
+      </div>
+      <div class="source-badge ${traitDataSource}"><span class="dot"></span>${traitDataSource === 'live' ? 'Live from Sheets' : 'Using built-in data'}</div>`;
+    startTraitCd();
+  } else {
+    foot.innerHTML = `
+      <button class="btn-draw-trait" onclick="traitDraw()">🎭 Draw a Trait</button>
+      <div class="source-badge ${traitDataSource}"><span class="dot"></span>${traitDataSource === 'live' ? 'Live from Sheets' : 'Using built-in data'}</div>`;
+  }
+}
+
+function startTraitCd() {
+  if (traitCdInterval) clearInterval(traitCdInterval);
+  traitCdInterval = setInterval(() => {
+    const el = document.getElementById('trait-cd');
+    if (!el) { clearInterval(traitCdInterval); return; }
+    const rem = TRAIT_LOCK_MS - (Date.now() - traitState.lockedAt);
+    if (rem <= 0) {
+      clearInterval(traitCdInterval);
+      localStorage.removeItem(TRAIT_STORAGE);
+      traitState = { rolled: false, mulligans: TRAIT_MAX_M, value: '', sheet: '', flavour: '', image: '', lockedAt: null };
+      traitDraw();
+    } else { el.textContent = traitFormatCd(rem); }
+  }, 1000);
+}
+
+window.traitDraw = function() {
+  if (traitIsLocked()) return;
+  if (traitState.rolled && traitState.mulligans <= 0) return;
+  if (traitState.rolled) traitState.mulligans--;
+
+  const valEl = document.getElementById('trait-val');
+  if (valEl) valEl.classList.add('fading');
+
+  setTimeout(() => {
+    const p = TRAIT_DATA[Math.floor(Math.random() * TRAIT_DATA.length)];
+    traitState.rolled  = true;
+    traitState.value   = p.value;
+    traitState.sheet   = p.sheet;
+    traitState.flavour = p.flavour || '';
+    traitState.image   = p.image   || '';
+    if (traitState.mulligans === 0) traitState.lockedAt = Date.now();
+    traitSave();
+    traitRender();
+  }, 200);
+};
+
+async function initTrait() {
+  traitInitialised = true;
+  const inner = document.getElementById('trait-inner');
+  inner.innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+  await traitFetchData();
+  const restored = traitLoad();
+  if (!restored) traitDraw(); else traitRender();
+  if (traitIsLocked()) startTraitCd();
+}
+
+// ============================================================
+//  ── POLL — FIREBASE LISTENER ──
+//  Runs inside the module so it has access to Firebase refs.
+// ============================================================
+const isAdmin = new URLSearchParams(window.location.search).has('admin');
+const pollVoterId = pollGetVoterId();
+let pollUnsubVotes = null;
+let pollCurrentSnap = null;
+
+if (!IS_DEMO) {
+  let app2, db2, pollRef2, votesRef2;
+  try {
+    app2      = initializeApp(FIREBASE_CONFIG, 'vault-poll');
+    db2       = getDatabase(app2);
+    pollRef2  = ref(db2, 'nodice/poll');
+    votesRef2 = ref(db2, 'nodice/votes');
+  } catch(e) {
+    // init failed — show fallback
+  }
+
+  function pollRenderAudienceWaiting() {
+    pollRenderInner(`
+      <div class="poll-section">
+        <p class="poll-waiting">
+          <span class="poll-waiting-pulse">🎲</span><br>
+          No poll active right now.<br>
+          <small>The showrunner will start one during the show.</small>
+        </p>
+      </div>`,
+      `<a href="poll.html" class="full-link-btn" style="max-width:100%;">Open Full Poll Tool <span>→</span></a>
+       ${pollBadge(true)}`);
+  }
+
+  function pollRenderVote(poll) {
+    const opts = poll.options || [];
+    const btns = opts.map((opt, i) => `
+      <button class="vote-btn" id="pvbtn-${i}" onclick="pollCastVote(${i})">
+        <span class="opt-letter">${POLL_LETTERS[i]}</span>
+        <span>${esc(opt)}</span>
+      </button>`).join('');
+    pollRenderInner(`
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="vote-options">${btns}</div>
+      </div>`, `${pollBadge(true)}`);
+  }
+
+  function pollRenderWaitingReveal(poll, myIdx) {
+    pollRenderInner(`
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <p class="voted-chip" style="margin-top:4px;">✔ Voted — ${POLL_LETTERS[myIdx]}: ${esc((poll.options||[])[myIdx]||'')}</p>
+        <p class="poll-waiting" style="margin-top:10px;"><span class="poll-waiting-pulse" style="font-size:1.2rem;">⚔</span><br>Waiting for reveal…</p>
+      </div>`, `${pollBadge(true)}`);
+  }
+
+  function pollRenderResults(poll, votes, myIdx) {
+    const opts    = poll.options || [];
+    const counts  = opts.map((_, i) => Object.values(votes).filter(v => v === String(i)).length);
+    const total   = counts.reduce((a, b) => a + b, 0);
+    const pcts    = counts.map(c => total ? Math.round(c / total * 100) : 0);
+    const maxC    = Math.max(...counts);
+
+    const bars = opts.map((opt, i) => `
+      <div class="poll-result-row">
+        <div class="poll-result-label-row">
+          <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(opt)}</span>
+          <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+        </div>
+        <div class="bar-track"><div class="bar-fill ${counts[i] === maxC && total > 0 ? 'winner' : ''}" style="width:${pcts[i]}%"></div></div>
+      </div>`).join('');
+
+    pollRenderInner(`
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        ${myIdx !== null ? `<p class="voted-chip" style="margin-top:2px;">✔ You voted ${POLL_LETTERS[myIdx]}</p>` : ''}
+        <div class="poll-result-wrap" style="margin-top:10px;">${bars}</div>
+        <p class="total-votes" style="margin-top:6px;">${total} vote${total !== 1 ? 's' : ''} cast</p>
+      </div>`,
+      `<a href="poll.html?admin" class="full-link-btn" style="max-width:100%;margin-bottom:4px;">Open Admin View <span>→</span></a>
+       ${pollBadge(true)}`);
+  }
+
+  // Admin mini view — link them to full admin
+  function pollRenderAdminMini(poll, votes) {
+    const opts   = poll && poll.active ? poll.options || [] : [];
+    const counts = opts.map((_, i) => Object.values(votes).filter(v => v === String(i)).length);
+    const total  = counts.reduce((a, b) => a + b, 0);
+
+    const activeNote = poll && poll.active
+      ? `<p class="poll-question-text" style="margin-bottom:8px;">${esc(poll.question)}</p>
+         <p class="poll-status-line"><span class="live-dot"></span> ${total} vote${total !== 1 ? 's' : ''} so far · ${poll.revealed ? 'Results revealed' : 'Not yet revealed'}</p>`
+      : `<p class="poll-waiting"><span class="poll-waiting-pulse">🎲</span><br>No active poll.</p>`;
+
+    pollRenderInner(`<div class="poll-section">${activeNote}</div>`,
+      `<a href="poll.html?admin" class="full-link-btn" style="max-width:100%;">Open Showrunner Controls <span>→</span></a>
+       ${pollBadge(true)}`);
+  }
+
+  window.pollCastVote = async function(index) {
+    const poll = pollCurrentSnap;
+    if (!poll) return;
+    const choice = String(index);
+    sessionStorage.setItem('nodice_vault_vote_ts',     poll.ts);
+    sessionStorage.setItem('nodice_vault_vote_choice', choice);
+
+    // Disable all vote buttons
+    (poll.options || []).forEach((_, i) => {
+      const b = document.getElementById('pvbtn-' + i);
+      if (b) b.disabled = true;
+    });
+
+    const voterRef = ref(db2, `nodice/votes/${pollVoterId}`);
+    await set(voterRef, choice);
+    pollRenderWaitingReveal(poll, index);
+    if (pollUnsubVotes) pollUnsubVotes();
+    pollUnsubVotes = onValue(votesRef2, snap => {
+      const vts = snap.val() || {};
+      if (pollCurrentSnap && pollCurrentSnap.revealed) {
+        pollRenderResults(pollCurrentSnap, vts, index);
+      }
+    });
+  };
+
+  function startPollListener() {
+    onValue(pollRef2, snap => {
+      const poll = snap.val();
+      pollCurrentSnap = poll;
+
+      if (isAdmin) {
+        get(votesRef2).then(vs => pollRenderAdminMini(poll, vs.val() || {}));
+        return;
+      }
+
+      if (!poll || !poll.active) {
+        sessionStorage.removeItem('nodice_vault_vote_ts');
+        sessionStorage.removeItem('nodice_vault_vote_choice');
+        if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
+        pollRenderAudienceWaiting();
+        return;
+      }
+
+      const storedTs     = sessionStorage.getItem('nodice_vault_vote_ts');
+      const storedChoice = sessionStorage.getItem('nodice_vault_vote_choice');
+      if (storedTs && parseInt(storedTs) === poll.ts && storedChoice !== null) {
+        const idx = parseInt(storedChoice);
+        if (poll.revealed) {
+          get(votesRef2).then(vs => pollRenderResults(poll, vs.val() || {}, idx));
+        } else {
+          pollRenderWaitingReveal(poll, idx);
+          if (!pollUnsubVotes) {
+            pollUnsubVotes = onValue(votesRef2, vs => {
+              if (pollCurrentSnap && pollCurrentSnap.revealed) {
+                pollRenderResults(pollCurrentSnap, vs.val() || {}, idx);
+              }
+            });
+          }
+        }
+        return;
+      }
+
+      if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
+      pollRenderVote(poll);
+    });
+  }
+
+  // Override initPoll to actually start the listener
+  const _origInitPoll = initPoll;
+  initPoll = function() {
+    pollInitialised = true;
+    document.getElementById('poll-inner').innerHTML =
+      `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    startPollListener();
+  };
+}
+
+</script>
+</body>
+</html>
