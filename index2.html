@@ -293,12 +293,12 @@
      CHARACTER GENERATOR
   ───────────────────────────────────────── */
 
-  /* Category button row */
+  /* Category button row — vertical stack of full-width buttons */
   .chargen-cat-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 10px 12px 8px;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 12px;
     border-bottom: 1px solid var(--border);
   }
 
@@ -309,11 +309,15 @@
     color: var(--ink);
     background: var(--parchment);
     border: 1.5px solid var(--border);
-    border-radius: 20px;
-    padding: 5px 11px;
+    border-radius: 8px;
+    padding: 9px 14px;
+    width: 100%;
+    text-align: left;
     cursor: pointer;
     transition: border-color .18s, background .18s, color .18s, box-shadow .18s;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     position: relative;
   }
   .chargen-cat-btn:hover {
@@ -327,11 +331,12 @@
     color: var(--ink);
     box-shadow: 0 2px 8px rgba(201,168,76,.3);
   }
-  /* small indicator dot on active button */
+  /* active indicator dot — centred on right edge */
   .chargen-cat-btn.active::after {
     content: '';
-    position: absolute; top: 3px; right: 4px;
-    width: 5px; height: 5px;
+    position: absolute; top: 50%; right: 12px;
+    transform: translateY(-50%);
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--ink);
     opacity: .4;
