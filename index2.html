@@ -774,7 +774,32 @@
   <footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
 </div>
 
-<!-- ── Firebase ── -->
+<!-- Plain script: toggleShelf must be on window BEFORE any click happens.
+     type="module" scripts are deferred — inline onclick attrs can't reach them. -->
+<script>
+(function() {
+  var activeShelf = null;
+  window.toggleShelf = function(id) {
+    if (activeShelf === id) {
+      document.getElementById('shelf-' + id).classList.remove('open');
+      activeShelf = null;
+      return;
+    }
+    if (activeShelf) document.getElementById('shelf-' + activeShelf).classList.remove('open');
+    document.getElementById('shelf-' + id).classList.add('open');
+    activeShelf = id;
+    // Tool inits are registered by the module after it loads;
+    // call them if available, otherwise they'll be queued below.
+    var fn = window['_vaultInit_' + id];
+    if (fn) fn();
+  };
+  // Queue: if a shelf was clicked before the module finished loading,
+  // store it and the module will pick it up.
+  window._vaultPendingInit = null;
+})();
+</script>
+
+<!-- App logic + Firebase -->
 <script type="module">
 import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, get, onValue }
@@ -882,25 +907,14 @@ function esc(s)     { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function isConfigured() { return SHEETS_CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' && SHEETS_CONFIG.API_KEY !== 'YOUR_API_KEY_HERE'; }
 
 // ═══════════════════════════════════════════════
-//  SHELF TOGGLE — one open at a time
+//  REGISTER TOOL INITS
+//  The plain script's toggleShelf calls window._vaultInit_<id>()
+//  on first open. We register them here once the module has loaded.
 // ═══════════════════════════════════════════════
-let activeShelf = null;
-
-window.toggleShelf = function(id) {
-  if (activeShelf === id) {
-    document.getElementById('shelf-' + id).classList.remove('open');
-    activeShelf = null;
-    return;
-  }
-  if (activeShelf) document.getElementById('shelf-' + activeShelf).classList.remove('open');
-  document.getElementById('shelf-' + id).classList.add('open');
-  activeShelf = id;
-
-  if (id === 'loot'    && !lootInitialised)    initLoot();
-  if (id === 'poll'    && !pollInitialised)    initPoll();
-  if (id === 'trait'   && !traitInitialised)   initTrait();
-  if (id === 'chargen' && !chargenInitialised) initChargen();
-};
+window._vaultInit_loot    = function() { if (!lootInitialised)    initLoot();    };
+window._vaultInit_poll    = function() { if (!pollInitialised)    initPoll();    };
+window._vaultInit_trait   = function() { if (!traitInitialised)   initTrait();   };
+window._vaultInit_chargen = function() { if (!chargenInitialised) initChargen(); };
 
 // ═══════════════════════════════════════════════
 //  COIN FLIP
@@ -944,30 +958,22 @@ window.doFlip = function() {
   const iters   = flips - 0.5;
 
   setFaceMystery();
-
-  // Each keyframe cycle = halfDur seconds; iters = number of cycles
-  const totalDur = halfDur * iters;
-
-  // Apply animation directly on style — avoids CSS custom property
-  // iteration-count parsing bugs across browsers
-  coin.style.animation = 'none';
+  coin.style.setProperty('--half-dur',   halfDur + 's');
+  coin.style.setProperty('--flip-count', iters);
+  coin.classList.remove('spinning', 'wobbling');
   void coin.offsetWidth;
-  coin.style.animation = `coinFlipMini ${halfDur}s ease-in-out ${iters} forwards`;
+  coin.classList.add('spinning');
 
   playFlipSound();
 
-  // Use both animationend AND a setTimeout fallback — whichever fires first
-  let finished = false;
-  function onFlipDone() {
-    if (finished) return;
-    finished = true;
-    coin.style.animation = 'none';
-    void coin.offsetWidth;
+  coin.addEventListener('animationend', function onEnd() {
+    coin.removeEventListener('animationend', onEnd);
+    coin.classList.remove('spinning');
 
     if (result === 'pass') setFacePass(); else setFaceFail();
 
     setTimeout(() => {
-      coin.style.animation = 'wobbleMini .45s ease-out forwards';
+      coin.classList.add('wobbling');
       if (result === 'pass') {
         banner.textContent = 'Go Time';
         banner.className   = 'coin-result-banner visible pass';
@@ -983,20 +989,12 @@ window.doFlip = function() {
         playWompWomp();
       }
       setTimeout(() => {
-        coin.style.animation = '';
+        coin.classList.remove('wobbling');
         coinSpinning = false;
         btn.disabled = false;
       }, 500);
     }, halfDur * 1000);
-  }
-
-  coin.addEventListener('animationend', function onEnd() {
-    coin.removeEventListener('animationend', onEnd);
-    onFlipDone();
   });
-
-  // Fallback: if animationend doesn't fire within expected time + 200ms buffer, proceed anyway
-  setTimeout(onFlipDone, totalDur * 1000 + 300);
 };
 
 // Confetti
