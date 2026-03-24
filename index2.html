@@ -7,40 +7,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Shared styles (colours, fonts, buttons, badges, animations) -->
+<link rel="stylesheet" href="styles.css">
 <style>
-  :root {
-    --ink:         #1a1a2e;
-    --ink-hover:   #2e2e4a;
-    --parchment:   #faf7f2;
-    --gold:        #c9a84c;
-    --gold-dim:    #a07c2e;
-    --gold-bg:     #fffdf5;
-    --card-bg:     #ffffff;
-    --border:      #e8e2d9;
-    --muted:       #6b6676;
-    --shadow:      rgba(26,26,46,.10);
-    --shadow-gold: rgba(201,168,76,.22);
-    --pass-grn:    #27ae60;
-    --fail-red:    #c0392b;
-    --success:     #2d7a5e;
-    --warning:     #b8860b;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  /* ── Page layout ── */
   body {
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    background-color: var(--parchment);
-    color: var(--ink);
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
   .page-wrap {
@@ -57,15 +32,7 @@
     text-align: center;
     padding: 1.6rem 0 .8rem;
   }
-  .site-label {
-    font-family: 'Cinzel', serif;
-    font-size: .6rem;
-    font-weight: 400;
-    letter-spacing: .28em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: .35rem;
-  }
+  /* .site-label comes from styles.css */
   h1 {
     font-family: 'Cinzel', serif;
     font-size: clamp(1.5rem, 5vw, 2rem);
@@ -74,7 +41,7 @@
     line-height: 1.1;
     letter-spacing: .04em;
   }
-  h1 span { color: var(--gold); }
+  /* h1 span gold colour comes from styles.css */
   .tagline {
     margin-top: .35rem;
     font-size: .75rem;
@@ -82,11 +49,8 @@
     color: var(--muted);
     letter-spacing: .05em;
   }
-  .header-divider {
-    width: 50px; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: .75rem auto 0;
-  }
+  /* Width override — gradient + height come from styles.css .divider */
+  .header-divider { width: 50px; margin: .75rem auto 0; }
 
   /* ── Main ── */
   main { display: flex; flex-direction: column; gap: 10px; padding: .9rem 0 1rem; }
@@ -163,7 +127,7 @@
     background: rgba(201,168,76,.015);
   }
 
-  /* ── SHARED ── */
+  /* ── SHELF-SPECIFIC SHARED HELPERS ── */
   .inner-label {
     font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
     color: var(--gold); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 8px;
@@ -179,14 +143,7 @@
   .full-link-btn:hover { background: var(--ink-hover); }
   .full-link-btn span { opacity: .6; font-size: .8rem; }
 
-  .source-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: .6rem; letter-spacing: .06em; text-transform: uppercase;
-    color: var(--muted); border: 1px solid var(--border); border-radius: 20px; padding: 2px 7px;
-  }
-  .source-badge .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-  .source-badge.live .dot     { background: var(--success); }
-  .source-badge.fallback .dot { background: var(--warning); }
+  /* .source-badge base styles come from styles.css */
 
   /* Shelf top-bar: full-link + optional badge side by side */
   .shelf-topbar {
@@ -611,15 +568,22 @@
 
   footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 
-  @keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  /* @keyframes slideUp comes from styles.css */
 </style>
 </head>
 <body>
 
+<!-- Confetti canvas — full-screen overlay for coin flip pass animation.
+     pointer-events: none keeps it non-blocking. Do not remove. -->
 <canvas id="coin-confetti"></canvas>
 
 <div class="page-wrap">
 
+  <!-- ============================================
+       HEADER
+       Edit: site-label eyebrow, h1 title, tagline.
+       The gold word in h1 is wrapped in a <span>.
+       ============================================ -->
   <header>
     <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
     <h1>The <span>Vault</span></h1>
@@ -627,9 +591,25 @@
     <div class="header-divider"></div>
   </header>
 
+  <!-- ============================================
+       SHELF LIST — ACCORDION TOOL MENU
+       Each .shelf block is one collapsible tool
+       entry. Clicking the .shelf-header opens it.
+
+       To add a shelf:
+         1. Copy an entire .shelf block
+         2. Give it a unique id="shelf-X"
+         3. Add the shelf body content
+         4. Register its init function in JS below
+       ============================================ -->
   <main>
 
-    <!-- ══════════════════ SHELF 1 — COIN FLIP ══════════════════ -->
+    <!-- ============================================
+         SHELF 1 — COIN FLIP
+         Layout: left = button + result text,
+         right = animated coin (130×130).
+         JS logic: doFlip() in plain <script> below
+         ============================================ -->
     <div class="shelf" id="shelf-coin">
       <div class="shelf-header" onclick="toggleShelf('coin')">
         <div class="shelf-icon">✨</div>
@@ -667,7 +647,12 @@
       </div>
     </div>
 
-    <!-- ══════════════════ SHELF 2 — CHARGEN ══════════════════ -->
+    <!-- ============================================
+         SHELF 2 — CHARACTER GENERATOR
+         Shows category buttons to roll a single
+         character field. Links to full chargen.html.
+         JS init: _vaultInit_chargen()
+         ============================================ -->
     <div class="shelf" id="shelf-chargen">
       <div class="shelf-header" onclick="toggleShelf('chargen')">
         <div class="shelf-icon">🎲</div>
@@ -700,7 +685,12 @@
       </div>
     </div>
 
-    <!-- ══════════════════ SHELF 3 — LOOT TABLE ══════════════════ -->
+    <!-- ============================================
+         SHELF 3 — LOOT TABLE
+         Shows item name + flavour + thumbnail image.
+         Content rendered into #loot-inner by JS.
+         JS init: _vaultInit_loot()
+         ============================================ -->
     <div class="shelf" id="shelf-loot">
       <div class="shelf-header" onclick="toggleShelf('loot')">
         <div class="shelf-icon">💰</div>
@@ -719,7 +709,13 @@
       </div>
     </div>
 
-    <!-- ══════════════════ SHELF 4 — THE POLL ══════════════════ -->
+    <!-- ============================================
+         SHELF 4 — THE POLL
+         Audience voting via Firebase Realtime DB.
+         Content rendered into #poll-inner by JS.
+         Requires Firebase config in poll.html.
+         JS init: _vaultInit_poll()
+         ============================================ -->
     <div class="shelf" id="shelf-poll">
       <div class="shelf-header" onclick="toggleShelf('poll')">
         <div class="shelf-icon">🗳️</div>
@@ -739,7 +735,12 @@
       </div>
     </div>
 
-    <!-- ══════════════════ SHELF 5 — TRAIT GEN ══════════════════ -->
+    <!-- ============================================
+         SHELF 5 — TRAIT GENERATOR
+         Rolls one trait from any Sheet tab.
+         Content rendered into #trait-inner by JS.
+         JS init: _vaultInit_trait()
+         ============================================ -->
     <div class="shelf" id="shelf-trait">
       <div class="shelf-header" onclick="toggleShelf('trait')">
         <div class="shelf-icon">🎭</div>
@@ -759,7 +760,12 @@
       </div>
     </div>
 
-    <!-- Coming Soon -->
+    <!-- ============================================
+         COMING SOON — IN THE FORGE
+         These are <div> cards (not links).
+         To promote one to live: create a new .shelf
+         block for it above and add its JS init.
+         ============================================ -->
     <div>
       <div class="section-rule"></div>
       <p class="section-label">In the forge</p>
@@ -777,7 +783,11 @@
 <!-- Plain script: toggleShelf must be on window BEFORE any click happens.
      type="module" scripts are deferred — inline onclick attrs can't reach them. -->
 <script>
-// ── Shelf navigation ──────────────────────────────────────
+// ============================================================
+// SHELF NAVIGATION
+// Manages which shelf is open. Only one can be open at a time.
+// _vaultInit_X() lazy-initialises each tool on first open.
+// ============================================================
 (function() {
   var activeShelf = null;
   window.toggleShelf = function(id) {
@@ -794,8 +804,11 @@
   };
 })();
 
-// ── Coin flip ─────────────────────────────────────────────
-// Must be in a plain script — onclick="doFlip()" can't reach module scope.
+// ============================================================
+// COIN FLIP — SHELF 1
+// Must be in a plain script — onclick="doFlip()" can't reach
+// module scope. Contains the full flip + confetti animation.
+// ============================================================
 (function() {
   var coinSpinning = false;
 
