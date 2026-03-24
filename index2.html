@@ -581,6 +581,17 @@
 
   footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 
+  /* ── DEV RESET — remove this block when no longer needed ── */
+  .dev-reset-btn {
+    position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
+    background: none; border: 1px solid #c0392b; border-radius: 5px;
+    padding: 3px 8px; font-family: 'Lato', sans-serif; font-size: .58rem;
+    font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: #c0392b; cursor: pointer; opacity: 0.65; transition: opacity .2s;
+  }
+  .dev-reset-btn:hover { opacity: 1; }
+  /* ── END DEV RESET ── */
+
   /* @keyframes slideUp comes from styles.css */
 </style>
 </head>
@@ -597,11 +608,14 @@
        Edit: site-label eyebrow, h1 title, tagline.
        The gold word in h1 is wrapped in a <span>.
        ============================================ -->
-  <header>
+  <header style="position:relative;">
     <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
     <h1>The <span>Vault</span></h1>
     <p class="tagline">Every tool. One scroll. Zero excuses.</p>
     <div class="header-divider"></div>
+    <!-- DEV RESET — remove this button when no longer needed -->
+    <button class="dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans">Reset Mulligans</button>
+    <!-- END DEV RESET -->
   </header>
 
   <!-- ============================================
@@ -1242,6 +1256,15 @@ function cgStartCountdown() {
   }, 1000);
 }
 
+// DEV RESET — remove this function when no longer needed
+window.cgDevReset = function() {
+  if (cgCountdownInterval) clearInterval(cgCountdownInterval);
+  localStorage.removeItem(CG_STORAGE_KEY);
+  cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
+  cgDoRoll();
+};
+// END DEV RESET
+
 window.cgDoRoll = function() {
   if (cgIsLocked()) return;
   if (cgState.rolled && cgState.mulligans <= 0) return;
@@ -1281,7 +1304,7 @@ function cgQuickRender() {
       <div class="cg-quick-result-value" id="cg-qr-value"></div>
     </div>
     <div class="cg-footer">
-      <button class="cg-roll-btn" onclick="cgSetMode('full')">← Full Character</button>
+      <button class="cg-mode-toggle" onclick="cgSetMode('full')">← Full Character</button>
     </div>`;
 }
 
