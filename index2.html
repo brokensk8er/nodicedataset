@@ -614,7 +614,7 @@
     <p class="tagline">Every tool. One scroll. Zero excuses.</p>
     <div class="header-divider"></div>
     <!-- DEV RESET — remove this button when no longer needed -->
-    <button class="dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans">Reset Mulligans</button>
+    <button class="dev-reset-btn" id="cg-dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans" style="display:none">Reset</button>
     <!-- END DEV RESET -->
   </header>
 
@@ -1237,6 +1237,10 @@ function cgRender() {
     </div>`;
 
   if (cgIsLocked()) cgStartCountdown();
+  // DEV RESET — show button only when all mulligans are spent
+  const devBtn = document.getElementById('cg-dev-reset-btn');
+  if (devBtn) devBtn.style.display = cgState.mulligans === 0 ? '' : 'none';
+  // END DEV RESET
 }
 
 function cgStartCountdown() {
