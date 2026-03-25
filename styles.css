@@ -491,9 +491,16 @@ html[data-theme="dark"] .lock-bar {
 
 /* ── Theme toggle button (used by index3.html) ── */
 .theme-toggle-btn {
-  position: absolute; top: 50%; left: 12px; transform: translateY(-50%);
-  background: none; border: 1px solid var(--border); border-radius: 5px;
-  padding: 3px 8px; font-size: 1rem; line-height: 1; cursor: pointer;
-  opacity: 0.75; transition: opacity .2s, border-color .2s;
+  position: fixed; top: 0; left: 16px; z-index: 100;
+  background: var(--card-bg);
+  border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 6px 12px; font-size: 1rem; line-height: 1; cursor: pointer;
+  box-shadow: 0 3px 10px var(--shadow);
+  opacity: 0.85; transition: opacity .2s, border-color .2s, box-shadow .2s;
 }
-.theme-toggle-btn:hover { opacity: 1; border-color: var(--gold); }
+.theme-toggle-btn:hover {
+  opacity: 1;
+  border-color: var(--gold);
+  box-shadow: 0 4px 14px var(--shadow-gold);
+}
