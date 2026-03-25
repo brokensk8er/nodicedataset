@@ -44,6 +44,153 @@
   .btn-coin-flip        { color: #1a1a2e; }   /* dark text on gold gradient */
   .cg-quick-cat-btn.active { color: #1a1a2e; } /* dark text on active gold segment */
 
+  /* ── Primary action buttons: gold gradient (mystery coin face) ── */
+  .full-link-btn,
+  .cg-roll-btn,
+  .btn-pull,
+  .btn-draw-trait {
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.3);
+  }
+  .full-link-btn:hover,
+  .cg-roll-btn:hover:not(:disabled),
+  .btn-pull:hover,
+  .btn-draw-trait:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e2bc6a 0%, var(--gold) 50%, #e2bc6a 100%);
+    color: #1a1a2e;
+  }
+
+  /* ── Red & green coin-face accents ── */
+
+  /* Open shelf: green glow + border (pass coin face) */
+  .shelf.open {
+    box-shadow: 0 6px 30px rgba(39,174,96,.22), 0 2px 12px rgba(201,168,76,.18);
+    border-color: rgba(39,174,96,.38);
+  }
+  .shelf.open .shelf-chevron { color: var(--pass-grn); }
+
+  /* Header divider: gold-to-green gradient */
+  .header-divider {
+    background: linear-gradient(90deg, var(--gold-dim), var(--pass-grn), var(--gold-dim));
+    opacity: .75;
+  }
+
+  /* Vote buttons: green hover glow (affirmative choice) */
+  .vote-btn:hover:not(:disabled) {
+    border-color: var(--pass-grn);
+    background: rgba(39,174,96,.10);
+    box-shadow: 0 2px 10px rgba(39,174,96,.20);
+  }
+
+  /* Section divider: faint green-to-red sweep */
+  .section-rule {
+    background: linear-gradient(90deg, transparent, rgba(192,57,43,.35) 20%, rgba(39,174,96,.35) 80%, transparent);
+  }
+
+  /* Lock bar: use card-bg so it reads against dark theme */
+  .lock-bar { background: rgba(201,168,76,.10); border: 1px solid var(--border); }
+
+  /* ── Poll admin inline styles (replaces poll.html?admin iframe) ── */
+  .poll-admin-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--gold); border: 1px solid rgba(201,168,76,.35);
+    background: rgba(201,168,76,.10); border-radius: 20px;
+    padding: 3px 10px; margin-bottom: 12px; align-self: flex-start; display: block;
+  }
+  .poll-form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .poll-form-label {
+    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+    color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
+  }
+  .poll-form-input {
+    width: 100%; background: rgba(255,255,255,.04); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    font-family: 'Lato', sans-serif; font-size: .92rem; color: var(--ink);
+    outline: none; transition: border-color .18s;
+  }
+  .poll-form-input:focus { border-color: var(--gold); }
+  .poll-form-input::placeholder { color: var(--muted); opacity: .7; }
+  .poll-btn-launch {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e; border: none; border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35);
+    transition: opacity .18s, transform .1s;
+  }
+  .poll-btn-launch:hover { opacity: .9; } .poll-btn-launch:disabled { opacity: .4; cursor: not-allowed; }
+  .poll-btn-reveal {
+    width: 100%;
+    background: linear-gradient(135deg, var(--pass-grn) 0%, #2ecc71 50%, var(--pass-grn) 100%);
+    color: #fff; border: none; border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    box-shadow: 0 3px 10px rgba(39,174,96,.35);
+    transition: opacity .18s, transform .1s;
+  }
+  .poll-btn-reveal:disabled { opacity: .4; cursor: not-allowed; }
+  .poll-btn-new {
+    width: 100%; background: rgba(201,168,76,.12); color: var(--gold);
+    border: 1px solid rgba(201,168,76,.4); border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    transition: background .2s;
+  }
+  .poll-btn-new:hover { background: rgba(201,168,76,.2); }
+  .poll-btn-danger {
+    width: 100%; background: none; color: var(--fail-red);
+    border: 1px solid rgba(192,57,43,.35); border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    transition: background .2s, border-color .2s;
+  }
+  .poll-btn-danger:hover { background: rgba(192,57,43,.10); border-color: var(--fail-red); }
+  .poll-admin-results-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .poll-live-indicator {
+    display: flex; align-items: center; gap: 5px; font-size: .65rem;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--pass-grn); font-weight: 700;
+  }
+  .poll-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--pass-grn);
+    animation: livePulse 1.4s ease-in-out infinite;
+  }
+  .poll-option-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .poll-option-letter-tag {
+    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
+    letter-spacing: .1em; color: var(--gold); flex-shrink: 0; width: 16px; text-align: center;
+  }
+  .poll-btn-remove-option {
+    flex-shrink: 0; width: 28px; height: 28px; background: none;
+    border: 1px solid var(--border); border-radius: 6px; color: var(--muted);
+    font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .poll-btn-remove-option:hover { border-color: var(--fail-red); color: var(--fail-red); background: rgba(192,57,43,.08); }
+  .poll-btn-remove-placeholder { flex-shrink: 0; width: 28px; height: 28px; }
+  .poll-options-section-label {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+  }
+  .poll-options-count-hint {
+    font-family: 'Lato', sans-serif; font-size: .6rem; font-weight: 300;
+    color: var(--muted); letter-spacing: .03em;
+  }
+  .poll-btn-add-option {
+    width: 100%; background: none; border: 1.5px dashed var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    font-family: 'Lato', sans-serif; font-size: .82rem; font-weight: 400;
+    color: var(--muted); cursor: pointer; text-align: left; letter-spacing: .03em;
+    transition: border-color .18s, color .18s, background .18s;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .poll-btn-add-option:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+  .poll-admin-section { padding: 12px 12px 14px; }
+
   /* Override body background for dark theme.
      Boosts gold radial glows to 12%/10% so they
      read on black; keeps the paper-grain texture. */
@@ -1627,10 +1774,192 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  const isAdmin       = true; // Vault is showrunner-facing — always admin mode
-  const pollVoterId   = pollGetVoterId();
-  let pollCurrentSnap = null;
-  let pollUnsubVotes  = null;
+  const isAdmin        = true; // Vault is showrunner-facing — always admin mode
+  const pollVoterId    = pollGetVoterId();
+  let pollCurrentSnap  = null;
+  let pollUnsubVotes   = null;
+  let pollAdminOptCount = 2;
+  const POLL_MIN_OPTS  = 2;
+  const POLL_MAX_OPTS  = 5;
+  const POLL_PLACEHOLDERS = ['The first option…','The second option…','A third choice…','Or maybe this…','One more possibility…'];
+
+  // ── Admin render: form (no active poll) ──────────────────
+  function pollRenderAdminForm(preserveValues) {
+    const optRowsHtml = POLL_LETTERS.slice(0, pollAdminOptCount).map((letter, i) => {
+      const isReq = i < POLL_MIN_OPTS;
+      const removeBtn = isReq
+        ? `<div class="poll-btn-remove-placeholder"></div>`
+        : `<button class="poll-btn-remove-option" data-index="${i}" title="Remove">✕</button>`;
+      const val = preserveValues && preserveValues[i] ? esc(preserveValues[i]) : '';
+      return `<div class="poll-option-row" id="padmin-row-${i}">
+        <span class="poll-option-letter-tag">${letter}</span>
+        <input class="poll-form-input" id="padmin-opt-${i}" type="text"
+          placeholder="${POLL_PLACEHOLDERS[i]}" maxlength="80" autocomplete="off" value="${val}">
+        ${removeBtn}</div>`;
+    }).join('');
+    const addBtnHtml = pollAdminOptCount < POLL_MAX_OPTS
+      ? `<button class="poll-btn-add-option" id="padmin-add-btn">
+           <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
+           Add another option (${pollAdminOptCount}/${POLL_MAX_OPTS})</button>`
+      : '';
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-admin-section">
+        <div class="poll-admin-badge">⚔ Showrunner</div>
+        <div class="poll-form-group">
+          <label class="poll-form-label" for="padmin-q">Question</label>
+          <input class="poll-form-input" id="padmin-q" type="text"
+            placeholder="What does the crowd choose?" maxlength="120" autocomplete="off"
+            value="${preserveValues && preserveValues.question ? esc(preserveValues.question) : ''}">
+        </div>
+        <div class="poll-options-section-label">
+          <span class="poll-form-label" style="margin-bottom:0;">Options</span>
+          <span class="poll-options-count-hint">Min 2 · Max 5</span>
+        </div>
+        <div id="padmin-opts">${optRowsHtml}</div>
+        ${addBtnHtml}
+        <button class="poll-btn-launch" id="padmin-launch-btn">⚔ Launch Poll</button>
+        ${pollBadge(true)}
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    document.getElementById('padmin-launch-btn').onclick = pollAdminLaunch;
+    document.getElementById('padmin-q').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('padmin-opt-0')?.focus();
+    });
+    for (let i = 0; i < pollAdminOptCount; i++) {
+      document.getElementById(`padmin-opt-${i}`).addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const next = document.getElementById(`padmin-opt-${i+1}`);
+          if (next) next.focus(); else pollAdminLaunch();
+        }
+      });
+    }
+    document.getElementById('padmin-add-btn')?.addEventListener('click', () => {
+      const vals = pollAdminGatherValues();
+      pollAdminOptCount++;
+      pollRenderAdminForm(vals);
+      setTimeout(() => document.getElementById(`padmin-opt-${pollAdminOptCount-1}`)?.focus(), 50);
+    });
+    document.querySelectorAll('.poll-btn-remove-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.index);
+        const vals = pollAdminGatherValues();
+        vals.splice(idx, 1);
+        pollAdminOptCount--;
+        pollRenderAdminForm(vals);
+      });
+    });
+  }
+
+  function pollAdminGatherValues() {
+    const vals = [];
+    vals.question = document.getElementById('padmin-q')?.value ?? '';
+    for (let i = 0; i < pollAdminOptCount; i++) {
+      vals.push(document.getElementById(`padmin-opt-${i}`)?.value ?? '');
+    }
+    return vals;
+  }
+
+  async function pollAdminLaunch() {
+    const q = document.getElementById('padmin-q')?.value.trim();
+    const options = [];
+    for (let i = 0; i < pollAdminOptCount; i++) {
+      options.push((document.getElementById(`padmin-opt-${i}`)?.value ?? '').trim());
+    }
+    let hasError = false;
+    if (!q) {
+      const el = document.getElementById('padmin-q');
+      el.style.borderColor = '#c0392b'; el.focus();
+      setTimeout(() => { el.style.borderColor = ''; }, 1200);
+      hasError = true;
+    }
+    options.forEach((val, i) => {
+      if (!val) {
+        const el = document.getElementById(`padmin-opt-${i}`);
+        if (el) { el.style.borderColor = '#c0392b'; if (!hasError) el.focus(); setTimeout(() => { el.style.borderColor = ''; }, 1200); }
+        hasError = true;
+      }
+    });
+    if (hasError) return;
+    const btn = document.getElementById('padmin-launch-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+    await set(pollRef2, { question: q, options, active: true, revealed: false, ts: Date.now() });
+    await set(votesRef2, {});
+    pollAdminOptCount = POLL_MIN_OPTS;
+  }
+
+  // ── Admin render: pre-reveal (votes hidden from audience) ─
+  function pollRenderAdminPreReveal(poll, votes) {
+    const opts = poll.options||[], counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
+    const total = counts.reduce((a,b)=>a+b,0), pcts = counts.map(c=>total?Math.round(c/total*100):0), maxC = Math.max(...counts);
+    const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+      <div class="poll-result-label-row">
+        <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span>
+        <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+    </div>`).join('');
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-admin-section">
+        <div class="poll-admin-badge">⚔ Showrunner</div>
+        <div class="poll-admin-results-header">
+          <div class="poll-question-label">Active Poll</div>
+          <div class="poll-live-indicator"><span class="poll-live-dot"></span>Votes incoming</div>
+        </div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="poll-result-wrap">${barsHtml}</div>
+        <p class="total-votes" style="margin-bottom:8px;">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
+        <button class="poll-btn-reveal" id="padmin-reveal-btn">🎲 Reveal Results to Audience</button>
+        <button class="poll-btn-danger" id="padmin-close-btn">Close Poll &amp; Clear</button>
+        ${pollBadge(true)}
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    document.getElementById('padmin-reveal-btn').onclick = pollAdminReveal;
+    document.getElementById('padmin-close-btn').onclick  = pollAdminClear;
+  }
+
+  // ── Admin render: post-reveal (results shown to audience) ─
+  function pollRenderAdminPostReveal(poll, votes) {
+    const opts = poll.options||[], counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
+    const total = counts.reduce((a,b)=>a+b,0), pcts = counts.map(c=>total?Math.round(c/total*100):0), maxC = Math.max(...counts);
+    const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+      <div class="poll-result-label-row">
+        <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span>
+        <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+    </div>`).join('');
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-admin-section">
+        <div class="poll-admin-badge">⚔ Showrunner</div>
+        <div class="poll-admin-results-header">
+          <div class="poll-question-label">Results Revealed</div>
+          <div class="poll-live-indicator" style="color:var(--gold);">
+            <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
+          </div>
+        </div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="poll-result-wrap">${barsHtml}</div>
+        <p class="total-votes" style="margin-bottom:8px;">${total} vote${total!==1?'s':''} cast</p>
+        <button class="poll-btn-new" id="padmin-new-btn">New Poll</button>
+        <button class="poll-btn-danger" id="padmin-close2-btn">Close Poll &amp; Clear</button>
+        ${pollBadge(true)}
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    document.getElementById('padmin-new-btn').onclick    = pollAdminClear;
+    document.getElementById('padmin-close2-btn').onclick = pollAdminClear;
+  }
+
+  async function pollAdminReveal() {
+    const btn = document.getElementById('padmin-reveal-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Revealing…'; }
+    await set(ref(db2, 'nodice/poll/revealed'), true);
+  }
+
+  async function pollAdminClear() {
+    await set(pollRef2, { active: false });
+    await set(votesRef2, {});
+    pollAdminOptCount = POLL_MIN_OPTS;
+  }
 
   function pollRenderWaiting() {
     document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">🎲</span><br>No poll active right now.<br><small>The showrunner will start one.</small></p></div>`;
@@ -1697,10 +2026,17 @@ if (!IS_DEMO) {
     onValue(pollRef2, snap => {
       const poll = snap.val(); pollCurrentSnap = poll;
       if (isAdmin) {
-        // Embed the full admin page inline — showrunner can manage polls without leaving the vault.
-        document.getElementById('poll-inner').innerHTML =
-          `<iframe src="poll.html?admin" style="width:100%;border:0;height:560px;display:block;" title="Showrunner Controls"></iframe>`;
-        document.getElementById('poll-footer').innerHTML = '';
+        if (!poll || !poll.active) {
+          if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
+          pollRenderAdminForm();
+        } else {
+          if (pollUnsubVotes) pollUnsubVotes();
+          pollUnsubVotes = onValue(votesRef2, votesSnap => {
+            const votes = votesSnap.val() || {};
+            if (poll.revealed) pollRenderAdminPostReveal(poll, votes);
+            else               pollRenderAdminPreReveal(poll, votes);
+          });
+        }
         return;
       }
       if (!poll||!poll.active) { if(pollUnsubVotes){pollUnsubVotes();pollUnsubVotes=null;} sessionStorage.removeItem('nodice_vault_vote_ts'); sessionStorage.removeItem('nodice_vault_vote_choice'); pollRenderWaiting(); return; }
