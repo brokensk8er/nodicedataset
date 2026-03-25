@@ -44,19 +44,13 @@
   .btn-coin-flip        { color: #1a1a2e; }   /* dark text on gold gradient */
   .cg-quick-cat-btn.active { color: #1a1a2e; } /* dark text on active gold segment */
 
-  /* ── Primary action buttons: gold gradient (mystery coin face) ── */
-  .full-link-btn,
-  .cg-roll-btn,
-  .btn-pull,
-  .btn-draw-trait {
+  /* ── Full-link button: gold gradient (mystery coin face) ── */
+  .full-link-btn {
     background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
     color: #1a1a2e;
     box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.3);
   }
-  .full-link-btn:hover,
-  .cg-roll-btn:hover:not(:disabled),
-  .btn-pull:hover,
-  .btn-draw-trait:hover:not(:disabled) {
+  .full-link-btn:hover {
     background: linear-gradient(135deg, #e2bc6a 0%, var(--gold) 50%, #e2bc6a 100%);
     color: #1a1a2e;
   }
@@ -372,7 +366,7 @@
   }
 
   .btn-coin-flip {
-    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 700;
     letter-spacing: .1em; text-transform: uppercase;
     color: var(--ink);
     background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
@@ -524,12 +518,16 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
   .cg-roll-btn {
-    width: 100%; background: var(--ink); color: var(--parchment); border: none;
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e; border: none;
     border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; transition: background .2s, transform .1s;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700;
+    letter-spacing: .08em; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.3);
+    transition: opacity .2s, transform .1s;
   }
-  .cg-roll-btn:hover:not(:disabled) { background: var(--ink-hover); }
+  .cg-roll-btn:hover:not(:disabled) { opacity: .88; }
   .cg-roll-btn:active { transform: scale(.98); }
   .cg-roll-btn:disabled { opacity: .35; cursor: not-allowed; }
 
@@ -631,12 +629,16 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
   .btn-pull {
-    width: 100%; background: var(--ink); color: var(--parchment); border: none;
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e; border: none;
     border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; transition: background .2s, transform .1s;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700;
+    letter-spacing: .08em; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.3);
+    transition: opacity .2s, transform .1s;
   }
-  .btn-pull:hover { background: var(--ink-hover); }
+  .btn-pull:hover { opacity: .88; }
   .btn-pull:active { transform: scale(.98); }
 
   /* ─────────────────────────────────────────
@@ -726,12 +728,16 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
   .btn-draw-trait {
-    width: 100%; background: var(--ink); color: var(--parchment); border: none;
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e; border: none;
     border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; transition: background .2s, transform .1s;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 700;
+    letter-spacing: .08em; cursor: pointer;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.3);
+    transition: opacity .2s, transform .1s;
   }
-  .btn-draw-trait:hover:not(:disabled) { background: var(--ink-hover); }
+  .btn-draw-trait:hover:not(:disabled) { opacity: .88; }
   .btn-draw-trait:active { transform: scale(.98); }
   .btn-draw-trait:disabled { opacity: .35; cursor: not-allowed; }
 
