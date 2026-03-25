@@ -1080,6 +1080,21 @@
     setTimeout(finish, totalMs + 300); // fallback
   };
 })();
+
+// ── THEME TOGGLE — must be in plain <script>, not type="module" ──
+window.toggleTheme = function() {
+  var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('theme-toggle-icon').textContent = next === 'dark' ? '🌙' : '☀️';
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+};
+// Sync icon on load to match whatever data-theme the head script set
+(function() {
+  var t = document.documentElement.getAttribute('data-theme') || 'dark';
+  var icon = document.getElementById('theme-toggle-icon');
+  if (icon) icon.textContent = t === 'dark' ? '🌙' : '☀️';
+})();
 </script>
 
 <!-- App logic + Firebase -->
@@ -1977,22 +1992,6 @@ if (!IS_DEMO) {
     });
   };
 }
-
-// ── THEME TOGGLE ──────────────────────────────────────
-function toggleTheme() {
-  var cur = document.documentElement.getAttribute('data-theme') || 'dark';
-  var next = cur === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('theme-toggle-icon').textContent = next === 'dark' ? '🌙' : '☀️';
-  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
-}
-// Sync icon to whichever theme is active (set by head script before paint)
-(function() {
-  var t = document.documentElement.getAttribute('data-theme') || 'dark';
-  var icon = document.getElementById('theme-toggle-icon');
-  if (icon) icon.textContent = t === 'dark' ? '🌙' : '☀️';
-})();
-// ── END THEME TOGGLE ──────────────────────────────────
 
 </script>
 <!-- QR lightbox overlay — tap anywhere to dismiss -->
