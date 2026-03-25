@@ -10,83 +10,8 @@
 <!-- Shared styles (colours, fonts, buttons, badges, animations) -->
 <link rel="stylesheet" href="styles.css">
 <!-- Prevent flash: apply saved theme before first paint -->
-<script>try{var _t=localStorage.getItem('vaultTheme');if(_t)document.documentElement.setAttribute('data-theme',_t);}catch(e){}</script>
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
-  /* ══════════════════════════════════════════════
-     GOLD & BLACK THEME — index3.html
-     Overrides styles.css :root tokens + body bg.
-     All layout/JS unchanged from index2.html.
-     ══════════════════════════════════════════════ */
-  :root {
-    /* Surfaces — flipped to near-black */
-    --ink:         #f0e8cc;   /* warm cream — body text on black */
-    --ink-hover:   #1a1400;   /* very dark gold-black for button press */
-    --parchment:   #0d0b00;   /* page background — near-black warm */
-
-    /* Cards and UI chrome */
-    --card-bg:     #141000;   /* dark warm black for cards */
-    --border:      #3a2e00;   /* dark gold border */
-    --muted:       #9a8a5a;   /* muted warm gold for secondary text */
-    --gold-bg:     #1f1800;   /* dark gold fill for hover states */
-
-    /* Elevation */
-    --shadow:      rgba(0, 0, 0, .55);          /* deeper shadow on black */
-    --shadow-gold: rgba(201, 168, 76, .40);     /* stronger gold glow */
-
-    /* Status — match coin face glow colors exactly */
-    --success:     #27ae60;   /* pass green (coin face) */
-    --warning:     #e2bc6a;   /* light gold for warnings */
-
-    /* Gold, pass/fail — unchanged (already ideal on black) */
-    /* --gold, --gold-dim, --pass-grn, --pass-rim, --fail-red, --fail-rim */
-  }
-
-  /* Contrast fix: elements that use color:var(--ink) on gold backgrounds
-     need dark text so they stay readable on the now-light --ink value. */
-  .btn-coin-flip        { color: #1a1a2e; }   /* dark text on gold gradient */
-  .cg-quick-cat-btn.active { color: #1a1a2e; } /* dark text on active gold segment */
-
-  /* ── Full-link button: gold gradient (mystery coin face) ── */
-  .full-link-btn {
-    background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
-    color: #1a1a2e;
-    box-shadow: 0 3px 10px rgba(201,168,76,.35), inset 0 1px 0 rgba(255,255,255,.3);
-  }
-  .full-link-btn:hover {
-    background: linear-gradient(135deg, #e2bc6a 0%, var(--gold) 50%, #e2bc6a 100%);
-    color: #1a1a2e;
-  }
-
-  /* ── Red & green coin-face accents ── */
-
-  /* Open shelf: green glow + border (pass coin face) */
-  .shelf.open {
-    box-shadow: 0 6px 30px rgba(39,174,96,.22), 0 2px 12px rgba(201,168,76,.18);
-    border-color: rgba(39,174,96,.38);
-  }
-  .shelf.open .shelf-chevron { color: var(--pass-grn); }
-
-  /* Header divider: gold-to-green gradient */
-  .header-divider {
-    background: linear-gradient(90deg, var(--gold-dim), var(--pass-grn), var(--gold-dim));
-    opacity: .75;
-  }
-
-  /* Vote buttons: green hover glow (affirmative choice) */
-  .vote-btn:hover:not(:disabled) {
-    border-color: var(--pass-grn);
-    background: rgba(39,174,96,.10);
-    box-shadow: 0 2px 10px rgba(39,174,96,.20);
-  }
-
-  /* Section divider: faint green-to-red sweep */
-  .section-rule {
-    background: linear-gradient(90deg, transparent, rgba(192,57,43,.35) 20%, rgba(39,174,96,.35) 80%, transparent);
-  }
-
-  /* Lock bar: use card-bg so it reads against dark theme */
-  .lock-bar { background: rgba(201,168,76,.10); border: 1px solid var(--border); }
-
   /* ── Poll admin inline styles (replaces poll.html?admin iframe) ── */
   .poll-admin-badge {
     display: inline-flex; align-items: center; gap: 5px;
@@ -186,75 +111,6 @@
   }
   .poll-btn-add-option:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
   .poll-admin-section { padding: 12px 12px 14px; }
-
-  /* Override body background for dark theme.
-     Boosts gold radial glows to 12%/10% so they
-     read on black; keeps the paper-grain texture. */
-  body {
-    background-color: var(--parchment);
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.12) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.10) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  }
-
-  /* ══════════════════════════════════════════════
-     LIGHT MODE OVERRIDES — applied when <html data-theme="light">
-     Restores styles.css :root defaults + light body bg.
-     ══════════════════════════════════════════════ */
-  html[data-theme="light"] {
-    --ink:         #1a1a2e;
-    --ink-hover:   #2d2b5e;
-    --parchment:   #faf7f2;
-    --card-bg:     #ffffff;
-    --border:      #e8e2d9;
-    --muted:       #6b6676;
-    --gold-bg:     #fffdf5;
-    --shadow:      rgba(0, 0, 0, .12);
-    --shadow-gold: rgba(201, 168, 76, .18);
-    --success:     #27ae60;
-    --warning:     #e2bc6a;
-  }
-
-  /* Revert dark-specific component overrides in light mode */
-  [data-theme="light"] body {
-    background-color: var(--parchment);
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.04) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.03) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  }
-  [data-theme="light"] .shelf.open {
-    box-shadow: 0 6px 28px var(--shadow-gold);
-    border-color: rgba(201,168,76,.35);
-  }
-  [data-theme="light"] .shelf.open .shelf-chevron { color: var(--gold); }
-  [data-theme="light"] .header-divider {
-    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-    opacity: 1;
-  }
-  [data-theme="light"] .vote-btn:hover:not(:disabled) {
-    border-color: var(--gold);
-    background: var(--gold-bg);
-    box-shadow: none;
-  }
-  [data-theme="light"] .section-rule {
-    background: linear-gradient(90deg, transparent, rgba(201,168,76,.25) 50%, transparent);
-  }
-  [data-theme="light"] .lock-bar { background: rgba(201,168,76,.06); border: 1px solid var(--border); }
-  /* Contrast: light --ink is dark, so gold-bg buttons need their default color from styles.css */
-  [data-theme="light"] .btn-coin-flip        { color: var(--ink); }
-  [data-theme="light"] .cg-quick-cat-btn.active { color: var(--ink); }
-  [data-theme="light"] .full-link-btn        { color: var(--ink); }
-
-  /* ── Theme toggle button ── */
-  .theme-toggle-btn {
-    position: absolute; top: 50%; left: 12px; transform: translateY(-50%);
-    background: none; border: 1px solid var(--border); border-radius: 5px;
-    padding: 3px 8px; font-size: 1rem; line-height: 1; cursor: pointer;
-    opacity: 0.75; transition: opacity .2s, border-color .2s;
-  }
-  .theme-toggle-btn:hover { opacity: 1; border-color: var(--gold); }
 
   /* ── Page layout ── */
   body {
@@ -2124,22 +1980,17 @@ if (!IS_DEMO) {
 
 // ── THEME TOGGLE ──────────────────────────────────────
 function toggleTheme() {
-  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  const next = isLight ? 'dark' : 'light';
+  var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  var next = cur === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('theme-toggle-icon').textContent = next === 'light' ? '☀️' : '🌙';
+  document.getElementById('theme-toggle-icon').textContent = next === 'dark' ? '🌙' : '☀️';
   try { localStorage.setItem('vaultTheme', next); } catch(e) {}
 }
-// Restore saved theme preference on load (script is at end of body so DOM is ready)
+// Sync icon to whichever theme is active (set by head script before paint)
 (function() {
-  try {
-    const saved = localStorage.getItem('vaultTheme');
-    if (saved === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
-      const icon = document.getElementById('theme-toggle-icon');
-      if (icon) icon.textContent = '☀️';
-    }
-  } catch(e) {}
+  var t = document.documentElement.getAttribute('data-theme') || 'dark';
+  var icon = document.getElementById('theme-toggle-icon');
+  if (icon) icon.textContent = t === 'dark' ? '🌙' : '☀️';
 })();
 // ── END THEME TOGGLE ──────────────────────────────────
 
