@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <!-- Shared styles (colours, fonts, buttons, badges, animations) -->
 <link rel="stylesheet" href="styles.css">
+<!-- Prevent theme flash: apply saved theme before first paint -->
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
   /* ── Page layout ── */
   html, body { height: 100%; }
@@ -20,31 +22,12 @@
   }
 
   /* ── Header ── */
-  /* .site-label comes from styles.css */
+  /* .site-label, header h1, .subtitle come from styles.css */
   header {
     text-align: center;
     padding: 10px 16px 6px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-  }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: .04em;
-    line-height: 1.2;
-  }
-
-  /* h1 span gold colour comes from styles.css */
-
-  header .subtitle {
-    font-size: 0.68rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 2px;
   }
 
   main {
@@ -213,6 +196,9 @@
 </style>
 </head>
 <body>
+
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
 
 <!-- ============================================
      HEADER
@@ -508,6 +494,19 @@ function escHtml(str) {
 loadData().then(() => {
   render(pickItem());
 });
+
+// ── Theme toggle ──────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+(function(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+})();
 </script>
 </body>
 </html>

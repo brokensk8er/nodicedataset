@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
   <!-- Shared styles (colours, fonts, nav link, animations) -->
   <link rel="stylesheet" href="styles.css" />
+  <!-- Prevent theme flash: apply saved theme before first paint -->
+  <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 
   <style>
     /* ── Page layout ── */
@@ -27,22 +29,20 @@
       text-align: center;
     }
 
-    h1 {
-      font-family: 'Cinzel', serif;
+    /* Base header h1 styles come from styles.css — override size only */
+    header h1 {
       font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--ink);
       line-height: 1.15;
-      letter-spacing: .04em;
     }
 
     /* h1 span gold colour comes from styles.css */
 
+    /* .subtitle base comes from styles.css */
     .subtitle {
       margin-top: .4rem;
       font-size: .85rem;
       font-weight: 300;
-      color: #666;
+      color: var(--muted);
       letter-spacing: .03em;
     }
 
@@ -191,7 +191,7 @@
       font-weight: 300;
       font-family: 'Lato', sans-serif;
       letter-spacing: .08em;
-      color: #888;
+      color: var(--muted);
       margin-top: .2rem;
       min-height: 1.1rem;
       text-align: center;
@@ -263,6 +263,9 @@
   </style>
 </head>
 <body>
+
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
 
   <!-- ============================================
        HEADER
@@ -719,6 +722,19 @@
 
       setTimeout(() => ac.close(), 1600);
     }
+
+    // ── Theme toggle ──────────────────────────────
+    function toggleTheme() {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+      document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    (function(){
+      const t = document.documentElement.getAttribute('data-theme') || 'dark';
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    })();
   </script>
 
 </body>
