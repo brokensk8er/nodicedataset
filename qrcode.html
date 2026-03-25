@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <!-- Shared styles (colours, fonts, buttons, badges, animations) -->
 <link rel="stylesheet" href="styles.css">
+<!-- Prevent theme flash: apply saved theme before first paint -->
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
   /* ── Page layout ── */
   html, body { height: 100%; }
@@ -90,10 +92,13 @@
 </head>
 <body>
 
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
+
 <header>
   <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
   <h1>The <span>QR Code</span></h1>
-  <p class="tagline">One scan. The whole Vault.</p>
+  <p class="subtitle">One scan. The whole Vault.</p>
   <div class="header-divider"></div>
 </header>
 
@@ -113,6 +118,21 @@
 <div id="qr-lightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;cursor:pointer;">
   <img src="qr.png" alt="No Dice QR Code" style="max-width:95vmin;max-height:95vmin;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.6);">
 </div>
+
+<script>
+// ── Theme toggle ──────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+(function(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+})();
+</script>
 
 </body>
 </html>

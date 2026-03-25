@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <!-- Shared styles (colours, fonts, buttons, badges, animations) -->
 <link rel="stylesheet" href="styles.css">
+<!-- Prevent theme flash: apply saved theme before first paint -->
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
   /* ── Page layout ── */
   html, body { height: 100%; }
@@ -19,33 +21,13 @@
     height: 100dvh;
   }
 
-  /* ── Desktop wrapper — centres and constrains on wide screens ── */
-  .page-frame {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-  }
-
+  /* ── Desktop wrapper — .page-frame base + media query come from styles.css ── */
   @media (min-width: 600px) {
-    body {
-      align-items: center;
-      justify-content: center;
-    }
-    .page-frame {
-      width: 420px;
-      height: 92dvh;
-      max-height: 860px;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 48px rgba(26,26,46,.18), 0 2px 8px rgba(26,26,46,.08);
-      border: 1px solid var(--border);
-    }
+    .page-frame { max-height: 860px; }
   }
 
   /* ── Header ── */
-  /* .site-label comes from styles.css */
+  /* .site-label, header h1, .subtitle come from styles.css */
   header {
     text-align: center;
     padding: 10px 16px 6px;
@@ -53,25 +35,6 @@
     flex-shrink: 0;
     position: relative;
     background-color: var(--parchment);
-  }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: .04em;
-    line-height: 1.2;
-  }
-
-  /* h1 span gold colour comes from styles.css */
-
-  header .subtitle {
-    font-size: .68rem;
-    color: var(--muted);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    margin-top: 2px;
   }
 
   /* .mulligan-bar, .pip-row, .pip, .pip.spent come from styles.css */
@@ -237,6 +200,9 @@
 </style>
 </head>
 <body>
+
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
 
 <div class="page-frame">
 
@@ -685,6 +651,19 @@ loadData().then(() => {
   const restored = loadSession();
   if (restored) { render(); } else { doRoll(); }
 });
+
+// ── Theme toggle ──────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+(function(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+})();
 </script>
 </body>
 </html>

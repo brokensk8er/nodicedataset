@@ -162,11 +162,15 @@ h1 span { color: var(--gold); }
    adds  .divider { width: Xpx; }  in its own block.
    ================================================ */
 
-.divider {
+.divider,
+.header-divider {
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
   margin: .9rem auto;
 }
+
+/* Hub header divider — narrower, tighter top margin */
+.header-divider { width: 50px; margin-top: .75rem; }
 
 
 /* ================================================
@@ -488,6 +492,64 @@ html[data-theme="dark"] .lock-bar {
   background: rgba(201,168,76,.10);
   border: 1px solid var(--border);
 }
+
+/* ================================================
+   15. TOOL-PAGE HEADER TYPOGRAPHY
+   Shared by chargen, coinflip (via h1 override),
+   loot, traitgen, poll, qrcode.
+   Hub pages (index.html) override h1 in their own
+   inline <style> block with a larger clamp() size.
+   ================================================ */
+
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: .04em;
+  line-height: 1.2;
+}
+
+/* Eyebrow subtitle below h1 on tool pages */
+.subtitle {
+  font-size: .68rem;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+
+/* ================================================
+   16. PAGE-FRAME  (chargen + traitgen)
+   Mobile-fill / desktop-window container.
+   Each page keeps its unique max-height override
+   in its own inline <style> block.
+   ================================================ */
+
+.page-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  body:has(.page-frame) {
+    align-items: center;
+    justify-content: center;
+  }
+  .page-frame {
+    width: 420px;
+    height: 92dvh;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 48px rgba(26,26,46,.18), 0 2px 8px rgba(26,26,46,.08);
+    border: 1px solid var(--border);
+  }
+}
+
 
 /* ── Theme toggle button (used by index3.html) ── */
 .theme-toggle-btn {
