@@ -877,7 +877,7 @@
     <p class="tagline">Every tool. One scroll. Zero excuses.</p>
     <div class="header-divider"></div>
     <!-- THEME TOGGLE — sun/moon light/dark mode switch -->
-    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark mode"><span id="theme-toggle-icon">☀️</span></button>
+    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark mode"><span id="theme-toggle-icon">🌙</span></button>
     <!-- END THEME TOGGLE -->
     <!-- DEV RESET — remove this button when no longer needed -->
     <button class="dev-reset-btn" id="cg-dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans" style="display:none">Reset</button>
@@ -2127,7 +2127,7 @@ function toggleTheme() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   const next = isLight ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('theme-toggle-icon').textContent = next === 'light' ? '🌙' : '☀️';
+  document.getElementById('theme-toggle-icon').textContent = next === 'light' ? '☀️' : '🌙';
   try { localStorage.setItem('vaultTheme', next); } catch(e) {}
 }
 // Restore saved theme preference on load (script is at end of body so DOM is ready)
@@ -2137,7 +2137,7 @@ function toggleTheme() {
     if (saved === 'light') {
       document.documentElement.setAttribute('data-theme', 'light');
       const icon = document.getElementById('theme-toggle-icon');
-      if (icon) icon.textContent = '🌙';
+      if (icon) icon.textContent = '☀️';
     }
   } catch(e) {}
 })();
