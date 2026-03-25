@@ -581,6 +581,11 @@
 
   footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 
+  /* ── QR Code shelf ── */
+  .qr-wrap { display: flex; flex-direction: column; align-items: center; padding: 20px 16px 16px; gap: 14px; }
+  .qr-canvas-wrap { border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 6px #d42020, 0 4px 24px rgba(212,32,32,.35); line-height: 0; }
+  .qr-hint { font-size: .72rem; color: var(--muted); text-align: center; line-height: 1.5; margin: 0; }
+
   /* ── DEV RESET — remove this block when no longer needed ── */
   .dev-reset-btn {
     position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
@@ -786,6 +791,32 @@
       <div class="soon-grid">
         <div class="soon-card"><div class="soon-icon">🗺️</div><div class="soon-name">Scenario Gen</div><div class="soon-desc">Drop-in quest hooks.</div><span class="soon-badge">Coming Soon</span></div>
         <div class="soon-card"><div class="soon-icon">🧙</div><div class="soon-name">NPC Gen</div><div class="soon-desc">Instant strangers.</div><span class="soon-badge">Coming Soon</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         SHELF — QR CODE
+         Renders a styled QR code for the current URL.
+         No data loading; lazy-init draws canvas on first open.
+         ============================================ -->
+    <div class="shelf" id="shelf-qr">
+      <div class="shelf-header" onclick="toggleShelf('qr')">
+        <div class="shelf-icon">⬛</div>
+        <div class="shelf-text">
+          <div class="shelf-name">QR Code</div>
+          <div class="shelf-desc">Scan to join. Share the Vault.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-qr">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div class="qr-wrap">
+              <div class="qr-canvas-wrap"><canvas id="qr-canvas"></canvas></div>
+              <p class="qr-hint">Scan to open the Vault on your phone.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1031,6 +1062,34 @@ window._vaultInit_loot    = function() { if (!lootInitialised)    initLoot();   
 window._vaultInit_poll    = function() { if (!pollInitialised)    initPoll();    };
 window._vaultInit_trait   = function() { if (!traitInitialised)   initTrait();   };
 window._vaultInit_chargen = function() { if (!chargenInitialised) initChargen(); };
+let qrInitialised = false;
+window._vaultInit_qr = function() {
+  if (qrInitialised) return;
+  qrInitialised = true;
+  const qrCanvas = document.getElementById('qr-canvas');
+  const qrUrl = window.location.href;
+  QRCode.toCanvas(qrCanvas, qrUrl, {
+    width: 240, margin: 1,
+    errorCorrectionLevel: 'H',
+    color: { dark: '#111111', light: '#d42020' }
+  }, function() {
+    const qrCtx = qrCanvas.getContext('2d');
+    const cx = qrCanvas.width / 2, cy = qrCanvas.height / 2;
+    const r = qrCanvas.width * 0.17;
+    qrCtx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (i * 60 - 30) * Math.PI / 180;
+      i === 0 ? qrCtx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a))
+              : qrCtx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    }
+    qrCtx.closePath();
+    qrCtx.fillStyle = '#ffffff'; qrCtx.fill();
+    qrCtx.fillStyle = '#111111';
+    qrCtx.font = `bold ${Math.round(r * 1.3)}px Georgia, serif`;
+    qrCtx.textAlign = 'center'; qrCtx.textBaseline = 'middle';
+    qrCtx.fillText('!', cx, cy - r * 0.05);
+  });
+};
 
 // Confetti
 const canvas  = document.getElementById('coin-confetti');
@@ -1641,5 +1700,6 @@ if (!IS_DEMO) {
 }
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </body>
 </html>
