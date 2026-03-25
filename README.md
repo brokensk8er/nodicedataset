@@ -10,6 +10,7 @@
 | Tool | Status | File |
 |------|--------|------|
 | Hub / Vault | ✅ Complete | `index.html` |
+| Hub v2 (inline chargen) | ✅ Complete | `index2.html` |
 | Character Generator | ✅ Complete | `chargen.html` |
 | Fate's Flip (coin) | ✅ Complete | `coinflip.html` |
 | Loot Table | ✅ Complete | `loot.html` |
@@ -41,6 +42,7 @@ The **Poll** uses Firebase Realtime Database for live vote sync across all devic
 ```
 /
 ├── index.html          — Hub (links to all tools)
+├── index2.html         — Hub v2 with inline character generator drawer
 ├── chargen.html        — Character generator
 ├── coinflip.html       — Coin flip / pass-fail
 ├── loot.html           — Loot table
@@ -48,6 +50,7 @@ The **Poll** uses Firebase Realtime Database for live vote sync across all devic
 ├── traitgen.html       — Single trait generator
 ├── scenario.html       — Scenario generator (planned)
 ├── npc.html            — NPC generator (planned)
+├── styles.css          — Shared CSS (colours, fonts, buttons, badges, animations)
 ├── design-system.css   — Visual reference (not linked, docs only)
 ├── character-data.csv  — Starter data for Google Sheets import
 ├── FIREBASE_SETUP.md   — Firebase setup guide for poll.html
@@ -60,6 +63,12 @@ The **Poll** uses Firebase Realtime Database for live vote sync across all devic
 
 ### Hub (`index.html`)
 Two-column card grid. Active tools are `<a>` tags; coming-soon tools are styled `<div>` cards with an amber badge.
+
+### Hub v2 (`index2.html`)
+Extends `index.html` with an inline character generator drawer — no page navigation needed. Uses `styles.css` for shared styling. The drawer has two modes toggled by a segmented control:
+
+- **Full Character** — rolls all six fields in a single card (same mulligan system as `chargen.html`)
+- **Quick Pull** — category buttons (Name, Race, Class, etc.) for rolling a single field on demand; animated fade swap on each pull
 
 ### Character Generator (`chargen.html`)
 Six fields in a single scrollable white card: Name, Race/Species, Class, Backstory, Personality Quirk, Secret/Flaw. Name is assembled from separate `First Names` and `Last Names` pools. Every other row has a faint gold tint for scan-ability. 3 shared mulligans → 1-hour lockout → countdown → auto-reset.
@@ -224,7 +233,7 @@ Free Spark plan is sufficient: 100 simultaneous connections, 1 GB storage, no bi
 
 Paste this at the top of a new conversation:
 
-> *I'm building an improv D&D tool suite on GitHub Pages called "No Dice." Live tools: hub (`index.html`), character generator (`chargen.html`), coin flip (`coinflip.html`), loot table (`loot.html`), audience poll (`poll.html`), trait generator (`traitgen.html`). Cinzel/Lato design system, parchment palette. chargen, loot, and traitgen pull from Google Sheets (already wired). traitgen auto-discovers all Sheet tabs, excludes via `EXCLUDE_TABS`, and shows a full loot card when a Loot tab entry is rolled. poll.html uses Firebase Realtime Database (already wired); showrunner via `?admin`. chargen and traitgen share the same 3-mulligan / 1-hour lockout / localStorage pattern. overflow:hidden intentionally absent from html/body. I'd like to continue building [describe what you need].*
+> *I'm building an improv D&D tool suite on GitHub Pages called "No Dice." Live tools: hub (`index.html`), hub v2 with inline chargen drawer (`index2.html`), character generator (`chargen.html`), coin flip (`coinflip.html`), loot table (`loot.html`), audience poll (`poll.html`), trait generator (`traitgen.html`). Shared stylesheet: `styles.css`. Cinzel/Lato design system, parchment palette. chargen, loot, and traitgen pull from Google Sheets (already wired). traitgen auto-discovers all Sheet tabs, excludes via `EXCLUDE_TABS`, and shows a full loot card when a Loot tab entry is rolled. poll.html uses Firebase Realtime Database (already wired); showrunner via `?admin`. chargen and traitgen share the same 3-mulligan / 1-hour lockout / localStorage pattern. index2.html has an inline chargen drawer with Full Character and Quick Pull modes. overflow:hidden intentionally absent from html/body. I'd like to continue building [describe what you need].*
 
 Then paste in the relevant file(s).
 
@@ -238,7 +247,7 @@ Then paste in the relevant file(s).
 - [ ] Firebase rules not expired (test mode expires 30 days after setup — check the Rules tab)
 - [ ] Poll tested: dummy poll created, audience screen updates, poll cleared
 - [ ] Showrunner has `poll.html?admin` bookmarked on their device
-- [ ] Dev Reset buttons in `chargen.html` and `traitgen.html` hidden or removed if players shouldn't see them
+- [ ] Dev Reset button in `chargen.html` / `index2.html` auto-hides until all 3 mulligans are spent — no manual hiding needed; verify it's not visible before mulligans run out
 - [ ] API key restrictions include the live GitHub Pages URL
 - [ ] All active tools tested on the actual show device
 
