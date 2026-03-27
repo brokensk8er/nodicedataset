@@ -905,7 +905,7 @@
       <p class="section-label">In the forge</p>
       <div class="soon-grid">
         <div class="soon-card"><div class="soon-icon">🗺️</div><div class="soon-name">Scenario Gen</div><div class="soon-desc">Drop-in quest hooks.</div><span class="soon-badge">Coming Soon</span></div>
-        <div class="soon-card"><div class="soon-icon">🧙</div><div class="soon-name">NPC Gen</div><div class="soon-desc">Instant strangers.</div><span class="soon-badge">Coming Soon</span></div>
+        <div class="soon-card" id="npc-gen-card"><div class="soon-icon">🧙</div><div class="soon-name">NPC Gen</div><div class="soon-desc">Instant strangers.</div><span class="soon-badge">Coming Soon</span></div>
       </div>
     </div>
 
@@ -1716,7 +1716,12 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; 5-second long-press on the theme button to toggle
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    sessionStorage.setItem('nodice_vault_admin', '1');
+    // Auto-open the poll shelf so admin doesn't have to hunt for it
+    if (typeof window.toggleShelf === 'function') window.toggleShelf('poll');
+  }
+  let isAdmin = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; hold 🧙 NPC card 3s to toggle, or visit ?admin
   const pollVoterId    = pollGetVoterId();
   let pollCurrentSnap  = null;
   let pollUnsubVotes   = null;
@@ -2027,38 +2032,84 @@ if (!IS_DEMO) {
     }
   }
 
-  // ── 5-second long-press on the theme-toggle button → toggle admin ──
-  // Suppresses the normal theme-switch click if the long-press fires.
-  ;(function() {
-    const btn = document.getElementById('theme-toggle-btn');
-    if (!btn) return;
-    let pressTimer = null;
-    let consumed   = false;
-    btn.addEventListener('pointerdown', () => {
-      consumed = false;
-      pressTimer = setTimeout(() => {
-        pressTimer = null;
-        consumed   = true;
-        isAdmin    = !isAdmin;
-        sessionStorage.setItem('nodice_vault_admin', isAdmin ? '1' : '0');
-        // Brief icon flash to confirm the toggle (⚔ = admin, 🎲 = audience)
-        const icon = document.getElementById('theme-toggle-icon');
-        if (icon) {
-          const orig = icon.textContent;
-          icon.textContent = isAdmin ? '⚔' : '🎲';
-          setTimeout(() => { icon.textContent = orig; }, 900);
-        }
-        pollRerenderForAdminChange();
-      }, 5000);
-    });
-    btn.addEventListener('pointerup',    () => clearTimeout(pressTimer));
-    btn.addEventListener('pointerleave', () => clearTimeout(pressTimer));
-    btn.addEventListener('contextmenu',  e  => { clearTimeout(pressTimer); e.preventDefault(); });
-    // Capture-phase click listener — swallows the click if long-press just fired
-    btn.addEventListener('click', e => { if (consumed) { consumed = false; e.stopImmediatePropagation(); } }, true);
-  })();
+  // ── Bridge: expose admin toggle to plain-script tap handler ─────
+  window._vaultAdminToggle = function() {
+    isAdmin = !isAdmin;
+    sessionStorage.setItem('nodice_vault_admin', isAdmin ? '1' : '0');
+    pollRerenderForAdminChange();
+    return isAdmin;
+  };
 }
 
+</script>
+<!-- Long-press on 🧙 NPC Gen card (3s) → toggle poll admin mode -->
+<script>
+(function() {
+  var card = document.getElementById('npc-gen-card');
+  if (!card) return;
+  var icon = card.querySelector('.soon-icon');
+  var timer = null;
+  var HOLD_MS = 3000;
+  var startX = 0, startY = 0;
+
+  function startHold(e) {
+    if (e && e.touches) { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }
+    clearTimeout(timer);
+    if (icon) {
+      icon.style.transition = 'transform ' + HOLD_MS + 'ms linear, opacity ' + HOLD_MS + 'ms linear';
+      requestAnimationFrame(function() {
+        icon.style.transform = 'scale(1.5)';
+        icon.style.opacity = '0.5';
+      });
+    }
+    timer = setTimeout(function() {
+      timer = null;
+      resetIcon();
+      if (typeof window._vaultAdminToggle === 'function') {
+        var nowAdmin = window._vaultAdminToggle();
+        if (icon) {
+          var orig = icon.textContent;
+          icon.textContent = nowAdmin ? '⚔' : '🎲';
+          setTimeout(function() { icon.textContent = orig; }, 900);
+        }
+      }
+    }, HOLD_MS);
+  }
+
+  function cancelHold() {
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+      resetIcon();
+    }
+  }
+
+  function resetIcon() {
+    if (icon) {
+      icon.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      icon.style.transform = '';
+      icon.style.opacity = '';
+      setTimeout(function() { icon.style.transition = ''; }, 250);
+    }
+  }
+
+  // Mobile — passive:true so we don't block scrolling
+  // Only cancel on touchmove if finger has moved >10px (ignore micro-tremor)
+  card.addEventListener('touchstart',  startHold, { passive: true });
+  card.addEventListener('touchend',    cancelHold);
+  card.addEventListener('touchcancel', cancelHold);
+  card.addEventListener('touchmove', function(e) {
+    var dx = e.touches[0].clientX - startX;
+    var dy = e.touches[0].clientY - startY;
+    if (dx*dx + dy*dy > 100) cancelHold(); // >10px movement = intentional scroll
+  }, { passive: true });
+  card.addEventListener('contextmenu', function(e) { e.preventDefault(); }); // block iOS long-press menu
+
+  // Desktop
+  card.addEventListener('mousedown',  startHold);
+  card.addEventListener('mouseup',    cancelHold);
+  card.addEventListener('mouseleave', cancelHold);
+})();
 </script>
 <!-- QR lightbox overlay — tap anywhere to dismiss -->
 <div id="qr-lightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;cursor:pointer;">
