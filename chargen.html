@@ -19,7 +19,7 @@
     display: flex;
     flex-direction: column;
     height: 100dvh;
-  }
+  }h
 
   /* ── Desktop wrapper — .page-frame base + media query come from styles.css ── */
   @media (min-width: 600px) {
@@ -441,7 +441,7 @@ function isConfigured() {
 
 async function fetchTab(tabName) {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}`
-            + `/values/${encodeURIComponent(tabName)}!A:A?key=${CONFIG.API_KEY}`;
+            + `/values/${encodeURIComponent(tabName)}!A2:A?key=${CONFIG.API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Tab "${tabName}" returned HTTP ${res.status}`);
   const json = await res.json();
