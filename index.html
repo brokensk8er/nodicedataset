@@ -905,7 +905,7 @@
       <p class="section-label">In the forge</p>
       <div class="soon-grid">
         <div class="soon-card"><div class="soon-icon">🗺️</div><div class="soon-name">Scenario Gen</div><div class="soon-desc">Drop-in quest hooks.</div><span class="soon-badge">Coming Soon</span></div>
-        <div class="soon-card"><div class="soon-icon">🧙</div><div class="soon-name">NPC Gen</div><div class="soon-desc">Instant strangers.</div><span class="soon-badge">Coming Soon</span></div>
+        <div class="soon-card" id="npc-gen-card"><div class="soon-icon">🧙</div><div class="soon-name">NPC Gen</div><div class="soon-desc">Instant strangers.</div><span class="soon-badge">Coming Soon</span></div>
       </div>
     </div>
 
@@ -1716,7 +1716,10 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; tap theme button 4× rapidly to toggle
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    sessionStorage.setItem('nodice_vault_admin', '1');
+  }
+  let isAdmin = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; hold 🧙 NPC card 3s to toggle, or visit ?admin
   const pollVoterId    = pollGetVoterId();
   let pollCurrentSnap  = null;
   let pollUnsubVotes   = null;
@@ -2037,34 +2040,66 @@ if (!IS_DEMO) {
 }
 
 </script>
-<!-- 4-tap admin toggle — plain script so it works even if Firebase module fails to load -->
+<!-- Long-press on 🧙 NPC Gen card (3s) → toggle poll admin mode -->
 <script>
 (function() {
-  var btn = document.getElementById('theme-toggle-btn');
-  if (!btn) return;
-  var taps = 0, timer = null;
-  btn.addEventListener('click', function() {
-    taps++;
+  var card = document.getElementById('npc-gen-card');
+  if (!card) return;
+  var icon = card.querySelector('.soon-icon');
+  var timer = null;
+  var HOLD_MS = 3000;
+
+  function startHold() {
     clearTimeout(timer);
-    timer = setTimeout(function() { taps = 0; }, 1500);
-    // Subtle feedback on taps 2 and 3 so admin knows the button is counting
-    if (taps === 2 || taps === 3) {
-      btn.style.opacity = '0.4';
-      setTimeout(function() { btn.style.opacity = ''; }, 180);
+    if (icon) {
+      icon.style.transition = 'transform ' + HOLD_MS + 'ms linear, opacity ' + HOLD_MS + 'ms linear';
+      requestAnimationFrame(function() {
+        icon.style.transform = 'scale(1.5)';
+        icon.style.opacity = '0.5';
+      });
     }
-    if (taps === 4) {
-      taps = 0;
+    timer = setTimeout(function() {
+      timer = null;
+      resetIcon();
       if (typeof window._vaultAdminToggle === 'function') {
         var nowAdmin = window._vaultAdminToggle();
-        var icon = document.getElementById('theme-toggle-icon');
         if (icon) {
           var orig = icon.textContent;
           icon.textContent = nowAdmin ? '⚔' : '🎲';
           setTimeout(function() { icon.textContent = orig; }, 900);
         }
       }
+    }, HOLD_MS);
+  }
+
+  function cancelHold() {
+    if (timer !== null) {
+      clearTimeout(timer);
+      timer = null;
+      resetIcon();
     }
-  });
+  }
+
+  function resetIcon() {
+    if (icon) {
+      icon.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      icon.style.transform = '';
+      icon.style.opacity = '';
+      setTimeout(function() { icon.style.transition = ''; }, 250);
+    }
+  }
+
+  // Mobile — passive:true so we don't block scrolling; cancel on move to avoid scroll false-triggers
+  card.addEventListener('touchstart',  startHold,   { passive: true });
+  card.addEventListener('touchend',    cancelHold);
+  card.addEventListener('touchcancel', cancelHold);
+  card.addEventListener('touchmove',   cancelHold);
+  card.addEventListener('contextmenu', function(e) { e.preventDefault(); }); // block iOS long-press menu
+
+  // Desktop
+  card.addEventListener('mousedown',  startHold);
+  card.addEventListener('mouseup',    cancelHold);
+  card.addEventListener('mouseleave', cancelHold);
 })();
 </script>
 <!-- QR lightbox overlay — tap anywhere to dismiss -->

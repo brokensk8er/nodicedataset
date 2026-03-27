@@ -623,9 +623,12 @@ const IS_DEMO = Object.values(FIREBASE_CONFIG).some(v => v.startsWith('YOUR_'));
 
 // ============================================================
 //  IS ADMIN?
-//  Showrunner taps the page <h1> title 5× quickly (within 2s)
-//  to toggle admin mode. State persists in sessionStorage.
+//  Visit poll.html?admin to enter showrunner mode.
+//  State persists in sessionStorage for the tab's lifetime.
 // ============================================================
+if (new URLSearchParams(window.location.search).has('admin')) {
+  sessionStorage.setItem('nodice_admin', '1');
+}
 let isAdmin = sessionStorage.getItem('nodice_admin') === '1';
 
 // ============================================================
@@ -1229,27 +1232,6 @@ if (IS_DEMO) {
   }
 
   startListening();
-
-  // ── 5× title tap → toggle admin mode ────────────────────
-  ;(function setupAdminToggle() {
-    const h1 = document.querySelector('h1');
-    if (!h1) return;
-    let taps = 0, timer = null;
-    h1.addEventListener('click', () => {
-      taps++;
-      clearTimeout(timer);
-      timer = setTimeout(() => { taps = 0; }, 2000);
-      if (taps >= 5) {
-        taps = 0;
-        isAdmin = !isAdmin;
-        sessionStorage.setItem('nodice_admin', isAdmin ? '1' : '0');
-        h1.style.transition = 'color .15s';
-        h1.style.color = isAdmin ? 'var(--gold)' : 'var(--muted)';
-        setTimeout(() => { h1.style.color = ''; setTimeout(() => { h1.style.transition = ''; }, 200); }, 400);
-        rerenderForAdminChange();
-      }
-    });
-  })();
 }
 
 // ============================================================
