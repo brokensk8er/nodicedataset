@@ -1988,6 +1988,17 @@ if (!IS_DEMO) {
       }
       if(pollUnsubVotes){pollUnsubVotes();pollUnsubVotes=null;}
       pollRenderVote(poll);
+    }, (error) => {
+      // Firebase read failed — show clear error instead of freezing on "Connecting…"
+      document.getElementById('poll-inner').innerHTML = `
+        <div class="poll-setup-notice">
+          <div class="notice-icon">⚠️</div>
+          <div class="notice-title">Database Unreachable</div>
+          <div class="notice-body">Firebase returned: <strong>${error.code}</strong><br><br>
+            Check Realtime Database → Rules in Firebase Console and ensure<br>
+            <code>".read": true, ".write": true</code> are set.</div>
+        </div>`;
+      document.getElementById('poll-footer').innerHTML = pollBadge(false);
     });
   };
 }

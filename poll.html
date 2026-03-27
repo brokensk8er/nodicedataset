@@ -551,8 +551,8 @@
      static content here.
 
      Access modes:
-       Audience: poll.html
-       Admin:    poll.html?admin
+       Audience: poll.html (default)
+       Admin:    tap the <h1> title 5× quickly to toggle
      ============================================ -->
 <main>
   <div class="card" id="card">
@@ -623,9 +623,10 @@ const IS_DEMO = Object.values(FIREBASE_CONFIG).some(v => v.startsWith('YOUR_'));
 
 // ============================================================
 //  IS ADMIN?
-//  Showrunner adds ?admin to the URL: poll.html?admin
+//  Showrunner taps the page <h1> title 5× quickly (within 2s)
+//  to toggle admin mode. State persists in sessionStorage.
 // ============================================================
-const isAdmin = new URLSearchParams(window.location.search).has('admin');
+let isAdmin = sessionStorage.getItem('nodice_admin') === '1';
 
 // ============================================================
 //  SESSION VOTER ID
@@ -1187,10 +1188,68 @@ if (IS_DEMO) {
       if (unsubVotes) { unsubVotes(); unsubVotes = null; }
       myVote = null;
       renderAudienceVote(poll);
+    }, (error) => {
+      // Firebase read failed — show a clear error instead of freezing on spinner
+      cardBody.innerHTML = `
+        <span class="status-icon">⚠️</span>
+        <p class="status-heading">Database Unreachable</p>
+        <p class="status-body">
+          Firebase returned: <code>${error.code}</code><br><br>
+          Most likely your Realtime Database rules are blocking reads.<br><br>
+          In Firebase Console → Realtime Database → Rules, set:<br>
+          <code>{ "rules": { ".read": true, ".write": true } }</code>
+        </p>`;
+      showFooter(`<div class="source-badge demo"><span class="dot"></span>${error.code}</div>`);
     });
   }
 
+  // ── RE-RENDER after admin toggle ─────────────────────────
+  function rerenderForAdminChange() {
+    const poll = currentPollSnap;
+    if (unsubVotes) { unsubVotes(); unsubVotes = null; }
+    if (isAdmin) {
+      subtitle.textContent = 'Showrunner controls';
+      if (!poll || !poll.active) {
+        renderAdminForm();
+      } else {
+        unsubVotes = onValue(votesRef, snap => {
+          const votes = snap.val() || {};
+          if (poll.revealed) renderAdminPostReveal(poll, votes);
+          else renderAdminPreReveal(poll, votes);
+        });
+      }
+    } else {
+      subtitle.textContent = 'The crowd decides';
+      myVote = null;
+      sessionStorage.removeItem('nodice_poll_vote_ts');
+      sessionStorage.removeItem('nodice_poll_vote_choice');
+      if (!poll || !poll.active) renderAudienceWaiting();
+      else renderAudienceVote(poll);
+    }
+  }
+
   startListening();
+
+  // ── 5× title tap → toggle admin mode ────────────────────
+  ;(function setupAdminToggle() {
+    const h1 = document.querySelector('h1');
+    if (!h1) return;
+    let taps = 0, timer = null;
+    h1.addEventListener('click', () => {
+      taps++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { taps = 0; }, 2000);
+      if (taps >= 5) {
+        taps = 0;
+        isAdmin = !isAdmin;
+        sessionStorage.setItem('nodice_admin', isAdmin ? '1' : '0');
+        h1.style.transition = 'color .15s';
+        h1.style.color = isAdmin ? 'var(--gold)' : 'var(--muted)';
+        setTimeout(() => { h1.style.color = ''; setTimeout(() => { h1.style.transition = ''; }, 200); }, 400);
+        rerenderForAdminChange();
+      }
+    });
+  })();
 }
 
 // ============================================================
