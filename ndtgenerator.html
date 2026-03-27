@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NDT Content Generator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap');
+
+:root {
+  --ink: #1a1a2e;
+  --parchment: #faf7f2;
+  --gold: #c9a84c;
+  --gold-dim: #a07c2e;
+  --gold-bg: #fffdf5;
+  --border: #e8e2d9;
+  --muted: #6b6676;
+  --pass: #2d6a4f;
+  --fail: #c1121f;
+  --card: #ffffff;
+  --shadow: rgba(26,26,46,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  background: var(--parchment);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 1.25rem 1rem 2.5rem;
+}
+
+header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gold-dim);
+  letter-spacing: 0.04em;
+}
+
+header p {
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 0.65rem;
+}
+
+label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+select, input[type="number"], input[type="password"], textarea {
+  width: 100%;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.83rem;
+  color: var(--ink);
+  background: var(--parchment);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 0.65rem;
+}
+
+select:focus, input:focus, textarea:focus { border-color: var(--gold); }
+textarea { min-height: 68px; resize: vertical; line-height: 1.55; margin-bottom: 0; }
+
+.row { display: flex; gap: 0.65rem; }
+.row > div { flex: 1; }
+
+.hint { font-size: 0.68rem; color: var(--muted); line-height: 1.5; margin-top: 0.25rem; }
+
+.btn {
+  width: 100%;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--parchment);
+  background: var(--gold-dim);
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn:hover:not(:disabled) { background: var(--gold); }
+.btn:active:not(:disabled) { transform: scale(0.98); }
+.btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--gold-dim);
+  border: 1px solid var(--gold-dim);
+  margin-top: 0.45rem;
+}
+.btn-outline:hover:not(:disabled) { background: var(--gold-bg); }
+
+.btn-danger {
+  background: transparent;
+  color: var(--fail);
+  border: 1px solid var(--fail);
+  margin-top: 0.45rem;
+  font-size: 0.72rem;
+  padding: 0.55rem;
+}
+.btn-danger:hover:not(:disabled) { background: #fff0f0; }
+
+.entries-wrap {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--parchment);
+  margin-bottom: 0.65rem;
+}
+
+.entry-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.42rem 0.65rem;
+  border-bottom: 1px solid var(--border);
+  gap: 0.4rem;
+  animation: fadeSlide 0.18s ease;
+}
+.entry-row:last-child { border-bottom: none; }
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.entry-text { flex: 1; font-size: 0.8rem; line-height: 1.45; color: var(--ink); padding-top: 1px; }
+
+.entry-del {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  font-size: 1rem; padding: 0 0.2rem;
+  line-height: 1; transition: color 0.15s; flex-shrink: 0;
+}
+.entry-del:hover { color: var(--fail); }
+
+.badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.18rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+.badge-gold { background: var(--gold-bg); color: var(--gold-dim); border: 1px solid var(--gold); }
+
+.log {
+  background: var(--ink);
+  color: #a8d8a8;
+  font-family: monospace;
+  font-size: 0.73rem;
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  min-height: 64px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.log .err  { color: #f4a0a0; }
+.log .warn { color: #ffd580; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; animation: spin 0.9s linear infinite; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NDT Content Generator</h1>
+  <p>No Dice Toolset · AI-Powered Staging Tool</p>
+</header>
+
+<div class="card">
+  <div class="section-label">Firebase Connection</div>
+  <label>Database Secret</label>
+  <input type="password" id="db-secret" placeholder="Paste your Firebase database secret..." />
+  <p class="hint">Firebase Console → Project Settings → Service Accounts → Database secrets.</p>
+  <button class="btn" id="connect-btn" onclick="connectFirebase()">Connect</button>
+</div>
+
+<div class="card">
+  <div class="section-label">Generate Entries</div>
+  <div class="row">
+    <div>
+      <label>Tab / Category</label>
+      <select id="tab-select">
+        <option value="Races">Races</option>
+        <option value="Classes">Classes</option>
+        <option value="Backstories">Backstories</option>
+        <option value="Quirks">Quirks</option>
+        <option value="Secrets">Secrets</option>
+        <option value="Loot">Loot</option>
+      </select>
+    </div>
+    <div>
+      <label>How many?</label>
+      <input type="number" id="count-input" value="20" min="1" max="150" />
+    </div>
+  </div>
+  <label>Instructions for Claude</label>
+  <textarea id="prompt-extra" placeholder="e.g. Focus on funny ones. Include some obscure races. Avoid verbose entries..."></textarea>
+  <p class="hint">Optional — leave blank for sensible defaults per category.</p>
+  <hr>
+  <button class="btn" id="gen-btn" onclick="generate()">Generate with Claude</button>
+</div>
+
+<div class="card" id="results-card" style="display:none">
+  <div class="section-label">
+    Generated Entries
+    <span class="badge badge-gold" id="count-badge">0</span>
+  </div>
+  <div class="entries-wrap" id="entries-list"></div>
+  <button class="btn" id="push-btn" onclick="pushToStaging()">Push to Staging</button>
+  <button class="btn btn-outline" onclick="regenerate()">Regenerate</button>
+  <button class="btn btn-danger" onclick="clearAll()">Clear</button>
+</div>
+
+<div class="card">
+  <div class="section-label">Log</div>
+  <div class="log" id="log">Ready. Connect Firebase above, then generate entries.</div>
+</div>
+
+<script>
+const FIREBASE_URL = 'https://nodicepolls-default-rtdb.firebaseio.com';
+const STAGING_NODE = 'nodicesheetdata_staging';
+let DB_SECRET = '';
+let entries   = [];
+
+const SYSTEM_PROMPTS = {
+  Races:       'You generate Race/Species entries for an improv D&D comedy show. Mix clean race names (e.g. "Githyanki", "Tabaxi") with short funny descriptors (e.g. "A Warforged on their third career"). About 20% should be longer/funnier. No parenthetical racial descriptions unless the race is very obscure. No duplicates within your response.',
+  Classes:     'You generate Class entries for an improv D&D comedy show. Mix clean class names with short funny variants (e.g. "Bard who knows three chords and is extremely confident"). About 20% longer/funnier. No duplicates.',
+  Backstories: 'You generate one-sentence absurd Backstory entries for an improv D&D comedy show. Keep most concise, make about 20% more elaborate and funny. No duplicates.',
+  Quirks:      'You generate short Personality Quirk entries for an improv D&D comedy show. Funny and specific behaviours. Keep most under 15 words, allow 20% to be longer. No duplicates.',
+  Secrets:     'You generate Secret/Flaw entries for an improv D&D comedy show. One-sentence secrets that are funny, embarrassing or absurd. No duplicates.',
+  Loot:        'You generate Loot item names for an improv D&D comedy show. Just the item name — funny, evocative, short. No descriptions. No duplicates.',
+};
+
+function connectFirebase() {
+  const s = document.getElementById('db-secret').value.trim();
+  if (!s) { log('Enter your Firebase database secret first.', 'err'); return; }
+  DB_SECRET = s;
+  document.getElementById('db-secret').disabled = true;
+  document.getElementById('connect-btn').textContent = 'Connected ✓';
+  document.getElementById('connect-btn').disabled = true;
+  log('🔑 Firebase connected. Ready to generate.');
+}
+
+async function generate() {
+  const tab   = document.getElementById('tab-select').value;
+  const count = parseInt(document.getElementById('count-input').value) || 20;
+  const extra = document.getElementById('prompt-extra').value.trim();
+  const btn   = document.getElementById('gen-btn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⚔</span> Consulting the dice gods...';
+  log(`Requesting ${count} entries for: ${tab}...`);
+
+  const system = (SYSTEM_PROMPTS[tab] || SYSTEM_PROMPTS.Races) +
+    '\n\nReturn ONLY a plain numbered list. One entry per line. No preamble, no markdown, no commentary.';
+
+  let userMsg = `Generate ${count} new ${tab} entries for an improv D&D show.`;
+  if (extra) userMsg += ` Additional instructions: ${extra}`;
+  userMsg += '\n\nNumbered list only. No other text.';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system:     system,
+        messages:   [{ role: 'user', content: userMsg }],
+      }),
+    });
+
+    if (!resp.ok) throw new Error(`API ${resp.status}: ${await resp.text()}`);
+
+    const data = await resp.json();
+    const text = (data.content || []).map(b => b.text || '').join('').trim();
+    if (!text) throw new Error('Empty response from Claude');
+
+    entries = text
+      .split('\n')
+      .map(l => l.replace(/^\d+[\.\)]\s*/, '').trim())
+      .filter(l => l.length > 0);
+
+    if (!entries.length) throw new Error('Could not parse entries from response');
+
+    renderEntries();
+    log(`✅ Generated ${entries.length} entries. Review then push to staging.`);
+
+  } catch(e) {
+    log(`❌ Generation failed: ${e.message}`, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate with Claude';
+}
+
+function renderEntries() {
+  const list = document.getElementById('entries-list');
+  list.innerHTML = '';
+  entries.forEach((e, i) => {
+    const row = document.createElement('div');
+    row.className = 'entry-row';
+    row.innerHTML = `<span class="entry-text">${esc(e)}</span><button class="entry-del" onclick="removeEntry(${i})">×</button>`;
+    list.appendChild(row);
+  });
+  document.getElementById('count-badge').textContent = entries.length + ' entries';
+  document.getElementById('results-card').style.display = 'block';
+}
+
+function removeEntry(i) { entries.splice(i, 1); renderEntries(); }
+function clearAll() { entries = []; document.getElementById('results-card').style.display = 'none'; log('Cleared.'); }
+function regenerate() { clearAll(); generate(); }
+
+async function pushToStaging() {
+  if (!DB_SECRET) { log('Connect Firebase first.', 'err'); return; }
+  if (!entries.length) { log('Nothing to push.', 'err'); return; }
+
+  const tab    = document.getElementById('tab-select').value;
+  const tabKey = tab.replace(/[.$#[\]/\s]/g, '_');
+  const btn    = document.getElementById('push-btn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⚔</span> Pushing to staging...';
+  log(`Reading existing staging for ${tab}...`);
+
+  try {
+    const readResp = await fetch(`${FIREBASE_URL}/${STAGING_NODE}.json?auth=${DB_SECRET}`);
+    if (!readResp.ok) throw new Error(`Firebase read failed HTTP ${readResp.status}`);
+
+    const existing = await readResp.json();
+    const current  = existing?.[tabKey] || [];
+    log(`Found ${current.length} existing entries in staging/${tab}.`, 'warn');
+
+    const norm        = s => String(s).toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+    const existingSet = new Set(current.map(norm));
+    const newItems    = entries.filter(e => !existingSet.has(norm(e)));
+
+    log(`After deduplication: ${newItems.length} new entries to add.`);
+
+    if (!newItems.length) {
+      log('✅ All entries already exist in staging.');
+      btn.disabled = false;
+      btn.textContent = 'Push to Staging';
+      return;
+    }
+
+    const merged = [...current, ...newItems];
+    const writeResp = await fetch(
+      `${FIREBASE_URL}/${STAGING_NODE}/${tabKey}.json?auth=${DB_SECRET}`,
+      { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(merged) }
+    );
+
+    if (!writeResp.ok) throw new Error(`Firebase write failed HTTP ${writeResp.status}`);
+
+    log(`✅ Pushed ${newItems.length} new entries to staging/${tab}.`);
+    log(`Total in staging/${tab}: ${merged.length}`);
+    log(`⚔  Run approveStaging() in Apps Script to promote to Sheet + live Firebase.`, 'warn');
+
+  } catch(e) {
+    log(`❌ ${e.message}`, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Push to Staging';
+}
+
+function log(msg, type) {
+  const el = document.getElementById('log');
+  el.innerHTML += `<span class="${type || 'ok'}">${esc(msg)}</span>\n`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
