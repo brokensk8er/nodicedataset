@@ -1720,6 +1720,8 @@ if (!IS_DEMO) {
     sessionStorage.setItem('nodice_vault_admin', '1');
     // Auto-open the poll shelf so admin doesn't have to hunt for it
     if (typeof window.toggleShelf === 'function') window.toggleShelf('poll');
+  } else {
+    sessionStorage.removeItem('nodice_vault_admin'); // always start as audience unless ?admin is in URL
   }
   let isAdmin = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; hold 🧙 NPC card 3s to toggle, or visit ?admin
   const pollVoterId    = pollGetVoterId();
