@@ -1716,7 +1716,7 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; 5-second long-press on the theme button to toggle
+  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; tap theme button 4× rapidly to toggle
   const pollVoterId    = pollGetVoterId();
   let pollCurrentSnap  = null;
   let pollUnsubVotes   = null;
@@ -2027,21 +2027,22 @@ if (!IS_DEMO) {
     }
   }
 
-  // ── 5-second long-press on the theme-toggle button → toggle admin ──
-  // Suppresses the normal theme-switch click if the long-press fires.
+  // ── 4 rapid taps on the theme button → toggle admin ─────────────
+  // Each tap still toggles the theme normally. 4 taps = even number,
+  // so theme returns to its starting state. On tap 4, admin flips too.
   ;(function() {
     const btn = document.getElementById('theme-toggle-btn');
     if (!btn) return;
-    let pressTimer = null;
-    let consumed   = false;
-    btn.addEventListener('pointerdown', () => {
-      consumed = false;
-      pressTimer = setTimeout(() => {
-        pressTimer = null;
-        consumed   = true;
-        isAdmin    = !isAdmin;
+    let taps = 0, timer = null;
+    btn.addEventListener('click', () => {
+      taps++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { taps = 0; }, 1500);
+      if (taps === 4) {
+        taps = 0;
+        isAdmin = !isAdmin;
         sessionStorage.setItem('nodice_vault_admin', isAdmin ? '1' : '0');
-        // Brief icon flash to confirm the toggle (⚔ = admin, 🎲 = audience)
+        // Brief icon flash: ⚔ = admin on, 🎲 = back to audience
         const icon = document.getElementById('theme-toggle-icon');
         if (icon) {
           const orig = icon.textContent;
@@ -2049,13 +2050,8 @@ if (!IS_DEMO) {
           setTimeout(() => { icon.textContent = orig; }, 900);
         }
         pollRerenderForAdminChange();
-      }, 5000);
+      }
     });
-    btn.addEventListener('pointerup',    () => clearTimeout(pressTimer));
-    btn.addEventListener('pointerleave', () => clearTimeout(pressTimer));
-    btn.addEventListener('contextmenu',  e  => { clearTimeout(pressTimer); e.preventDefault(); });
-    // Capture-phase click listener — swallows the click if long-press just fired
-    btn.addEventListener('click', e => { if (consumed) { consumed = false; e.stopImmediatePropagation(); } }, true);
   })();
 }
 
