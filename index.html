@@ -495,10 +495,9 @@
 
   .loot-wide {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    flex-direction: column;
     gap: 12px;
-    padding: 12px 12px 14px;
+    padding: 12px 12px 0;
   }
 
   .loot-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -528,15 +527,15 @@
   .loot-item-flavour.fading { opacity: 0; }
 
   .loot-image-slot {
-    flex-shrink: 0;
-    width: 80px; height: 80px;
+    width: 100%;
+    min-height: 60px;
     border-radius: 10px;
     background: linear-gradient(135deg, #1a1400, #2a2000);
     border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
-  .loot-image-slot img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .loot-image-slot img { max-width: 100%; height: auto; display: block; border-radius: 10px; }
   .loot-slot-icon { font-size: 1.5rem; opacity: .45; }
 
   .loot-footer {
@@ -727,7 +726,7 @@
        The gold word in h1 is wrapped in a <span>.
        ============================================ -->
   <header style="position:relative;">
-    <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+    <p class="site-label">No Dice &mdash; Improv RPG</p>
     <h1>The <span>Vault</span></h1>
     <p class="tagline">Every tool. One scroll. Zero excuses.</p>
     <div class="header-divider"></div>
@@ -938,7 +937,7 @@
 
   </main>
 
-  <footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
+  <footer>No Dice &mdash; Improv RPG &mdash; 2025</footer>
 </div>
 
 <!-- Plain script: toggleShelf must be on window BEFORE any click happens.
@@ -1713,7 +1712,7 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  const isAdmin        = true; // Vault is showrunner-facing — always admin mode
+  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') !== '0'; // default admin; tap "The Poll" title 5× to toggle
   const pollVoterId    = pollGetVoterId();
   let pollCurrentSnap  = null;
   let pollUnsubVotes   = null;
@@ -2001,6 +2000,56 @@ if (!IS_DEMO) {
       document.getElementById('poll-footer').innerHTML = pollBadge(false);
     });
   };
+
+  // ── Re-render after admin toggle ─────────────────────────
+  function pollRerenderForAdminChange() {
+    const poll = pollCurrentSnap;
+    if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
+    if (isAdmin) {
+      if (!poll || !poll.active) {
+        pollRenderAdminForm();
+      } else {
+        pollUnsubVotes = onValue(votesRef2, snap => {
+          const votes = snap.val() || {};
+          if (poll.revealed) pollRenderAdminPostReveal(poll, votes);
+          else               pollRenderAdminPreReveal(poll, votes);
+        });
+      }
+    } else {
+      sessionStorage.removeItem('nodice_vault_vote_ts');
+      sessionStorage.removeItem('nodice_vault_vote_choice');
+      if (!poll || !poll.active) pollRenderWaiting();
+      else pollRenderVote(poll);
+    }
+  }
+
+  // ── 5× tap on "The Poll" shelf title → toggle admin ──────
+  ;(function() {
+    const nameEl = document.querySelector('#shelf-poll .shelf-name');
+    if (!nameEl) return;
+    let taps = 0, timer = null;
+    nameEl.addEventListener('click', e => {
+      if (!document.getElementById('shelf-poll').classList.contains('open')) return;
+      e.stopPropagation();
+      taps++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { taps = 0; }, 2000);
+      if (taps >= 5) {
+        taps = 0;
+        isAdmin = !isAdmin;
+        sessionStorage.setItem('nodice_vault_admin', isAdmin ? '1' : '0');
+        nameEl.style.transition = 'color .15s';
+        nameEl.style.color = isAdmin ? 'var(--gold)' : 'var(--muted)';
+        setTimeout(() => { nameEl.style.color = ''; setTimeout(() => { nameEl.style.transition = ''; }, 200); }, 400);
+        // Close the drawer, then reopen to new view
+        window.toggleShelf('poll');
+        setTimeout(() => {
+          window.toggleShelf('poll');
+          pollRerenderForAdminChange();
+        }, 320);
+      }
+    });
+  })();
 }
 
 </script>

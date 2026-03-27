@@ -273,12 +273,12 @@ let DB_SECRET = '';
 let entries   = [];
 
 const SYSTEM_PROMPTS = {
-  Races:       'You generate Race/Species entries for an improv D&D comedy show. Mix clean race names (e.g. "Githyanki", "Tabaxi") with short funny descriptors (e.g. "A Warforged on their third career"). About 20% should be longer/funnier. No parenthetical racial descriptions unless the race is very obscure. No duplicates within your response.',
-  Classes:     'You generate Class entries for an improv D&D comedy show. Mix clean class names with short funny variants (e.g. "Bard who knows three chords and is extremely confident"). About 20% longer/funnier. No duplicates.',
-  Backstories: 'You generate one-sentence absurd Backstory entries for an improv D&D comedy show. Keep most concise, make about 20% more elaborate and funny. No duplicates.',
-  Quirks:      'You generate short Personality Quirk entries for an improv D&D comedy show. Funny and specific behaviours. Keep most under 15 words, allow 20% to be longer. No duplicates.',
-  Secrets:     'You generate Secret/Flaw entries for an improv D&D comedy show. One-sentence secrets that are funny, embarrassing or absurd. No duplicates.',
-  Loot:        'You generate Loot item names for an improv D&D comedy show. Just the item name — funny, evocative, short. No descriptions. No duplicates.',
+  Races:       'You generate Race/Species entries for an improv RPG comedy show. Mix clean race names (e.g. "Githyanki", "Tabaxi") with short funny descriptors (e.g. "A Warforged on their third career"). About 20% should be longer/funnier. No parenthetical racial descriptions unless the race is very obscure. No duplicates within your response.',
+  Classes:     'You generate Class entries for an improv RPG comedy show. Mix clean class names with short funny variants (e.g. "Bard who knows three chords and is extremely confident"). About 20% longer/funnier. No duplicates.',
+  Backstories: 'You generate one-sentence absurd Backstory entries for an improv RPG comedy show. Keep most concise, make about 20% more elaborate and funny. No duplicates.',
+  Quirks:      'You generate short Personality Quirk entries for an improv RPG comedy show. Funny and specific behaviours. Keep most under 15 words, allow 20% to be longer. No duplicates.',
+  Secrets:     'You generate Secret/Flaw entries for an improv RPG comedy show. One-sentence secrets that are funny, embarrassing or absurd. No duplicates.',
+  Loot:        'You generate Loot item names for an improv RPG comedy show. Just the item name — funny, evocative, short. No descriptions. No duplicates.',
 };
 
 function connectFirebase() {
@@ -304,7 +304,7 @@ async function generate() {
   const system = (SYSTEM_PROMPTS[tab] || SYSTEM_PROMPTS.Races) +
     '\n\nReturn ONLY a plain numbered list. One entry per line. No preamble, no markdown, no commentary.';
 
-  let userMsg = `Generate ${count} new ${tab} entries for an improv D&D show.`;
+  let userMsg = `Generate ${count} new ${tab} entries for an improv RPG show.`;
   if (extra) userMsg += ` Additional instructions: ${extra}`;
   userMsg += '\n\nNumbered list only. No other text.';
 
