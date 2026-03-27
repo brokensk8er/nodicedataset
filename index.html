@@ -1716,7 +1716,7 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; long-press the site label to toggle
+  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; 5-second long-press on the theme button to toggle
   const pollVoterId    = pollGetVoterId();
   let pollCurrentSnap  = null;
   let pollUnsubVotes   = null;
@@ -2027,25 +2027,35 @@ if (!IS_DEMO) {
     }
   }
 
-  // ── Long-press on "No Dice — Improv RPG" site label → toggle admin ──
+  // ── 5-second long-press on the theme-toggle button → toggle admin ──
+  // Suppresses the normal theme-switch click if the long-press fires.
   ;(function() {
-    const label = document.querySelector('header .site-label');
-    if (!label) return;
+    const btn = document.getElementById('theme-toggle-btn');
+    if (!btn) return;
     let pressTimer = null;
-    label.addEventListener('pointerdown', () => {
+    let consumed   = false;
+    btn.addEventListener('pointerdown', () => {
+      consumed = false;
       pressTimer = setTimeout(() => {
         pressTimer = null;
-        isAdmin = !isAdmin;
+        consumed   = true;
+        isAdmin    = !isAdmin;
         sessionStorage.setItem('nodice_vault_admin', isAdmin ? '1' : '0');
-        label.style.transition = 'color .2s';
-        label.style.color = isAdmin ? 'var(--gold)' : 'var(--muted)';
-        setTimeout(() => { label.style.color = ''; setTimeout(() => { label.style.transition = ''; }, 200); }, 600);
+        // Brief icon flash to confirm the toggle (⚔ = admin, 🎲 = audience)
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) {
+          const orig = icon.textContent;
+          icon.textContent = isAdmin ? '⚔' : '🎲';
+          setTimeout(() => { icon.textContent = orig; }, 900);
+        }
         pollRerenderForAdminChange();
-      }, 600);
+      }, 5000);
     });
-    label.addEventListener('pointerup',    () => clearTimeout(pressTimer));
-    label.addEventListener('pointerleave', () => clearTimeout(pressTimer));
-    label.addEventListener('contextmenu',  e  => { clearTimeout(pressTimer); e.preventDefault(); });
+    btn.addEventListener('pointerup',    () => clearTimeout(pressTimer));
+    btn.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+    btn.addEventListener('contextmenu',  e  => { clearTimeout(pressTimer); e.preventDefault(); });
+    // Capture-phase click listener — swallows the click if long-press just fired
+    btn.addEventListener('click', e => { if (consumed) { consumed = false; e.stopImmediatePropagation(); } }, true);
   })();
 }
 
