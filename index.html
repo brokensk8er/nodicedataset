@@ -539,7 +539,7 @@
   .loot-slot-icon { font-size: 1.5rem; opacity: .45; }
 
   .loot-footer {
-    padding: 0 12px 12px;
+    padding: 8px 12px 12px;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
   .btn-pull {
@@ -1651,16 +1651,20 @@ function traitRenderItem(item) {
   if (!item) {
     content = `<div class="trait-wide"><div class="trait-big-value">&nbsp;</div></div>`;
   } else if (isLoot) {
-    const imgHtml = item.image ? `<div class="loot-image-slot" style="width:64px;height:64px;"><img src="${item.image}" alt="" /></div>` : `<div class="loot-image-slot" style="width:64px;height:64px;"><span class="loot-slot-icon">✨</span></div>`;
+    const imgHtml = item.image
+      ? `<div class="loot-image-slot"><img src="${item.image}" alt="" style="width:100%;height:auto;display:block;" /></div>`
+      : `<div class="loot-image-slot"><span class="loot-slot-icon">✨</span></div>`;
     content = `<div class="trait-wide">
-      <div style="display:flex;gap:10px;align-items:flex-start;">
-        ${imgHtml}
-        <div>
-          <div class="trait-display-label">Magic Item</div>
-          <div class="trait-loot-name">${esc(item.value)}</div>
-          ${item.flavour ? `<div class="trait-loot-flavour" style="margin-top:4px;">${esc(item.flavour)}</div>` : ''}
-        </div>
+      ${imgHtml}
+      <div>
+        <div class="loot-item-name-label">Magic Item</div>
+        <div class="loot-item-name">${esc(item.value)}</div>
       </div>
+      <div class="loot-divider"></div>
+      ${item.flavour ? `<div>
+        <div class="loot-item-flavour-label">Description</div>
+        <div class="loot-item-flavour">${esc(item.flavour)}</div>
+      </div>` : ''}
       <div class="trait-source-tag">from: ${esc(item.sheet)}</div>
     </div>`;
   } else {
@@ -1712,7 +1716,7 @@ if (!IS_DEMO) {
     votesRef2 = ref(db2, 'nodice/votes');
   } catch(e) {}
 
-  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') !== '0'; // default admin; tap "The Poll" title 5× to toggle
+  let isAdmin          = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; 5-second long-press on the theme button to toggle
   const pollVoterId    = pollGetVoterId();
   let pollCurrentSnap  = null;
   let pollUnsubVotes   = null;
@@ -2023,32 +2027,35 @@ if (!IS_DEMO) {
     }
   }
 
-  // ── 5× tap on "The Poll" shelf title → toggle admin ──────
+  // ── 5-second long-press on the theme-toggle button → toggle admin ──
+  // Suppresses the normal theme-switch click if the long-press fires.
   ;(function() {
-    const nameEl = document.querySelector('#shelf-poll .shelf-name');
-    if (!nameEl) return;
-    let taps = 0, timer = null;
-    nameEl.addEventListener('click', e => {
-      if (!document.getElementById('shelf-poll').classList.contains('open')) return;
-      e.stopPropagation();
-      taps++;
-      clearTimeout(timer);
-      timer = setTimeout(() => { taps = 0; }, 2000);
-      if (taps >= 5) {
-        taps = 0;
-        isAdmin = !isAdmin;
+    const btn = document.getElementById('theme-toggle-btn');
+    if (!btn) return;
+    let pressTimer = null;
+    let consumed   = false;
+    btn.addEventListener('pointerdown', () => {
+      consumed = false;
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        consumed   = true;
+        isAdmin    = !isAdmin;
         sessionStorage.setItem('nodice_vault_admin', isAdmin ? '1' : '0');
-        nameEl.style.transition = 'color .15s';
-        nameEl.style.color = isAdmin ? 'var(--gold)' : 'var(--muted)';
-        setTimeout(() => { nameEl.style.color = ''; setTimeout(() => { nameEl.style.transition = ''; }, 200); }, 400);
-        // Close the drawer, then reopen to new view
-        window.toggleShelf('poll');
-        setTimeout(() => {
-          window.toggleShelf('poll');
-          pollRerenderForAdminChange();
-        }, 320);
-      }
+        // Brief icon flash to confirm the toggle (⚔ = admin, 🎲 = audience)
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) {
+          const orig = icon.textContent;
+          icon.textContent = isAdmin ? '⚔' : '🎲';
+          setTimeout(() => { icon.textContent = orig; }, 900);
+        }
+        pollRerenderForAdminChange();
+      }, 5000);
     });
+    btn.addEventListener('pointerup',    () => clearTimeout(pressTimer));
+    btn.addEventListener('pointerleave', () => clearTimeout(pressTimer));
+    btn.addEventListener('contextmenu',  e  => { clearTimeout(pressTimer); e.preventDefault(); });
+    // Capture-phase click listener — swallows the click if long-press just fired
+    btn.addEventListener('click', e => { if (consumed) { consumed = false; e.stopImmediatePropagation(); } }, true);
   })();
 }
 
