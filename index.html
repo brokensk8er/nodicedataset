@@ -1718,6 +1718,8 @@ if (!IS_DEMO) {
 
   if (new URLSearchParams(window.location.search).has('admin')) {
     sessionStorage.setItem('nodice_vault_admin', '1');
+    // Auto-open the poll shelf so admin doesn't have to hunt for it
+    if (typeof window.toggleShelf === 'function') window.toggleShelf('poll');
   }
   let isAdmin = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; hold 🧙 NPC card 3s to toggle, or visit ?admin
   const pollVoterId    = pollGetVoterId();
@@ -2048,8 +2050,10 @@ if (!IS_DEMO) {
   var icon = card.querySelector('.soon-icon');
   var timer = null;
   var HOLD_MS = 3000;
+  var startX = 0, startY = 0;
 
-  function startHold() {
+  function startHold(e) {
+    if (e && e.touches) { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }
     clearTimeout(timer);
     if (icon) {
       icon.style.transition = 'transform ' + HOLD_MS + 'ms linear, opacity ' + HOLD_MS + 'ms linear';
@@ -2089,11 +2093,16 @@ if (!IS_DEMO) {
     }
   }
 
-  // Mobile — passive:true so we don't block scrolling; cancel on move to avoid scroll false-triggers
-  card.addEventListener('touchstart',  startHold,   { passive: true });
+  // Mobile — passive:true so we don't block scrolling
+  // Only cancel on touchmove if finger has moved >10px (ignore micro-tremor)
+  card.addEventListener('touchstart',  startHold, { passive: true });
   card.addEventListener('touchend',    cancelHold);
   card.addEventListener('touchcancel', cancelHold);
-  card.addEventListener('touchmove',   cancelHold);
+  card.addEventListener('touchmove', function(e) {
+    var dx = e.touches[0].clientX - startX;
+    var dy = e.touches[0].clientY - startY;
+    if (dx*dx + dy*dy > 100) cancelHold(); // >10px movement = intentional scroll
+  }, { passive: true });
   card.addEventListener('contextmenu', function(e) { e.preventDefault(); }); // block iOS long-press menu
 
   // Desktop
