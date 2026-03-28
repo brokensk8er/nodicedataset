@@ -1,7 +1,7 @@
 # NO DICE — THE TOOLSET
-### Improv D&D · Static GitHub Pages · Mobile-First
+### Improv RPG · Static GitHub Pages · Mobile-First
 
-*A suite of tools for live improv D&D shows. Players scan a QR code. Fate does the rest. No actual dice required or permitted.*
+*A suite of tools for live improv RPG shows. Players scan a QR code. Fate does the rest. No actual dice required or permitted.*
 
 ---
 
@@ -46,6 +46,8 @@ Players scan a QR code at the show and land on the Vault (`index.html`) — a sc
 ├── design-system.css   — Visual reference (not linked — docs only)
 ├── character-data.csv  — Starter data for Google Sheets import
 ├── FIREBASE_SETUP.md   — Firebase setup guide for poll.html
+├── ndtgenerator.html   — NDT generator (standalone)
+├── icons/              — AI-generated loot item artwork (55 images)
 └── README.md           — You are here
 ```
 
@@ -65,15 +67,12 @@ Six fields in a scrollable white card: Name, Race/Species, Class, Backstory, Per
 Binary pass/fail. Custom coin artwork embedded as base64 PNGs. Confetti + Web Audio coin chime on pass, womp-womp trombone on fail. 16 flavour lines per outcome. Zero external dependencies.
 
 ### Loot Table (`loot.html`)
-Single card. Sheet tab: `Loot` — Col A: name, Col B: flavour, Col C: image data URI. Shuffle-bag ensures the full list is seen before any repeat. Animated fade on each pull.
+Single card. Sheet tab: `Loot` — Col A: name, Col B: flavour, Col C: image data URI or filename (served from `icons/`). Shuffle-bag ensures the full list is seen before any repeat. Animated fade on each pull. 55 AI-generated item images ship in `icons/`.
 
 ### The Poll (`poll.html`)
 Firebase Realtime Database for live vote sync. See `FIREBASE_SETUP.md`.
 
-| URL | Who | What |
-|-----|-----|------|
-| `poll.html` | Audience | Vote → waiting → results |
-| `poll.html?admin` | Showrunner | Build poll → watch votes → reveal |
+Audience view is the default. Showrunner activates admin mode by **tapping the poll title 5 times within 2 seconds** — a brief gold flash confirms the switch. State persists in `sessionStorage` key `nodice_vault_admin` for the duration of the browser session. The same 5x-tap gesture works inside the Vault shelf or on the standalone `poll.html`.
 
 2–5 options per poll. Results hidden until the showrunner reveals them. Votes are anonymous, tied to a `sessionStorage` UUID that clears when the tab closes.
 
@@ -222,7 +221,7 @@ All shared styles live in `styles.css`. Each tool page has a small inline `<styl
 - [ ] QR code (`qrcode.html`) tested and points to the live URL
 - [ ] Firebase rules not expired (test mode expires 30 days — check the Rules tab)
 - [ ] Poll tested end-to-end: create, vote, reveal, clear
-- [ ] Showrunner has `poll.html?admin` bookmarked
+- [ ] Showrunner knows the 5x-tap admin toggle on the poll title
 - [ ] Dev Reset button in `chargen.html` auto-hides until mulligans run out — verify it's not visible before first spend
 - [ ] API key restrictions include the live GitHub Pages URL
 - [ ] All tools tested on the actual show device in dark mode
@@ -231,8 +230,8 @@ All shared styles live in `styles.css`. Each tool page has a small inline `<styl
 
 ## Resuming Work With Claude
 
-> *I'm building an improv D&D tool suite on GitHub Pages called "No Dice." The Vault (`index.html`) is an accordion hub — each tool has an inline shelf and a standalone page. Tools: Character Generator (`chargen.html`), Fate's Flip (`coinflip.html`), Loot Table (`loot.html`), Poll (`poll.html`, Firebase), Trait Generator (`traitgen.html`), QR Code (`qrcode.html`). Shared stylesheet: `styles.css` (tokens, typography, buttons, dark mode, animations). Cinzel/Lato, parchment palette. chargen, loot, traitgen pull from Google Sheets (already wired). traitgen auto-discovers Sheet tabs, excludes via `EXCLUDE_TABS`, shows full loot card for the Loot tab. poll.html uses Firebase (already wired); showrunner via `?admin`. chargen and traitgen share 3-mulligan / 1-hour lockout / localStorage. Dark/light toggle on every page via `localStorage` key `vaultTheme`. I'd like to [describe what you need].*
+> *I'm building an improv RPG tool suite on GitHub Pages called "No Dice." The Vault (`index.html`) is an accordion hub — each tool has an inline shelf and a standalone page. Tools: Character Generator (`chargen.html`), Fate's Flip (`coinflip.html`), Loot Table (`loot.html`), Poll (`poll.html`, Firebase), Trait Generator (`traitgen.html`), QR Code (`qrcode.html`). Shared stylesheet: `styles.css` (tokens, typography, buttons, dark mode, animations). Cinzel/Lato, parchment palette. chargen, loot, traitgen pull from Google Sheets (already wired). traitgen auto-discovers Sheet tabs, excludes via `EXCLUDE_TABS`, shows full loot card for the Loot tab. poll.html uses Firebase (already wired); showrunner toggles admin mode via 5x-tap on the poll title (persists in sessionStorage key `nodice_vault_admin`). chargen and traitgen share 3-mulligan / 1-hour lockout / localStorage. Dark/light toggle on every page via `localStorage` key `vaultTheme`. I'd like to [describe what you need].*
 
 ---
 
-*Built with Claude · No Dice · Improv D&D · Your hometown, probably*
+*Built with Claude · No Dice · Improv RPG · Your hometown, probably*
