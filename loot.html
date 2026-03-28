@@ -179,7 +179,10 @@
      Padding is 9px 0 10px here (no side padding) — overrides shared value */
   .card-footer { padding: 16px 0 10px; }
 
-  /* .pull-btn comes from styles.css */
+  /* .pull-btn base + :active come from styles.css */
+  /* Dark-theme hover: --ink-hover goes near-black, so we lighten it */
+  [data-theme="dark"]  .pull-btn:hover  { background: #d8d0b8; }
+  [data-theme="light"] .pull-btn:hover  { background: var(--ink-hover); }
 
   /* .loading + .loading .spinner come from styles.css */
 
