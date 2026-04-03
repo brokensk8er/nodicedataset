@@ -10,8 +10,8 @@
 | Tool | File | Status |
 |------|------|--------|
 | The Vault (hub) | `index.html` | ✅ Live |
-| Character Generator | `chargen.html` | ✅ Live |
 | Fate's Flip (coin flip) | `coinflip.html` | ✅ Live |
+| Character Generator | `chargen.html` | ✅ Live |
 | Loot Table | `loot.html` | ✅ Live |
 | The Poll | `poll.html` | ✅ Live — requires Firebase |
 | Trait Generator | `traitgen.html` | ✅ Live |
