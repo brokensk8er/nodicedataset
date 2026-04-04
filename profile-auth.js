@@ -19,13 +19,13 @@ import {
 //  Same project as poll.html — paste your values here.
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey:            'YOUR_API_KEY',
-  authDomain:        'YOUR_PROJECT_ID.firebaseapp.com',
-  databaseURL:       'https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com',
-  projectId:         'YOUR_PROJECT_ID',
-  storageBucket:     'YOUR_PROJECT_ID.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId:             'YOUR_APP_ID',
+  apiKey:            'AIzaSyAIwTgubmE9V1XrSF3BS4rxSIr3uNua1a8',
+  authDomain:        'nodicetools.firebaseapp.com',
+  databaseURL:       'https://nodicetools-default-rtdb.firebaseio.com',
+  projectId:         'nodicetools',
+  storageBucket:     'nodicetools.firebasestorage.app',
+  messagingSenderId: '387258889697',
+  appId:             '1:387258889697:web:5467488ab109ea67b74ea0',
 };
 
 // ============================================================
