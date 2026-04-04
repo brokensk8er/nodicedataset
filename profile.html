@@ -196,6 +196,159 @@
     background: rgba(201,168,76,.12);
   }
 
+  /* ── Admin Showrunner Panel ── */
+  .admin-drawer { padding: 0; overflow: hidden; border-color: rgba(201,168,76,.3); }
+  .admin-drawer.hidden { display: none; }
+  .admin-drawer-hdr {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; cursor: pointer;
+    transition: background .18s; border-radius: 10px 10px 0 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .admin-drawer-hdr:hover { background: rgba(201,168,76,.06); }
+  .admin-drawer-icon { font-size: 1.15rem; flex-shrink: 0; }
+  .admin-drawer-text { flex: 1; min-width: 0; }
+  .admin-drawer-title {
+    font-family: 'Cinzel', serif; font-size: .8rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--gold);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .admin-badge-pill {
+    font-size: .56rem; padding: 1px 7px; border-radius: 12px; font-weight: 700;
+    background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.4);
+    letter-spacing: .1em; color: var(--gold-dim); vertical-align: middle;
+  }
+  .admin-drawer-desc { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+  .admin-drawer-chevron {
+    color: var(--gold-dim); font-size: .7rem;
+    transition: transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .admin-drawer-chevron.open { transform: rotate(180deg); color: var(--gold); }
+  .admin-drawer-body {
+    display: grid; grid-template-rows: 0fr;
+    transition: grid-template-rows .35s cubic-bezier(.22,1,.36,1);
+  }
+  .admin-drawer-body.open { grid-template-rows: 1fr; }
+  .admin-drawer-inner {
+    overflow: hidden; border-top: 1px solid var(--border);
+    background: rgba(201,168,76,.03);
+  }
+
+  /* poll form + results (shared with index.html) */
+  .poll-admin-section { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 0; }
+  .poll-admin-badge {
+    display: inline-block; font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid rgba(201,168,76,.35); background: rgba(201,168,76,.10);
+    border-radius: 20px; padding: 3px 10px; margin-bottom: 12px; align-self: flex-start;
+  }
+  .poll-form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .poll-form-label {
+    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+    color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
+  }
+  .poll-options-section-label {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .poll-options-count-hint { font-size: .65rem; color: var(--text-muted); }
+  .poll-form-input {
+    width: 100%; box-sizing: border-box;
+    background: rgba(255,255,255,.04); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    font-family: 'Lato', sans-serif; font-size: .92rem; color: var(--text);
+    outline: none; transition: border-color .18s;
+  }
+  .poll-form-input:focus { border-color: var(--gold); }
+  .poll-form-input::placeholder { color: var(--text-muted); opacity: .7; }
+  .poll-option-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .poll-option-letter-tag {
+    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
+    letter-spacing: .1em; color: var(--gold); flex-shrink: 0; width: 16px; text-align: center;
+  }
+  .poll-btn-remove-option {
+    flex-shrink: 0; width: 28px; height: 28px; background: none;
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted);
+    font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .poll-btn-remove-option:hover { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,.08); }
+  .poll-btn-remove-placeholder { flex-shrink: 0; width: 28px; height: 28px; }
+  .poll-btn-add-option {
+    width: 100%; background: none; border: 1.5px dashed var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    font-family: 'Lato', sans-serif; font-size: .82rem;
+    color: var(--text-muted); cursor: pointer; text-align: left;
+    transition: border-color .18s, color .18s, background .18s;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .poll-btn-add-option:hover { border-color: var(--gold); color: var(--gold); }
+  .poll-btn-launch {
+    width: 100%; background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e; border: none; border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35); transition: opacity .18s;
+  }
+  .poll-btn-launch:hover { opacity: .9; }
+  .poll-btn-launch:disabled { opacity: .4; cursor: not-allowed; }
+  .poll-btn-reveal {
+    width: 100%; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #27ae60 100%);
+    color: #fff; border: none; border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    box-shadow: 0 3px 10px rgba(39,174,96,.35); transition: opacity .18s;
+  }
+  .poll-btn-reveal:disabled { opacity: .4; cursor: not-allowed; }
+  .poll-btn-new {
+    width: 100%; background: rgba(201,168,76,.12); color: var(--gold);
+    border: 1px solid rgba(201,168,76,.4); border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px; transition: background .2s;
+  }
+  .poll-btn-new:hover { background: rgba(201,168,76,.22); }
+  .poll-btn-danger {
+    width: 100%; background: none; color: #c0392b;
+    border: 1px solid rgba(192,57,43,.35); border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    transition: background .2s, border-color .2s;
+  }
+  .poll-btn-danger:hover { background: rgba(192,57,43,.10); border-color: #c0392b; }
+  .poll-admin-results-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .poll-question-label {
+    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 4px;
+  }
+  .poll-question-text { font-size: .92rem; color: var(--text); margin: 0 0 10px; }
+  .poll-live-indicator {
+    display: flex; align-items: center; gap: 5px; font-size: .65rem;
+    letter-spacing: .08em; text-transform: uppercase; color: #27ae60; font-weight: 700;
+  }
+  .poll-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #27ae60;
+    animation: livePulse 1.4s ease-in-out infinite;
+  }
+  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+  .poll-result-wrap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; }
+  .poll-result-row {}
+  .poll-result-label-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .poll-result-opt-name { font-size: .82rem; color: var(--text); }
+  .poll-result-pct { font-size: .82rem; font-weight: 700; color: var(--gold); margin-right: 5px; }
+  .poll-result-count { font-size: .72rem; color: var(--text-muted); }
+  .bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--gold-dim); border-radius: 3px; transition: width .4s; }
+  .bar-fill.winner { background: var(--gold); }
+  .total-votes { font-size: .75rem; color: var(--text-muted); margin: 4px 0 8px; }
+  .poll-waiting {
+    text-align: center; padding: 20px 12px;
+    font-size: .82rem; color: var(--text-muted); line-height: 1.8;
+  }
+
   /* back to vault cutout tab */
   .btn-back-vault {
     position: fixed; top: 0; right: 130px; z-index: 900;
@@ -367,6 +520,27 @@
         </div>
         <div class="char-locked-note hidden" id="char-locked-note">
           🔒 Character sheet locked until <span id="char-locked-date"></span>.
+        </div>
+      </div>
+
+      <!-- Admin Showrunner Panel — only rendered when isAdmin: true -->
+      <div class="profile-card admin-drawer hidden" id="admin-poll-card">
+        <div class="admin-drawer-hdr" id="admin-poll-toggle">
+          <div class="admin-drawer-icon">⚔</div>
+          <div class="admin-drawer-text">
+            <div class="admin-drawer-title">
+              Showrunner Panel
+              <span class="admin-badge-pill">ADMIN</span>
+            </div>
+            <div class="admin-drawer-desc">Launch &amp; manage live audience polls</div>
+          </div>
+          <div class="admin-drawer-chevron" id="admin-poll-chevron">▾</div>
+        </div>
+        <div class="admin-drawer-body" id="admin-poll-body">
+          <div class="admin-drawer-inner">
+            <div id="poll-inner" style="min-height:48px"></div>
+            <div id="poll-footer" style="padding:0 14px 10px"></div>
+          </div>
         </div>
       </div>
 
@@ -630,6 +804,9 @@ import {
 import {
   doc, updateDoc, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref as rtdbRef, set as rtdbSet, onValue }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 mountProfileButton();
 
@@ -745,6 +922,7 @@ function renderProfile(user, data) {
 
   renderTicket(data);
   renderCharSheet(data);
+  initAdminPanel(!!data.isAdmin);
 }
 
 function renderTicket(data) {
@@ -842,6 +1020,269 @@ document.getElementById('btn-char-save').addEventListener('click', async () => {
   }
   saveBtn.disabled = false;
 });
+
+// ══════════════════════════════════════════════════════════════
+//  ADMIN SHOWRUNNER PANEL
+//  Replicates the poll admin from index.html.
+//  Only mounted when data.isAdmin === true in Firestore.
+// ══════════════════════════════════════════════════════════════
+
+function pEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+const P_LETTERS       = ['A','B','C','D','E'];
+const P_MIN_OPTS      = 2;
+const P_MAX_OPTS      = 5;
+const P_PLACEHOLDERS  = ['The first option…','The second option…','A third choice…','Or maybe this…','One more possibility…'];
+
+// Reuse the already-initialized 'ndt-profile' Firebase app for Realtime Database
+const _pollApp   = getApps().find(a => a.name === 'ndt-profile');
+const _rtdb      = _pollApp ? getDatabase(_pollApp) : null;
+const _pollRef   = _rtdb ? rtdbRef(_rtdb, 'nodice/poll')  : null;
+const _votesRef  = _rtdb ? rtdbRef(_rtdb, 'nodice/votes') : null;
+
+let _pollDrawerOpen    = false;
+let _pollListenerSetUp = false;
+let _pollCurrentSnap   = null;
+let _pollUnsubVotes    = null;
+let _pollOptCount      = P_MIN_OPTS;
+
+function pBadge() {
+  const live = !!_rtdb;
+  return `<div class="source-badge ${live?'live':'fallback'}"><span class="dot"></span>${live?'Connected':'Firebase not configured'}</div>`;
+}
+
+function pRenderAdminForm(preserveValues) {
+  const optRowsHtml = P_LETTERS.slice(0, _pollOptCount).map((letter, i) => {
+    const isReq = i < P_MIN_OPTS;
+    const removeBtn = isReq
+      ? `<div class="poll-btn-remove-placeholder"></div>`
+      : `<button class="poll-btn-remove-option" data-index="${i}" title="Remove">✕</button>`;
+    const val = preserveValues && preserveValues[i] ? pEsc(preserveValues[i]) : '';
+    return `<div class="poll-option-row" id="padmin-row-${i}">
+      <span class="poll-option-letter-tag">${letter}</span>
+      <input class="poll-form-input" id="padmin-opt-${i}" type="text"
+        placeholder="${P_PLACEHOLDERS[i]}" maxlength="80" autocomplete="off" value="${val}">
+      ${removeBtn}</div>`;
+  }).join('');
+  const addBtnHtml = _pollOptCount < P_MAX_OPTS
+    ? `<button class="poll-btn-add-option" id="padmin-add-btn">
+         <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
+         Add another option (${_pollOptCount}/${P_MAX_OPTS})</button>`
+    : '';
+  document.getElementById('poll-inner').innerHTML = `
+    <div class="poll-admin-section">
+      <div class="poll-admin-badge">⚔ Showrunner</div>
+      <div class="poll-form-group">
+        <label class="poll-form-label" for="padmin-q">Question</label>
+        <input class="poll-form-input" id="padmin-q" type="text"
+          placeholder="What does the crowd choose?" maxlength="120" autocomplete="off"
+          value="${preserveValues && preserveValues.question ? pEsc(preserveValues.question) : ''}">
+      </div>
+      <div class="poll-options-section-label">
+        <span class="poll-form-label" style="margin-bottom:0;">Options</span>
+        <span class="poll-options-count-hint">Min 2 · Max 5</span>
+      </div>
+      <div id="padmin-opts">${optRowsHtml}</div>
+      ${addBtnHtml}
+      <button class="poll-btn-launch" id="padmin-launch-btn">⚔ Launch Poll</button>
+      ${pBadge()}
+    </div>`;
+  document.getElementById('poll-footer').innerHTML = '';
+  document.getElementById('padmin-launch-btn').onclick = pAdminLaunch;
+  document.getElementById('padmin-q').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('padmin-opt-0')?.focus();
+  });
+  for (let i = 0; i < _pollOptCount; i++) {
+    document.getElementById(`padmin-opt-${i}`).addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const next = document.getElementById(`padmin-opt-${i+1}`);
+        if (next) next.focus(); else pAdminLaunch();
+      }
+    });
+  }
+  document.getElementById('padmin-add-btn')?.addEventListener('click', () => {
+    const vals = pGatherValues();
+    _pollOptCount++;
+    pRenderAdminForm(vals);
+    setTimeout(() => document.getElementById(`padmin-opt-${_pollOptCount-1}`)?.focus(), 50);
+  });
+  document.querySelectorAll('.poll-btn-remove-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index);
+      const vals = pGatherValues();
+      vals.splice(idx, 1);
+      _pollOptCount--;
+      pRenderAdminForm(vals);
+    });
+  });
+}
+
+function pGatherValues() {
+  const vals = [];
+  vals.question = document.getElementById('padmin-q')?.value ?? '';
+  for (let i = 0; i < _pollOptCount; i++) {
+    vals.push(document.getElementById(`padmin-opt-${i}`)?.value ?? '');
+  }
+  return vals;
+}
+
+async function pAdminLaunch() {
+  if (!_pollRef) return;
+  const q = document.getElementById('padmin-q')?.value.trim();
+  const options = [];
+  for (let i = 0; i < _pollOptCount; i++) {
+    options.push((document.getElementById(`padmin-opt-${i}`)?.value ?? '').trim());
+  }
+  let hasError = false;
+  if (!q) {
+    const el = document.getElementById('padmin-q');
+    el.style.borderColor = '#c0392b'; el.focus();
+    setTimeout(() => { el.style.borderColor = ''; }, 1200);
+    hasError = true;
+  }
+  options.forEach((val, i) => {
+    if (!val) {
+      const el = document.getElementById(`padmin-opt-${i}`);
+      if (el) { el.style.borderColor = '#c0392b'; if (!hasError) el.focus(); setTimeout(() => { el.style.borderColor = ''; }, 1200); }
+      hasError = true;
+    }
+  });
+  if (hasError) return;
+  const btn = document.getElementById('padmin-launch-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+  await rtdbSet(_pollRef, { question: q, options, active: true, revealed: false, ts: Date.now() });
+  await rtdbSet(_votesRef, {});
+  _pollOptCount = P_MIN_OPTS;
+}
+
+function pRenderAdminPreReveal(poll, votes) {
+  const opts = poll.options || [];
+  const counts = opts.map((_,i) => Object.values(votes).filter(v => v === String(i)).length);
+  const total = counts.reduce((a,b) => a+b, 0);
+  const pcts  = counts.map(c => total ? Math.round(c/total*100) : 0);
+  const maxC  = Math.max(...counts);
+  const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+    <div class="poll-result-label-row">
+      <span class="poll-result-opt-name">${P_LETTERS[i]} — ${pEsc(o)}</span>
+      <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+    </div>
+    <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+  </div>`).join('');
+  document.getElementById('poll-inner').innerHTML = `
+    <div class="poll-admin-section">
+      <div class="poll-admin-badge">⚔ Showrunner</div>
+      <div class="poll-admin-results-header">
+        <div>
+          <div class="poll-question-label">Active Poll</div>
+        </div>
+        <div class="poll-live-indicator"><span class="poll-live-dot"></span>Votes incoming</div>
+      </div>
+      <p class="poll-question-text">${pEsc(poll.question)}</p>
+      <div class="poll-result-wrap">${barsHtml}</div>
+      <p class="total-votes">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
+      <button class="poll-btn-reveal" id="padmin-reveal-btn">🎲 Reveal Results to Audience</button>
+      <button class="poll-btn-danger" id="padmin-close-btn">Close Poll &amp; Clear</button>
+      ${pBadge()}
+    </div>`;
+  document.getElementById('poll-footer').innerHTML = '';
+  document.getElementById('padmin-reveal-btn').onclick = pAdminReveal;
+  document.getElementById('padmin-close-btn').onclick  = pAdminClear;
+}
+
+function pRenderAdminPostReveal(poll, votes) {
+  const opts   = poll.options || [];
+  const counts = opts.map((_,i) => Object.values(votes).filter(v => v === String(i)).length);
+  const total  = counts.reduce((a,b) => a+b, 0);
+  const pcts   = counts.map(c => total ? Math.round(c/total*100) : 0);
+  const maxC   = Math.max(...counts);
+  const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+    <div class="poll-result-label-row">
+      <span class="poll-result-opt-name">${P_LETTERS[i]} — ${pEsc(o)}</span>
+      <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+    </div>
+    <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+  </div>`).join('');
+  document.getElementById('poll-inner').innerHTML = `
+    <div class="poll-admin-section">
+      <div class="poll-admin-badge">⚔ Showrunner</div>
+      <div class="poll-admin-results-header">
+        <div>
+          <div class="poll-question-label">Results Revealed</div>
+        </div>
+        <div class="poll-live-indicator" style="color:var(--gold);">
+          <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
+        </div>
+      </div>
+      <p class="poll-question-text">${pEsc(poll.question)}</p>
+      <div class="poll-result-wrap">${barsHtml}</div>
+      <p class="total-votes">${total} vote${total!==1?'s':''} cast</p>
+      <button class="poll-btn-new" id="padmin-new-btn">New Poll</button>
+      <button class="poll-btn-danger" id="padmin-close2-btn">Close Poll &amp; Clear</button>
+      ${pBadge()}
+    </div>`;
+  document.getElementById('poll-footer').innerHTML = '';
+  document.getElementById('padmin-new-btn').onclick    = pAdminClear;
+  document.getElementById('padmin-close2-btn').onclick = pAdminClear;
+}
+
+async function pAdminReveal() {
+  if (!_rtdb) return;
+  const btn = document.getElementById('padmin-reveal-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Revealing…'; }
+  await rtdbSet(rtdbRef(_rtdb, 'nodice/poll/revealed'), true);
+}
+
+async function pAdminClear() {
+  if (!_pollRef || !_votesRef) return;
+  await rtdbSet(_pollRef, { active: false });
+  await rtdbSet(_votesRef, {});
+  _pollOptCount = P_MIN_OPTS;
+}
+
+function pStartListener() {
+  if (!_pollRef) {
+    document.getElementById('poll-inner').innerHTML =
+      '<div class="poll-waiting">Firebase not configured.</div>';
+    return;
+  }
+  document.getElementById('poll-inner').innerHTML =
+    '<div class="poll-waiting"><span style="font-size:1.2rem">⚔</span><br>Connecting…</div>';
+
+  onValue(_pollRef, snap => {
+    const poll = snap.val(); _pollCurrentSnap = poll;
+    if (!poll || !poll.active) {
+      if (_pollUnsubVotes) { _pollUnsubVotes(); _pollUnsubVotes = null; }
+      pRenderAdminForm();
+    } else {
+      if (_pollUnsubVotes) _pollUnsubVotes();
+      _pollUnsubVotes = onValue(_votesRef, votesSnap => {
+        const votes = votesSnap.val() || {};
+        if (poll.revealed) pRenderAdminPostReveal(poll, votes);
+        else               pRenderAdminPreReveal(poll, votes);
+      });
+    }
+  });
+}
+
+function initAdminPanel(isAdmin) {
+  const card = document.getElementById('admin-poll-card');
+  if (!card) return;
+  if (!isAdmin) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+
+  // Wire the accordion toggle — only once
+  document.getElementById('admin-poll-toggle').addEventListener('click', () => {
+    _pollDrawerOpen = !_pollDrawerOpen;
+    document.getElementById('admin-poll-body').classList.toggle('open', _pollDrawerOpen);
+    document.getElementById('admin-poll-chevron').classList.toggle('open', _pollDrawerOpen);
+    // Start the Firebase listener the first time the panel is opened
+    if (_pollDrawerOpen && !_pollListenerSetUp) {
+      _pollListenerSetUp = true;
+      pStartListener();
+    }
+  });
+}
 </script>
 </body>
 </html>
