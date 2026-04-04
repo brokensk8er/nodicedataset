@@ -19,7 +19,7 @@ import {
 //  Same project as poll.html — paste your values here.
 // ============================================================
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyAIwTgubmE9V1XrSF3BS4rxSIr3uNua1a8",
+  apiKey:            "AIzaSyAXcvi644izGZhK8nPGlkfV4vAc3ZWPH8w",
   authDomain:        "nodicetools.firebaseapp.com",
   databaseURL:       "https://nodicetools-default-rtdb.firebaseio.com",
   projectId:         "nodicetools",
