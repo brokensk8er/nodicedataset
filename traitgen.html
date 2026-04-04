@@ -822,5 +822,9 @@ function toggleTheme() {
   if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
 })();
 </script>
+<script type="module">
+import { mountProfileButton } from './profile-auth.js';
+mountProfileButton();
+</script>
 </body>
 </html>
