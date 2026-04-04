@@ -147,6 +147,70 @@
   .char-save-msg { font-size: .78rem; color: var(--text-muted); display: none; }
   .char-save-msg.visible { display: block; }
   .char-save-msg.error { color: #f08080; }
+
+  /* character sheet — randomize additions */
+  .char-sheet-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .char-sheet-header h2 { margin: 0; }
+  .mulligan-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .72rem; color: var(--text-muted);
+    font-family: 'Cinzel', serif; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .char-pip-row { display: flex; gap: 5px; align-items: center; }
+  .char-pip {
+    width: 9px; height: 9px; background: var(--gold);
+    transform: rotate(45deg); border-radius: 2px;
+    transition: opacity .2s, background .2s;
+  }
+  .char-pip.spent { opacity: .18; }
+
+  .btn-full-rand {
+    width: 100%; padding: 9px; border-radius: 6px;
+    border: 1px solid var(--gold-dim); background: transparent;
+    color: var(--gold-dim); font-family: 'Cinzel', serif; font-size: .78rem;
+    font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    cursor: pointer; transition: background .2s, color .2s, border-color .2s;
+  }
+  .btn-full-rand:hover:not(:disabled) { background: var(--gold-dim); color: #1a1200; }
+  .btn-full-rand:disabled { opacity: .32; cursor: default; }
+
+  .char-input-row { display: flex; align-items: flex-start; gap: 6px; }
+  .char-input-row input, .char-input-row textarea {
+    flex: 1; min-width: 0;
+  }
+  .btn-rand, .btn-field-pin {
+    flex-shrink: 0; padding: 7px 9px; border-radius: 6px;
+    border: 1px solid var(--border); background: none; color: var(--text-muted);
+    font-size: .82rem; line-height: 1; cursor: pointer; align-self: flex-start;
+    transition: border-color .2s, color .2s, background .2s;
+  }
+  .btn-rand:hover:not(:disabled), .btn-field-pin:hover:not(:disabled) {
+    border-color: var(--gold-dim); color: var(--gold-dim);
+  }
+  .btn-rand:disabled, .btn-field-pin:disabled { opacity: .28; cursor: default; }
+  .btn-field-pin.pinned {
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(201,168,76,.12);
+  }
+
+  /* back to vault cutout tab */
+  .btn-back-vault {
+    position: fixed; top: 0; right: 130px; z-index: 900;
+    font-family: 'Cinzel', serif; font-size: .68rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    color: var(--gold-dim); background: var(--card-bg);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 8px 8px; padding: 6px 14px; cursor: pointer;
+    box-shadow: 0 3px 10px var(--shadow); opacity: .85;
+    transition: opacity .2s, border-color .2s, color .2s, box-shadow .2s;
+  }
+  .btn-back-vault:hover {
+    opacity: 1; border-color: var(--gold); color: var(--gold);
+    box-shadow: 0 4px 14px var(--shadow-gold);
+  }
 </style>
 </head>
 <body>
@@ -232,38 +296,77 @@
 
       <!-- Character Sheet -->
       <div class="profile-card">
-        <h2>Character Sheet</h2>
+        <div class="char-sheet-header">
+          <h2>Character Sheet</h2>
+          <div class="mulligan-row" id="char-mulligan-row" style="display:none">
+            Mulligans
+            <div class="char-pip-row">
+              <div class="char-pip" id="cp-0"></div>
+              <div class="char-pip" id="cp-1"></div>
+              <div class="char-pip" id="cp-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-full-rand" id="btn-full-rand">🎲 Fully Randomize</button>
+
         <div class="char-field">
           <label for="char-name">Character Name</label>
-          <input type="text" id="char-name" placeholder="e.g. Aldric Stonemantle" maxlength="60">
+          <div class="char-input-row">
+            <input type="text" id="char-name" placeholder="e.g. Aldric Stonemantle" maxlength="60">
+            <button class="btn-rand" id="rand-name" title="Roll a random name">⚄</button>
+            <button class="btn-field-pin" id="pin-name" title="Pin this value (skip on full randomize)">✓</button>
+          </div>
         </div>
         <div class="char-field">
           <label for="char-race">Race / Species</label>
-          <input type="text" id="char-race" placeholder="e.g. Half-elf" maxlength="60">
+          <div class="char-input-row">
+            <input type="text" id="char-race" placeholder="e.g. Half-elf" maxlength="60">
+            <button class="btn-rand" id="rand-race" title="Roll a random race">⚄</button>
+            <button class="btn-field-pin" id="pin-race" title="Pin this value">✓</button>
+          </div>
         </div>
         <div class="char-field">
           <label for="char-class">Class / Role</label>
-          <input type="text" id="char-class" placeholder="e.g. Rogue" maxlength="60">
+          <div class="char-input-row">
+            <input type="text" id="char-class" placeholder="e.g. Rogue" maxlength="60">
+            <button class="btn-rand" id="rand-class" title="Roll a random class">⚄</button>
+            <button class="btn-field-pin" id="pin-class" title="Pin this value">✓</button>
+          </div>
         </div>
         <div class="char-field">
           <label for="char-backstory">Backstory</label>
-          <textarea id="char-backstory" rows="3"
-            placeholder="A few sentences about your character's past…" maxlength="500"></textarea>
+          <div class="char-input-row">
+            <textarea id="char-backstory" rows="3"
+              placeholder="A few sentences about your character's past…" maxlength="500"></textarea>
+            <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+              <button class="btn-rand" id="rand-backstory" title="Roll a random backstory">⚄</button>
+              <button class="btn-field-pin" id="pin-backstory" title="Pin this value">✓</button>
+            </div>
+          </div>
         </div>
         <div class="char-field">
           <label for="char-quirk">Quirk</label>
-          <input type="text" id="char-quirk" placeholder="e.g. Hums when nervous" maxlength="120">
+          <div class="char-input-row">
+            <input type="text" id="char-quirk" placeholder="e.g. Hums when nervous" maxlength="120">
+            <button class="btn-rand" id="rand-quirk" title="Roll a random quirk">⚄</button>
+            <button class="btn-field-pin" id="pin-quirk" title="Pin this value">✓</button>
+          </div>
         </div>
         <div class="char-field">
           <label for="char-secret">Secret</label>
-          <input type="text" id="char-secret" placeholder="Something only you know…" maxlength="120">
+          <div class="char-input-row">
+            <input type="text" id="char-secret" placeholder="Something only you know…" maxlength="120">
+            <button class="btn-rand" id="rand-secret" title="Roll a random secret">⚄</button>
+            <button class="btn-field-pin" id="pin-secret" title="Pin this value">✓</button>
+          </div>
         </div>
         <div class="char-actions">
           <button class="btn-save" id="btn-char-save">Save Character</button>
           <span class="char-save-msg" id="char-save-msg"></span>
         </div>
         <div class="char-locked-note hidden" id="char-locked-note">
-          🔒 Character sheet locked on <span id="char-locked-date"></span>.
+          🔒 Character sheet locked until <span id="char-locked-date"></span>.
         </div>
       </div>
 
@@ -272,6 +375,7 @@
 </div><!-- /page-wrap -->
 
 <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+<button class="btn-back-vault" onclick="window.location.href='index.html'">&#8592; Vault</button>
 
 <script>
 (function () {
@@ -289,13 +393,242 @@
 })();
 </script>
 
+<script>
+// ── Character sheet randomize system ─────────────────────────
+// Mirrors chargen.html's data layer; runs in plain (non-module) scope
+// so button event listeners can reference functions directly.
+
+const CS_CONFIG = {
+  SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
+  API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+  TABS: [
+    { key: 'firstNames',  sheetTab: 'First Names'  },
+    { key: 'lastNames',   sheetTab: 'Last Names'   },
+    { key: 'races',       sheetTab: 'Races'        },
+    { key: 'classes',     sheetTab: 'Classes'      },
+    { key: 'backstories', sheetTab: 'Backstories'  },
+    { key: 'quirks',      sheetTab: 'Quirks'       },
+    { key: 'secrets',     sheetTab: 'Secrets'      },
+  ]
+};
+
+const CS_FALLBACK = {
+  firstNames: [
+    "Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert",
+    "Pambula","Gornak","Smitch","Quibble","Florp","Nutwig","Dravox","Grumblina",
+    "Zorp","Weeble","Crunchy","Pflop","Thumdar","Snibbly","Ruckus","Blorfen",
+    "Twonk","Gundula","Snazzle","Murphbert","Clobba","Flibnor"
+  ],
+  lastNames: [
+    "Puddlesnort","the Adequate","Bonesworth","McFlumps","of the Bog","Cracklefingers",
+    "Thunderbutt","Noodlearm","Spigotface","the Slightly Heroic","Wobbleheim",
+    "Crumblewick","Snorkleson","Dinglebottom","of Questionable Origin","Fumblegrip",
+    "the Unready","Blunderpants","Gnarlytoe","Wobblechin","the Forgettable",
+    "Toadsworth","Bumbleshire","Flapjaw","of Nowhere in Particular"
+  ],
+  races: [
+    "A Halfling who insists they're actually a Gnome",
+    "A very small Dragon in a trenchcoat",
+    "An Elf who has never once been on time",
+    "A Dwarf with a surprisingly lovely singing voice",
+    "A Tiefling who keeps getting mistaken for the villain",
+    "A Human who is absolutely convinced they have magic powers (they don't)",
+    "A Goblin with an extensive collection of spoons",
+    "An Orc who trained as a pastry chef",
+    "A Gnome who is 400 years old and still described as 'gifted'",
+    "A Skeleton who hasn't told anyone yet",
+    "A Centaur who refuses to go anywhere that has stairs",
+    "A Merfolk out of water, extremely inconvenienced",
+    "A Were-Accountant (transforms at quarter-end, not full moon)",
+    "A Vampire who is very lactose intolerant",
+    "A Rock Golem who has recently discovered feelings",
+    "A Cloud Giant who has shrunk in the wash",
+    "A Fairy who lost their wings in a card game"
+  ],
+  classes: [
+    "Barbarian (specialises in strongly-worded letters)",
+    "Bard (knows three chords, extremely confident)",
+    "Cleric of a god they've never actually met",
+    "Druid who mostly just turns into a slightly larger dog",
+    "Fighter who brings a clipboard to every battle",
+    "Monk whose vow of silence only applies to Tuesdays",
+    "Paladin who is really into morally grey areas actually",
+    "Ranger who gets lost indoors",
+    "Rogue who is an absolutely terrible liar",
+    "Sorcerer who got their powers from a particularly weird sneeze",
+    "Warlock in a very awkward contractual situation",
+    "Wizard who still hasn't returned their library books",
+    "Artificer who insists everything is 'in beta'",
+    "Blood Hunter who just found out what that means",
+    "Necromancer with excellent customer service skills",
+    "Illusionist who can't turn it off when nervous",
+    "Cavalier who lost their horse in a bet"
+  ],
+  backstories: [
+    "Fled their hometown after accidentally winning a yodeling competition and the expectations became too much",
+    "Was raised by wolves, but normal wolves — they were very supportive and helped with homework",
+    "Worked for ten years as a professional adventurer reviewer; decided to try it themselves",
+    "Left a promising career in cheese-making after a prophetic dream that was almost certainly just indigestion",
+    "Was turned into a frog for three years. Won't say by whom. Still angry",
+    "Inherited a map to treasure, but the treasure turned out to be 'self-belief' and they are furious",
+    "Joined the adventure after losing a bet to a seagull. Long story",
+    "Spent seven years as an apprentice to a wizard who turned out to be a raccoon in a hat",
+    "Former town crier who got tired of only reporting bad news",
+    "Accidentally married royalty during a festival, quietly left before breakfast",
+    "Was a professional monster bait for three seasons — looking to try a different role now",
+    "Woke up one day knowing sword skills with no memory of learning them. Went with it",
+    "Started adventuring to return a borrowed book; it escalated",
+    "Exiled from their village for consistently giving unsolicited quest advice",
+    "Has been chasing the same cart for six years. Nobody knows why"
+  ],
+  quirks: [
+    "Narrates their own actions in third person at dramatic moments",
+    "Cannot resist correcting people's grammar mid-combat",
+    "Insists on taking meeting minutes during every dungeon encounter",
+    "Has given a nickname to every door they've ever opened",
+    "Always speaks in rhyme when they lie, completely unaware of it",
+    "Refuses to be surprised. Will loudly claim they 'knew about this'",
+    "Applauds after every spell, including enemies'",
+    "Has never once walked into a room without pausing for effect",
+    "Keeps a journal but only writes the boring parts",
+    "Maintains extremely strong opinions about inn ratings",
+    "Asks 'but what's their motivation?' about every monster",
+    "Dramatically misremembers every adventure they've been on",
+    "Refers to all taverns as 'the office'",
+    "Cannot physically leave a room without saying goodbye to furniture",
+    "Insists on a brief debrief after every combat"
+  ],
+  secrets: [
+    "Has never actually read the spell they claim is their signature move",
+    "Secretly fluent in three additional languages but finds it easier to pretend otherwise",
+    "The legendary sword was found in a bin. The bin was outside a blacksmith's. It had a 'free' sign on it",
+    "Is on the run from a bakers' guild for reasons they decline to specify",
+    "Secretly writes a serialised adventure novel featuring a thinly-veiled version of the party",
+    "Has a wanted poster — looks nothing like them, but they're still worried",
+    "Owes money to a god. Not a lot of money. Still very inconvenient",
+    "Was once a villain. Briefly. Didn't care for it",
+    "Their impressive backstory was purchased from a retired bard for 40 gold",
+    "Cannot actually read maps. Has been winging it the entire time",
+    "Adopted by mistake — was handed to their family at a festival, chaos ensued, nobody corrected it",
+    "Their mortal enemy is a duck. They don't want to talk about it",
+    "Has a whole other name they use in different towns. Keeping them apart is getting complicated",
+    "Once accidentally became mayor of a small village and just... never resigned",
+    "Their weapon has a name. The weapon does not like the name they gave it"
+  ]
+};
+
+const CS_FIELDS = [
+  { key: 'name',      inputId: 'char-name',      pool: null          },
+  { key: 'race',      inputId: 'char-race',      pool: 'races'       },
+  { key: 'class',     inputId: 'char-class',     pool: 'classes'     },
+  { key: 'backstory', inputId: 'char-backstory', pool: 'backstories' },
+  { key: 'quirk',     inputId: 'char-quirk',     pool: 'quirks'      },
+  { key: 'secret',    inputId: 'char-secret',    pool: 'secrets'     },
+];
+
+const CS_MAX_MULLIGANS = 3;
+let CS_DATA  = null;
+// In-memory state — resets on page refresh, separate from Firestore 24h lock
+let csState  = { rolled: false, mulligans: CS_MAX_MULLIGANS, pinned: new Set() };
+
+function csIsConfigured() {
+  return CS_CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
+         CS_CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
+}
+
+async function csFetchTab(tabName) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CS_CONFIG.SHEET_ID}`
+            + `/values/${encodeURIComponent(tabName)}!A2:A?key=${CS_CONFIG.API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Tab "${tabName}" returned HTTP ${res.status}`);
+  const json = await res.json();
+  return (json.values || []).flat().map(v => v.trim()).filter(Boolean);
+}
+
+async function csLoadData() {
+  if (!csIsConfigured()) { CS_DATA = CS_FALLBACK; return; }
+  try {
+    const results = await Promise.all(CS_CONFIG.TABS.map(t => csFetchTab(t.sheetTab)));
+    CS_DATA = {};
+    CS_CONFIG.TABS.forEach((t, i) => { CS_DATA[t.key] = results[i]; });
+  } catch (err) {
+    console.warn('Sheets fetch failed — using fallback data.', err);
+    CS_DATA = CS_FALLBACK;
+  }
+}
+
+function csPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function csGenName()  { return csPick(CS_DATA.firstNames) + ' ' + csPick(CS_DATA.lastNames); }
+
+function csUpdateMulliganDisplay() {
+  const row = document.getElementById('char-mulligan-row');
+  if (row) row.style.display = csState.rolled ? 'flex' : 'none';
+  for (let i = 0; i < CS_MAX_MULLIGANS; i++) {
+    const pip = document.getElementById('cp-' + i);
+    if (pip) pip.classList.toggle('spent', i >= csState.mulligans);
+  }
+  const canRand = !csState.rolled || csState.mulligans > 0;
+  document.querySelectorAll('.btn-rand')
+    .forEach(b => { b.disabled = !canRand; });
+  const fullBtn = document.getElementById('btn-full-rand');
+  if (fullBtn) fullBtn.disabled = !canRand;
+}
+
+function csRandomizeField(key) {
+  if (!CS_DATA) return;
+  if (csState.rolled && csState.mulligans <= 0) return;
+  if (csState.rolled) csState.mulligans--;
+  csState.rolled = true;
+  const f = CS_FIELDS.find(x => x.key === key);
+  const val = (key === 'name') ? csGenName() : csPick(CS_DATA[f.pool]);
+  const el = document.getElementById(f.inputId);
+  if (el && !el.readOnly) el.value = val;
+  csUpdateMulliganDisplay();
+}
+
+function csRandomizeAll() {
+  if (!CS_DATA) return;
+  if (csState.rolled && csState.mulligans <= 0) return;
+  if (csState.rolled) csState.mulligans--;
+  csState.rolled = true;
+  CS_FIELDS.forEach(f => {
+    if (csState.pinned.has(f.key)) return;
+    const val = (f.key === 'name') ? csGenName() : csPick(CS_DATA[f.pool]);
+    const el = document.getElementById(f.inputId);
+    if (el && !el.readOnly) el.value = val;
+  });
+  csUpdateMulliganDisplay();
+}
+
+function csTogglePin(key) {
+  if (csState.pinned.has(key)) csState.pinned.delete(key);
+  else csState.pinned.add(key);
+  const btn = document.getElementById('pin-' + key);
+  if (btn) btn.classList.toggle('pinned', csState.pinned.has(key));
+}
+
+function csInitButtons() {
+  csUpdateMulliganDisplay();
+  document.getElementById('btn-full-rand')
+    ?.addEventListener('click', csRandomizeAll);
+  CS_FIELDS.forEach(f => {
+    document.getElementById('rand-' + f.key)
+      ?.addEventListener('click', () => csRandomizeField(f.key));
+    document.getElementById('pin-' + f.key)
+      ?.addEventListener('click', () => csTogglePin(f.key));
+  });
+}
+
+csLoadData().then(csInitButtons);
+</script>
+
 <script type="module">
 import {
   mountProfileButton, onUser, ensureUserDoc, signOutUser,
   signInGoogle, signInEmail, createEmail, earnedBadges, currentUser, db,
 } from './profile-auth.js';
 import {
-  doc, updateDoc,
+  doc, updateDoc, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 mountProfileButton();
@@ -461,15 +794,23 @@ function renderCharSheet(data) {
   document.getElementById('char-quirk').value     = ch.quirk     || '';
   document.getElementById('char-secret').value    = ch.secret    || '';
 
-  if (ch.lockedAt) {
+  const lockMs = ch.lockedAt?.toDate?.().getTime()
+              ?? (ch.lockedAt ? Number(ch.lockedAt) : null);
+  const LOCK_DURATION = 24 * 60 * 60 * 1000;
+  const isLocked = lockMs && (Date.now() - lockMs < LOCK_DURATION);
+
+  if (isLocked) {
     ['char-name','char-race','char-class','char-backstory','char-quirk','char-secret']
       .forEach(id => document.getElementById(id).setAttribute('readonly', ''));
     document.getElementById('btn-char-save').disabled = true;
+    document.querySelectorAll('.btn-rand, .btn-field-pin, #btn-full-rand')
+      .forEach(b => { b.disabled = true; });
     const note = document.getElementById('char-locked-note');
     note.classList.remove('hidden');
-    const d = ch.lockedAt?.toDate?.() ?? new Date(ch.lockedAt);
+    const unlockDate = new Date(lockMs + LOCK_DURATION);
     document.getElementById('char-locked-date').textContent =
-      d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      unlockDate.toLocaleString(undefined,
+        { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 }
 
@@ -489,7 +830,7 @@ document.getElementById('btn-char-save').addEventListener('click', async () => {
         backstory: document.getElementById('char-backstory').value.trim(),
         quirk:     document.getElementById('char-quirk').value.trim(),
         secret:    document.getElementById('char-secret').value.trim(),
-        lockedAt:  null,
+        lockedAt:  serverTimestamp(),
       },
     });
     saveMsg.textContent = 'Saved!';
