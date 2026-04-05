@@ -619,7 +619,8 @@
 <script>
 (function() {
   var HOLD_MS     = 400;
-  var MOVE_CANCEL = 25; // px — Android touch slop at 3× density (~24–32px)
+  var MOVE_CANCEL_H = 35;  // px horizontal — cancel on clear sideways-swipe intent
+  var MOVE_CANCEL_V = 55;  // px vertical   — more permissive; natural thumb drift is vertical
   var LSKEY       = 'nodice_profile_shelf_order';
 
   function getContainer() { return document.getElementById('profile-panel'); }
@@ -671,7 +672,7 @@
           // after pointerdown (browser artifact, not real finger movement)
           if (Date.now() - holdStart < 50) return;
           var dx = ev.clientX - sx, dy = ev.clientY - sy;
-          if (dx*dx + dy*dy > MOVE_CANCEL * MOVE_CANCEL) cleanup();
+          if (Math.abs(dx) > MOVE_CANCEL_H || Math.abs(dy) > MOVE_CANCEL_V) cleanup();
         }
         document.addEventListener('pointermove',   onEarlyMove);
         document.addEventListener('pointerup',     cleanup);
