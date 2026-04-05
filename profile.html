@@ -619,7 +619,7 @@
 <script>
 (function() {
   var HOLD_MS     = 400;
-  var MOVE_CANCEL = 15; // px movement before long-press cancels
+  var MOVE_CANCEL = 25; // px — Android touch slop at 3× density (~24–32px)
   var LSKEY       = 'nodice_profile_shelf_order';
 
   function getContainer() { return document.getElementById('profile-panel'); }
@@ -630,10 +630,16 @@
     try { saved = JSON.parse(localStorage.getItem(LSKEY)); } catch(e) {}
     if (!Array.isArray(saved) || !saved.length) return;
     var c = getContainer(); if (!c) return;
+    // Snapshot non-shelf children before moving shelves so they
+    // aren't displaced to the top of the container.
+    var nonShelves = Array.from(c.children).filter(function(ch) {
+      return !ch.classList.contains('shelf');
+    });
     saved.forEach(function(id) {
       var el = document.getElementById(id);
       if (el && el.parentNode === c) c.appendChild(el);
     });
+    nonShelves.forEach(function(el) { c.appendChild(el); });
   }
 
   // ── Persist current DOM order ──────────────────────────────────
@@ -651,6 +657,7 @@
         if (e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
         var shelf = header.closest('.shelf'); if (!shelf) return;
         var sx = e.clientX, sy = e.clientY;
+        var holdStart = Date.now(); // grace period reference
         var timer = null;
 
         function cleanup() {
@@ -660,6 +667,9 @@
           document.removeEventListener('pointercancel', cleanup);
         }
         function onEarlyMove(ev) {
+          // 50ms grace: skip the synthetic pointermove browsers fire right
+          // after pointerdown (browser artifact, not real finger movement)
+          if (Date.now() - holdStart < 50) return;
           var dx = ev.clientX - sx, dy = ev.clientY - sy;
           if (dx*dx + dy*dy > MOVE_CANCEL * MOVE_CANCEL) cleanup();
         }
