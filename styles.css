@@ -842,6 +842,29 @@ html[data-theme="dark"] .profile-btn--signed-in {
     background: rgba(201,168,76,.05);
   }
 
+  /* ── SHELF DRAG-REORDER ── */
+  .shelf.dragging {
+    opacity: 0.88;
+    transform: scale(1.02);
+    box-shadow: 0 12px 36px var(--shadow-gold);
+    border-color: var(--gold);
+    z-index: 100;
+    position: relative;
+    cursor: grabbing;
+  }
+  .shelf.drag-placeholder {
+    border: 2px dashed var(--gold);
+    background: rgba(201,168,76,.07);
+    border-radius: 16px;
+    opacity: 0.6;
+  }
+  .shelf-header.reorder-active {
+    cursor: grabbing;
+  }
+  .shelf-header:not(.reorder-active) {
+    touch-action: pan-y;
+  }
+
   /* ── SHELF-SPECIFIC SHARED HELPERS ── */
   .inner-label {
     font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
