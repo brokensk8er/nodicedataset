@@ -1348,7 +1348,8 @@ if (!IS_DEMO) {
 <script>
 (function() {
   var HOLD_MS     = 400;
-  var MOVE_CANCEL = 25; // px — Android touch slop at 3× density (~24–32px); 25 is the sweet spot
+  var MOVE_CANCEL_H = 35;  // px horizontal — cancel on clear sideways-swipe intent
+  var MOVE_CANCEL_V = 55;  // px vertical   — more permissive; natural thumb drift is vertical
 
   // ── Restore saved order on page load ───────────────────────────
   function restoreShelfOrder() {
@@ -1407,7 +1408,7 @@ if (!IS_DEMO) {
           // immediately after pointerdown (0–5px artifact, not real movement)
           if (Date.now() - holdStart < 50) return;
           var dx = ev.clientX - sx, dy = ev.clientY - sy;
-          if (dx*dx + dy*dy > MOVE_CANCEL * MOVE_CANCEL) cleanup();
+          if (Math.abs(dx) > MOVE_CANCEL_H || Math.abs(dy) > MOVE_CANCEL_V) cleanup();
         }
 
         document.addEventListener('pointermove',   onEarlyMove);
