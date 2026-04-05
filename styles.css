@@ -843,11 +843,17 @@ html[data-theme="dark"] .profile-btn--signed-in {
   }
 
   /* ── SHELF DRAG-REORDER ── */
+  /* Gold ring ripple fires once when .dragging is added by startDrag() */
+  @keyframes shelf-drag-activate {
+    0%   { box-shadow: 0 2px 14px var(--shadow), 0 0 0 0 rgba(201,168,76,.6); }
+    60%  { box-shadow: 0 12px 36px var(--shadow-gold), 0 0 0 16px rgba(201,168,76,0); }
+    100% { box-shadow: 0 12px 36px var(--shadow-gold); }
+  }
   .shelf.dragging {
-    opacity: 0.88;
+    animation: shelf-drag-activate 0.35s ease-out forwards;
     transform: scale(1.02);
-    box-shadow: 0 12px 36px var(--shadow-gold);
     border-color: var(--gold);
+    opacity: 0.88;
     z-index: 100;
     position: relative;
     cursor: grabbing;
@@ -864,6 +870,19 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .shelf-header:not(.reorder-active) {
     touch-action: pan-y;
   }
+
+  /* ── PROFILE PAGE — shelf adjustments ── */
+  /* Shelves render after Firebase auth; skip the slideUp entrance animation */
+  .profile-panel .shelf { animation: none; }
+  /* Content padding inside profile shelves (replaces .profile-card padding) */
+  .profile-shelf-content { padding: 14px 16px 16px; }
+  /* Ticket section hint text — replaces inline style="font-size:.8rem;…" */
+  .ticket-hint { font-size: .8rem; color: var(--text-muted); margin: 0; }
+  /* Backstory button column — replaces inline display:flex on wrapper div */
+  .char-btn-stack { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  /* Poll inner/footer sizing — moved from inline style attrs in profile.html */
+  #poll-inner  { min-height: 48px; }
+  #poll-footer { padding: 0 14px 10px; }
 
   /* ── SHELF-SPECIFIC SHARED HELPERS ── */
   .inner-label {
