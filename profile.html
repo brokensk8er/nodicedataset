@@ -197,41 +197,12 @@
   }
 
   /* ── Admin Showrunner Panel ── */
-  .admin-drawer { padding: 0; overflow: hidden; border-color: rgba(201,168,76,.3); }
-  .admin-drawer.hidden { display: none; }
-  .admin-drawer-hdr {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px; cursor: pointer;
-    transition: background .18s; border-radius: 10px 10px 0 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .admin-drawer-hdr:hover { background: rgba(201,168,76,.06); }
-  .admin-drawer-icon { font-size: 1.15rem; flex-shrink: 0; }
-  .admin-drawer-text { flex: 1; min-width: 0; }
-  .admin-drawer-title {
-    font-family: 'Cinzel', serif; font-size: .8rem; font-weight: 700;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--gold);
-    display: flex; align-items: center; gap: 7px;
-  }
+  /* Note: drawer open/close and layout now use shared .shelf / .shelf-* classes
+     from styles.css. Only the admin-badge-pill remains here. */
   .admin-badge-pill {
     font-size: .56rem; padding: 1px 7px; border-radius: 12px; font-weight: 700;
     background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.4);
     letter-spacing: .1em; color: var(--gold-dim); vertical-align: middle;
-  }
-  .admin-drawer-desc { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
-  .admin-drawer-chevron {
-    color: var(--gold-dim); font-size: .7rem;
-    transition: transform .3s cubic-bezier(.22,1,.36,1);
-  }
-  .admin-drawer-chevron.open { transform: rotate(180deg); color: var(--gold); }
-  .admin-drawer-body {
-    display: grid; grid-template-rows: 0fr;
-    transition: grid-template-rows .35s cubic-bezier(.22,1,.36,1);
-  }
-  .admin-drawer-body.open { grid-template-rows: 1fr; }
-  .admin-drawer-inner {
-    overflow: hidden; border-top: 1px solid var(--border);
-    background: rgba(201,168,76,.03);
   }
 
   /* poll form + results (shared with index.html) */
@@ -417,40 +388,68 @@
         <button class="btn-signout" id="btn-signout">Sign out</button>
       </div>
 
-      <!-- Attendance + Badges -->
-      <div class="profile-card">
-        <h2>Attendance &amp; Badges</h2>
-        <div class="attendance-row">
-          <div class="attendance-count" id="attendance-count">0</div>
-          <div class="attendance-label">sessions<br>attended</div>
+      <!-- ── SHELF: Attendance & Badges ── -->
+      <div class="shelf" id="profile-shelf-attendance">
+        <div class="shelf-header" onclick="toggleProfileShelf('attendance')">
+          <div class="shelf-icon">🏅</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Attendance &amp; Badges</div>
+          </div>
+          <div class="shelf-chevron">▼</div>
         </div>
-        <div class="badges-grid" id="badges-grid">
-          <span class="no-badges">Attend your first session to earn a badge.</span>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+              <div class="attendance-row">
+                <div class="attendance-count" id="attendance-count">0</div>
+                <div class="attendance-label">sessions<br>attended</div>
+              </div>
+              <div class="badges-grid" id="badges-grid">
+                <span class="no-badges">Attend your first session to earn a badge.</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Ticket Verification -->
-      <div class="profile-card">
-        <h2>Ticket Verification</h2>
-        <div class="ticket-status">
-          <span>Status:</span>
-          <span class="pill pill--none" id="ticket-pill">Not submitted</span>
+      <!-- ── SHELF: Ticket Verification ── -->
+      <div class="shelf" id="profile-shelf-ticket">
+        <div class="shelf-header" onclick="toggleProfileShelf('ticket')">
+          <div class="shelf-icon">🎟️</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Ticket Verification</div>
+          </div>
+          <div class="shelf-chevron">▼</div>
         </div>
-        <p style="font-size:.8rem;color:var(--text-muted);margin:0">
-          Submit the email used to purchase your ticket. An admin will verify it
-          and credit your attendance.
-        </p>
-        <div class="ticket-form" id="ticket-form-row">
-          <input type="email" id="ticket-email-input" placeholder="Ticket email address">
-          <button type="button" id="btn-ticket-submit">Submit</button>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+              <div class="ticket-status">
+                <span>Status:</span>
+                <span class="pill pill--none" id="ticket-pill">Not submitted</span>
+              </div>
+              <p class="ticket-hint">
+                Submit the email used to purchase your ticket. An admin will verify it
+                and credit your attendance.
+              </p>
+              <div class="ticket-form" id="ticket-form-row">
+                <input type="email" id="ticket-email-input" placeholder="Ticket email address">
+                <button type="button" id="btn-ticket-submit">Submit</button>
+              </div>
+              <div class="ticket-msg" id="ticket-msg"></div>
+            </div>
+          </div>
         </div>
-        <div class="ticket-msg" id="ticket-msg"></div>
       </div>
 
-      <!-- Character Sheet -->
-      <div class="profile-card">
-        <div class="char-sheet-header">
-          <h2>Character Sheet</h2>
+      <!-- ── SHELF: Character Sheet ── -->
+      <div class="shelf" id="profile-shelf-charsheet">
+        <div class="shelf-header" onclick="toggleProfileShelf('charsheet')">
+          <div class="shelf-icon">📜</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Character Sheet</div>
+          </div>
+          <!-- Mulligan pips shown inline next to chevron when active -->
           <div class="mulligan-row" id="char-mulligan-row" style="display:none">
             Mulligans
             <div class="char-pip-row">
@@ -459,87 +458,93 @@
               <div class="char-pip" id="cp-2"></div>
             </div>
           </div>
+          <div class="shelf-chevron">▼</div>
         </div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+              <button class="btn-full-rand" id="btn-full-rand">🎲 Fully Randomize</button>
 
-        <button class="btn-full-rand" id="btn-full-rand">🎲 Fully Randomize</button>
-
-        <div class="char-field">
-          <label for="char-name">Character Name</label>
-          <div class="char-input-row">
-            <input type="text" id="char-name" placeholder="e.g. Aldric Stonemantle" maxlength="60">
-            <button class="btn-rand" id="rand-name" title="Roll a random name">⚄</button>
-            <button class="btn-field-pin" id="pin-name" title="Pin this value (skip on full randomize)">✓</button>
-          </div>
-        </div>
-        <div class="char-field">
-          <label for="char-race">Race / Species</label>
-          <div class="char-input-row">
-            <input type="text" id="char-race" placeholder="e.g. Half-elf" maxlength="60">
-            <button class="btn-rand" id="rand-race" title="Roll a random race">⚄</button>
-            <button class="btn-field-pin" id="pin-race" title="Pin this value">✓</button>
-          </div>
-        </div>
-        <div class="char-field">
-          <label for="char-class">Class / Role</label>
-          <div class="char-input-row">
-            <input type="text" id="char-class" placeholder="e.g. Rogue" maxlength="60">
-            <button class="btn-rand" id="rand-class" title="Roll a random class">⚄</button>
-            <button class="btn-field-pin" id="pin-class" title="Pin this value">✓</button>
-          </div>
-        </div>
-        <div class="char-field">
-          <label for="char-backstory">Backstory</label>
-          <div class="char-input-row">
-            <textarea id="char-backstory" rows="3"
-              placeholder="A few sentences about your character's past…" maxlength="500"></textarea>
-            <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-              <button class="btn-rand" id="rand-backstory" title="Roll a random backstory">⚄</button>
-              <button class="btn-field-pin" id="pin-backstory" title="Pin this value">✓</button>
+              <div class="char-field">
+                <label for="char-name">Character Name</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-name" placeholder="e.g. Aldric Stonemantle" maxlength="60">
+                  <button class="btn-rand" id="rand-name" title="Roll a random name">⚄</button>
+                  <button class="btn-field-pin" id="pin-name" title="Pin this value (skip on full randomize)">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-race">Race / Species</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-race" placeholder="e.g. Half-elf" maxlength="60">
+                  <button class="btn-rand" id="rand-race" title="Roll a random race">⚄</button>
+                  <button class="btn-field-pin" id="pin-race" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-class">Class / Role</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-class" placeholder="e.g. Rogue" maxlength="60">
+                  <button class="btn-rand" id="rand-class" title="Roll a random class">⚄</button>
+                  <button class="btn-field-pin" id="pin-class" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-backstory">Backstory</label>
+                <div class="char-input-row">
+                  <textarea id="char-backstory" rows="3"
+                    placeholder="A few sentences about your character's past…" maxlength="500"></textarea>
+                  <div class="char-btn-stack">
+                    <button class="btn-rand" id="rand-backstory" title="Roll a random backstory">⚄</button>
+                    <button class="btn-field-pin" id="pin-backstory" title="Pin this value">✓</button>
+                  </div>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-quirk">Quirk</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-quirk" placeholder="e.g. Hums when nervous" maxlength="120">
+                  <button class="btn-rand" id="rand-quirk" title="Roll a random quirk">⚄</button>
+                  <button class="btn-field-pin" id="pin-quirk" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-secret">Secret</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-secret" placeholder="Something only you know…" maxlength="120">
+                  <button class="btn-rand" id="rand-secret" title="Roll a random secret">⚄</button>
+                  <button class="btn-field-pin" id="pin-secret" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-actions">
+                <button class="btn-save" id="btn-char-save">Save Character</button>
+                <span class="char-save-msg" id="char-save-msg"></span>
+              </div>
+              <div class="char-locked-note hidden" id="char-locked-note">
+                🔒 Character sheet locked until <span id="char-locked-date"></span>.
+              </div>
             </div>
           </div>
-        </div>
-        <div class="char-field">
-          <label for="char-quirk">Quirk</label>
-          <div class="char-input-row">
-            <input type="text" id="char-quirk" placeholder="e.g. Hums when nervous" maxlength="120">
-            <button class="btn-rand" id="rand-quirk" title="Roll a random quirk">⚄</button>
-            <button class="btn-field-pin" id="pin-quirk" title="Pin this value">✓</button>
-          </div>
-        </div>
-        <div class="char-field">
-          <label for="char-secret">Secret</label>
-          <div class="char-input-row">
-            <input type="text" id="char-secret" placeholder="Something only you know…" maxlength="120">
-            <button class="btn-rand" id="rand-secret" title="Roll a random secret">⚄</button>
-            <button class="btn-field-pin" id="pin-secret" title="Pin this value">✓</button>
-          </div>
-        </div>
-        <div class="char-actions">
-          <button class="btn-save" id="btn-char-save">Save Character</button>
-          <span class="char-save-msg" id="char-save-msg"></span>
-        </div>
-        <div class="char-locked-note hidden" id="char-locked-note">
-          🔒 Character sheet locked until <span id="char-locked-date"></span>.
         </div>
       </div>
 
-      <!-- Admin Showrunner Panel — only rendered when isAdmin: true -->
-      <div class="profile-card admin-drawer hidden" id="admin-poll-card">
-        <div class="admin-drawer-hdr" id="admin-poll-toggle">
-          <div class="admin-drawer-icon">⚔</div>
-          <div class="admin-drawer-text">
-            <div class="admin-drawer-title">
+      <!-- ── SHELF: Admin Showrunner Panel — only shown when isAdmin: true ── -->
+      <div class="shelf hidden" id="admin-poll-card">
+        <div class="shelf-header" id="admin-poll-toggle" onclick="toggleProfileShelf('admin')">
+          <div class="shelf-icon">⚔</div>
+          <div class="shelf-text">
+            <div class="shelf-name">
               Showrunner Panel
               <span class="admin-badge-pill">ADMIN</span>
             </div>
-            <div class="admin-drawer-desc">Launch &amp; manage live audience polls</div>
+            <div class="shelf-desc">Launch &amp; manage live audience polls</div>
           </div>
-          <div class="admin-drawer-chevron" id="admin-poll-chevron">▾</div>
+          <div class="shelf-chevron">▼</div>
         </div>
-        <div class="admin-drawer-body" id="admin-poll-body">
-          <div class="admin-drawer-inner">
-            <div id="poll-inner" style="min-height:48px"></div>
-            <div id="poll-footer" style="padding:0 14px 10px"></div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div id="poll-inner"></div>
+            <div id="poll-footer"></div>
           </div>
         </div>
       </div>
@@ -563,6 +568,190 @@
   apply(localStorage.getItem('vaultTheme') || 'dark');
   if (btn) btn.addEventListener('click', () => {
     apply(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
+
+<!-- ============================================================
+     PROFILE SHELF NAVIGATION
+     Mirrors toggleShelf() from index.html.
+     Only one shelf open at a time (accordion behaviour).
+     The admin shelf has a Firebase lazy-init hook — the module
+     script registers window._onProfileShelfOpen() for that callback.
+     ============================================================ -->
+<script>
+(function() {
+  var activeProfileShelf = null;
+  window.toggleProfileShelf = function(id) {
+    var shelf = document.getElementById('profile-shelf-' + id);
+    // Admin shelf uses a different ID root (admin-poll-card)
+    if (!shelf) shelf = id === 'admin' ? document.getElementById('admin-poll-card') : null;
+    if (!shelf) return;
+    var isOpening = !shelf.classList.contains('open');
+    // Close previously open shelf
+    if (activeProfileShelf) {
+      var prevId = 'profile-shelf-' + activeProfileShelf;
+      var prev   = document.getElementById(prevId) ||
+                   (activeProfileShelf === 'admin' ? document.getElementById('admin-poll-card') : null);
+      if (prev) prev.classList.remove('open');
+    }
+    if (!isOpening) {
+      activeProfileShelf = null;
+      return;
+    }
+    shelf.classList.add('open');
+    activeProfileShelf = id;
+    // Notify module script (e.g. admin Firebase lazy-init)
+    if (typeof window._onProfileShelfOpen === 'function') {
+      window._onProfileShelfOpen(id);
+    }
+  };
+})();
+</script>
+
+<!-- ============================================================
+     PROFILE SHELF REORDER — long-press (400 ms) to drag/reorder
+     Same Pointer Events pattern as the index.html shelf reorder.
+     Container: #profile-panel (auth-gated). A MutationObserver
+     waits for the panel to become visible before wiring listeners.
+     localStorage key: 'nodice_profile_shelf_order'
+     ============================================================ -->
+<script>
+(function() {
+  var HOLD_MS     = 400;
+  var MOVE_CANCEL = 15; // px movement before long-press cancels
+  var LSKEY       = 'nodice_profile_shelf_order';
+
+  function getContainer() { return document.getElementById('profile-panel'); }
+
+  // ── Restore saved shelf order on page load ─────────────────────
+  function restoreShelfOrder() {
+    var saved;
+    try { saved = JSON.parse(localStorage.getItem(LSKEY)); } catch(e) {}
+    if (!Array.isArray(saved) || !saved.length) return;
+    var c = getContainer(); if (!c) return;
+    saved.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.parentNode === c) c.appendChild(el);
+    });
+  }
+
+  // ── Persist current DOM order ──────────────────────────────────
+  function saveShelfOrder() {
+    var c = getContainer(); if (!c) return;
+    var ids = Array.from(c.querySelectorAll(':scope > .shelf')).map(function(s) { return s.id; });
+    localStorage.setItem(LSKEY, JSON.stringify(ids));
+  }
+
+  // ── Wire long-press listeners on every profile shelf header ────
+  function initReorder() {
+    var c = getContainer(); if (!c) return;
+    c.querySelectorAll('.shelf-header').forEach(function(header) {
+      header.addEventListener('pointerdown', function(e) {
+        if (e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+        var shelf = header.closest('.shelf'); if (!shelf) return;
+        var sx = e.clientX, sy = e.clientY;
+        var timer = null;
+
+        function cleanup() {
+          clearTimeout(timer);
+          document.removeEventListener('pointermove',   onEarlyMove);
+          document.removeEventListener('pointerup',     cleanup);
+          document.removeEventListener('pointercancel', cleanup);
+        }
+        function onEarlyMove(ev) {
+          var dx = ev.clientX - sx, dy = ev.clientY - sy;
+          if (dx*dx + dy*dy > MOVE_CANCEL * MOVE_CANCEL) cleanup();
+        }
+        document.addEventListener('pointermove',   onEarlyMove);
+        document.addEventListener('pointerup',     cleanup);
+        document.addEventListener('pointercancel', cleanup);
+        timer = setTimeout(function() {
+          cleanup();
+          startDrag(c, shelf, header, e.pointerId, sx, sy);
+        }, HOLD_MS);
+      });
+    });
+  }
+
+  // ── Handle drag after long-press activates ─────────────────────
+  function startDrag(c, shelf, header, pointerId, sx, sy) {
+    if (navigator.vibrate) navigator.vibrate(30);
+    var rect        = shelf.getBoundingClientRect();
+    var grabOffsetY = sy - rect.top;
+
+    // Placeholder preserves the gap while the shelf floats
+    var ph = document.createElement('div');
+    ph.className = 'shelf drag-placeholder';
+    ph.style.height = rect.height + 'px';
+    c.insertBefore(ph, shelf);
+
+    // Lift shelf out of flow
+    shelf.style.position = 'fixed';
+    shelf.style.top      = rect.top  + 'px';
+    shelf.style.left     = rect.left + 'px';
+    shelf.style.width    = rect.width + 'px';
+    shelf.style.zIndex   = '1000';
+    shelf.style.margin   = '0';
+    shelf.classList.add('dragging');
+    header.classList.add('reorder-active');
+    header.setPointerCapture(pointerId);
+
+    function onMove(e) {
+      e.preventDefault();
+      shelf.style.top = (e.clientY - grabOffsetY) + 'px';
+      var midY     = e.clientY;
+      var siblings = Array.from(c.querySelectorAll(':scope > .shelf:not(.dragging)'));
+      var insertRef = null;
+      for (var i = 0; i < siblings.length; i++) {
+        var r = siblings[i].getBoundingClientRect();
+        if (midY < r.top + r.height / 2) { insertRef = siblings[i]; break; }
+      }
+      if (insertRef) {
+        if (ph.nextSibling !== insertRef) c.insertBefore(ph, insertRef);
+      } else {
+        if (c.lastChild !== ph) c.appendChild(ph);
+      }
+    }
+
+    function onUp() {
+      shelf.style.position = '';
+      shelf.style.top      = '';
+      shelf.style.left     = '';
+      shelf.style.width    = '';
+      shelf.style.zIndex   = '';
+      shelf.style.margin   = '';
+      shelf.classList.remove('dragging');
+      header.classList.remove('reorder-active');
+      c.insertBefore(shelf, ph);
+      ph.parentNode.removeChild(ph);
+      saveShelfOrder();
+      header.removeEventListener('pointermove',   onMove);
+      header.removeEventListener('pointerup',     onUp);
+      header.removeEventListener('pointercancel', onUp);
+      // Suppress the click that fires immediately after pointerup
+      header.addEventListener('click', function eatClick(ev) {
+        ev.stopImmediatePropagation();
+        header.removeEventListener('click', eatClick, true);
+      }, { capture: true, once: true });
+    }
+
+    header.addEventListener('pointermove',   onMove);
+    header.addEventListener('pointerup',     onUp);
+    header.addEventListener('pointercancel', onUp);
+  }
+
+  // ── Init — wait for profile-panel to become visible after auth ──
+  document.addEventListener('DOMContentLoaded', function() {
+    restoreShelfOrder(); // safe to run even while panel is hidden
+    var panel = document.getElementById('profile-panel');
+    if (!panel) return;
+    if (!panel.classList.contains('hidden')) { initReorder(); return; }
+    // MutationObserver fires when profile-auth.js removes the 'hidden' class
+    var obs = new MutationObserver(function() {
+      if (!panel.classList.contains('hidden')) { obs.disconnect(); initReorder(); }
+    });
+    obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
   });
 })();
 </script>
@@ -1041,7 +1230,6 @@ const _rtdb      = _pollApp ? getDatabase(_pollApp) : null;
 const _pollRef   = _rtdb ? rtdbRef(_rtdb, 'nodice/poll')  : null;
 const _votesRef  = _rtdb ? rtdbRef(_rtdb, 'nodice/votes') : null;
 
-let _pollDrawerOpen    = false;
 let _pollListenerSetUp = false;
 let _pollCurrentSnap   = null;
 let _pollUnsubVotes    = null;
@@ -1271,17 +1459,15 @@ function initAdminPanel(isAdmin) {
   if (!isAdmin) { card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
 
-  // Wire the accordion toggle — only once
-  document.getElementById('admin-poll-toggle').addEventListener('click', () => {
-    _pollDrawerOpen = !_pollDrawerOpen;
-    document.getElementById('admin-poll-body').classList.toggle('open', _pollDrawerOpen);
-    document.getElementById('admin-poll-chevron').classList.toggle('open', _pollDrawerOpen);
-    // Start the Firebase listener the first time the panel is opened
-    if (_pollDrawerOpen && !_pollListenerSetUp) {
+  // Open/close is driven by toggleProfileShelf('admin') via onclick on .shelf-header.
+  // Register a hook so toggleProfileShelf can lazy-start the Firebase listener
+  // the first time the admin shelf is opened.
+  window._onProfileShelfOpen = function(id) {
+    if (id === 'admin' && !_pollListenerSetUp) {
       _pollListenerSetUp = true;
       pStartListener();
     }
-  });
+  };
 }
 </script>
 </body>
