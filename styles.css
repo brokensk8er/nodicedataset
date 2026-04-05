@@ -868,9 +868,6 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .shelf-header.reorder-active {
     cursor: grabbing;
   }
-  .shelf-header:not(.reorder-active) {
-    touch-action: pan-y;
-  }
 
   /* ── PROFILE PAGE — shelf adjustments ── */
   /* Shelves render after Firebase auth; skip the slideUp entrance animation */
