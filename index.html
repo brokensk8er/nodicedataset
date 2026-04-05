@@ -1348,7 +1348,7 @@ if (!IS_DEMO) {
 <script>
 (function() {
   var HOLD_MS     = 400;
-  var MOVE_CANCEL = 15; // px movement before long-press is cancelled
+  var MOVE_CANCEL = 25; // px — Android touch slop at 3× density (~24–32px); 25 is the sweet spot
 
   // ── Restore saved order on page load ───────────────────────────
   function restoreShelfOrder() {
@@ -1357,10 +1357,18 @@ if (!IS_DEMO) {
     if (!Array.isArray(saved) || !saved.length) return;
     var main = document.querySelector('main');
     if (!main) return;
+    // Snapshot non-shelf children BEFORE moving shelves.
+    // Without this, main.appendChild() on shelves displaces the
+    // "In the Forge" div to the top of <main>.
+    var nonShelves = Array.from(main.children).filter(function(c) {
+      return !c.classList.contains('shelf');
+    });
     saved.forEach(function(id) {
       var el = document.getElementById(id);
       if (el && el.parentNode === main) main.appendChild(el);
     });
+    // Re-append non-shelf sections at the end (e.g. "In the Forge")
+    nonShelves.forEach(function(el) { main.appendChild(el); });
   }
 
   // ── Save current DOM order ─────────────────────────────────────
@@ -1384,6 +1392,7 @@ if (!IS_DEMO) {
         if (!shelf) return;
 
         var sx = e.clientX, sy = e.clientY;
+        var holdStart = Date.now(); // grace period reference
         var timer = null;
 
         function cleanup() {
@@ -1394,6 +1403,9 @@ if (!IS_DEMO) {
         }
 
         function onEarlyMove(ev) {
+          // 50ms grace: ignore the synthetic pointermove browsers often fire
+          // immediately after pointerdown (0–5px artifact, not real movement)
+          if (Date.now() - holdStart < 50) return;
           var dx = ev.clientX - sx, dy = ev.clientY - sy;
           if (dx*dx + dy*dy > MOVE_CANCEL * MOVE_CANCEL) cleanup();
         }
