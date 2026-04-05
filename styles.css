@@ -800,6 +800,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
     user-select: none;
     position: relative;
     -webkit-tap-highlight-color: transparent;
+    touch-action: none; /* prevent browser scroll-detection from firing pointercancel during long-press */
   }
   .shelf-header::after {
     content: '';
