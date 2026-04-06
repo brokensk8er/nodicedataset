@@ -117,7 +117,7 @@ body {
 .site-label {
   font-family: 'Cinzel', serif;
   font-size: .6rem;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: .25em;
   text-transform: uppercase;
   color: var(--gold-dim);
@@ -726,7 +726,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .poll-admin-section { padding: 12px 12px 14px; }
 
   /* ── Page layout ── */
-  body:has(.page-wrap) {
+  body {
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -743,37 +743,22 @@ html[data-theme="dark"] .profile-btn--signed-in {
   }
 
   /* ── Header ── */
-  body:has(.page-wrap) header {
+  header {
     text-align: center;
     padding: 1.6rem 0 .8rem;
     position: relative;
   }
-
-  /* .site-label — largest in header hierarchy; overrides Section 4 base size */
-  body:has(.page-wrap) .site-label {
-    font-size: clamp(1.6rem, 6vw, 2.4rem);
-    letter-spacing: .06em;
-    color: var(--gold);
-    margin-bottom: .3rem;
-    filter: drop-shadow(0 2px 10px rgba(201,168,76,.5))
-            drop-shadow(0 0 28px rgba(201,168,76,.18));
-  }
-
-  /* h1 — second in hierarchy, below .site-label */
-  body:has(.page-wrap) h1 {
+  /* .site-label comes from styles.css */
+  h1 {
     font-family: 'Cinzel', serif;
-    font-size: clamp(.9rem, 3vw, 1.15rem);
+    font-size: clamp(1.5rem, 5vw, 2rem);
     font-weight: 700;
     color: var(--ink);
-    line-height: 1.2;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    text-shadow: 0 1px 5px rgba(26,26,46,.28), 0 2px 10px rgba(26,26,46,.14);
+    line-height: 1.1;
+    letter-spacing: .04em;
   }
-
   /* h1 span gold colour comes from styles.css */
-  /* .tagline — unchanged; colour and weight from base */
-  body:has(.page-wrap) .tagline {
+  .tagline {
     margin-top: .35rem;
     font-size: .75rem;
     font-weight: 300;
@@ -783,7 +768,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   /* .header-divider width, gradient, and height come from styles.css */
 
   /* ── Main ── */
-  body:has(.page-wrap) main { display: flex; flex-direction: column; gap: 10px; padding: .9rem 0 1rem; }
+  main { display: flex; flex-direction: column; gap: 10px; padding: .9rem 0 1rem; }
 
   /* ── SHELF ── */
   .shelf {
@@ -1360,7 +1345,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .soon-desc { font-size: .65rem; font-weight: 300; color: var(--muted); line-height: 1.35; }
   .soon-badge { display: inline-block; font-family: 'Cinzel', serif; font-size: .48rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); border-radius: 20px; padding: 2px 7px; margin-top: 3px; align-self: flex-start; }
 
-  body:has(.page-wrap) footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 
   /* ── QR Code shelf ── */
   .qr-wrap { display: flex; flex-direction: column; align-items: center; padding: 16px 16px 14px; gap: 10px; }
