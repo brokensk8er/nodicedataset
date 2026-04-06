@@ -131,7 +131,7 @@
   .char-field input, .char-field textarea {
     padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border);
     background: var(--card-bg); color: var(--text); font-family: 'Lato', sans-serif;
-    font-size: .9rem; box-sizing: border-box; resize: vertical; width: 100%; }
+    font-size: .9rem; box-sizing: border-box; width: 100%; }
   .char-field input:focus, .char-field textarea:focus {
     outline: none; border-color: var(--gold); }
   .char-field input[readonly], .char-field textarea[readonly] {
@@ -180,6 +180,25 @@
   .char-input-row { display: flex; align-items: flex-start; gap: 6px; }
   .char-input-row input, .char-input-row textarea {
     flex: 1; min-width: 0;
+  }
+  .char-input-row textarea {
+    min-height: 2.9rem;
+    resize: none;
+    overflow: hidden;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .char-btn-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+  .char-btn-stack .btn-rand,
+  .char-btn-stack .btn-field-pin {
+    width: 100%;
   }
   .btn-rand, .btn-field-pin {
     flex-shrink: 0; padding: 7px 9px; border-radius: 6px;
@@ -468,7 +487,7 @@
               <div class="char-field">
                 <label for="char-name">Character Name</label>
                 <div class="char-input-row">
-                  <input type="text" id="char-name" placeholder="e.g. Aldric Stonemantle" maxlength="60">
+                  <textarea id="char-name" rows="1" placeholder="e.g. Aldric Stonemantle" maxlength="60"></textarea>
                   <button class="btn-rand" id="rand-name" title="Roll a random name">⚄</button>
                   <button class="btn-field-pin" id="pin-name" title="Pin this value (skip on full randomize)">✓</button>
                 </div>
@@ -476,7 +495,7 @@
               <div class="char-field">
                 <label for="char-race">Race / Species</label>
                 <div class="char-input-row">
-                  <input type="text" id="char-race" placeholder="e.g. Half-elf" maxlength="60">
+                  <textarea id="char-race" rows="1" placeholder="e.g. Half-elf" maxlength="60"></textarea>
                   <button class="btn-rand" id="rand-race" title="Roll a random race">⚄</button>
                   <button class="btn-field-pin" id="pin-race" title="Pin this value">✓</button>
                 </div>
@@ -484,7 +503,7 @@
               <div class="char-field">
                 <label for="char-class">Class / Role</label>
                 <div class="char-input-row">
-                  <input type="text" id="char-class" placeholder="e.g. Rogue" maxlength="60">
+                  <textarea id="char-class" rows="1" placeholder="e.g. Rogue" maxlength="60"></textarea>
                   <button class="btn-rand" id="rand-class" title="Roll a random class">⚄</button>
                   <button class="btn-field-pin" id="pin-class" title="Pin this value">✓</button>
                 </div>
@@ -503,7 +522,7 @@
               <div class="char-field">
                 <label for="char-quirk">Quirk</label>
                 <div class="char-input-row">
-                  <input type="text" id="char-quirk" placeholder="e.g. Hums when nervous" maxlength="120">
+                  <textarea id="char-quirk" rows="1" placeholder="e.g. Hums when nervous" maxlength="120"></textarea>
                   <button class="btn-rand" id="rand-quirk" title="Roll a random quirk">⚄</button>
                   <button class="btn-field-pin" id="pin-quirk" title="Pin this value">✓</button>
                 </div>
@@ -511,7 +530,7 @@
               <div class="char-field">
                 <label for="char-secret">Secret</label>
                 <div class="char-input-row">
-                  <input type="text" id="char-secret" placeholder="Something only you know…" maxlength="120">
+                  <textarea id="char-secret" rows="1" placeholder="Something only you know…" maxlength="120"></textarea>
                   <button class="btn-rand" id="rand-secret" title="Roll a random secret">⚄</button>
                   <button class="btn-field-pin" id="pin-secret" title="Pin this value">✓</button>
                 </div>
@@ -601,6 +620,9 @@
     }
     shelf.classList.add('open');
     activeProfileShelf = id;
+    if (id === 'charsheet') {
+      requestAnimationFrame(csAutoSizeAllFields);
+    }
     // Notify module script (e.g. admin Firebase lazy-init)
     if (typeof window._onProfileShelfOpen === 'function') {
       window._onProfileShelfOpen(id);
@@ -934,6 +956,16 @@ async function csLoadData() {
 function csPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function csGenName()  { return csPick(CS_DATA.firstNames) + ' ' + csPick(CS_DATA.lastNames); }
 
+function csAutoSizeField(el) {
+  if (!el || el.tagName !== 'TEXTAREA') return;
+  el.style.height = 'auto';
+  el.style.height = `${el.scrollHeight}px`;
+}
+
+function csAutoSizeAllFields() {
+  document.querySelectorAll('.char-input-row textarea').forEach(csAutoSizeField);
+}
+
 function csUpdateMulliganDisplay() {
   const row = document.getElementById('char-mulligan-row');
   if (row) row.style.display = csState.rolled ? 'flex' : 'none';
@@ -956,7 +988,10 @@ function csRandomizeField(key) {
   const f = CS_FIELDS.find(x => x.key === key);
   const val = (key === 'name') ? csGenName() : csPick(CS_DATA[f.pool]);
   const el = document.getElementById(f.inputId);
-  if (el && !el.readOnly) el.value = val;
+  if (el && !el.readOnly) {
+    el.value = val;
+    csAutoSizeField(el);
+  }
   csUpdateMulliganDisplay();
 }
 
@@ -969,7 +1004,10 @@ function csRandomizeAll() {
     if (csState.pinned.has(f.key)) return;
     const val = (f.key === 'name') ? csGenName() : csPick(CS_DATA[f.pool]);
     const el = document.getElementById(f.inputId);
-    if (el && !el.readOnly) el.value = val;
+    if (el && !el.readOnly) {
+      el.value = val;
+      csAutoSizeField(el);
+    }
   });
   csUpdateMulliganDisplay();
 }
@@ -983,6 +1021,10 @@ function csTogglePin(key) {
 
 function csInitButtons() {
   csUpdateMulliganDisplay();
+  document.querySelectorAll('.char-input-row textarea').forEach(el => {
+    el.addEventListener('input', () => csAutoSizeField(el));
+    csAutoSizeField(el);
+  });
   document.getElementById('btn-full-rand')
     ?.addEventListener('click', csRandomizeAll);
   CS_FIELDS.forEach(f => {
@@ -1171,6 +1213,7 @@ function renderCharSheet(data) {
   document.getElementById('char-backstory').value = ch.backstory || '';
   document.getElementById('char-quirk').value     = ch.quirk     || '';
   document.getElementById('char-secret').value    = ch.secret    || '';
+  csAutoSizeAllFields();
 
   const lockMs = ch.lockedAt?.toDate?.().getTime()
               ?? (ch.lockedAt ? Number(ch.lockedAt) : null);
