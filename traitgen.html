@@ -3,67 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>No Dice — Trait Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Shared styles (colours, fonts, buttons, badges, animations) -->
+<link rel="stylesheet" href="styles.css">
+<!-- Prevent theme flash: apply saved theme before first paint -->
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
-  :root {
-    --ink:       #1a1a2e;
-    --parchment: #faf7f2;
-    --gold:      #c9a84c;
-    --gold-dim:  #a07c2e;
-    --gold-bg:   #fffdf5;
-    --card-bg:   #ffffff;
-    --border:    #e8e2d9;
-    --muted:     #6b6676;
-    --shadow:    rgba(26,26,46,.12);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  /* ── Page layout ── */
   html, body { height: 100%; }
 
   body {
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    background-color: var(--parchment);
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    color: var(--ink);
     display: flex;
     flex-direction: column;
     height: 100dvh;
   }
 
-  /* ── Desktop wrapper ── */
-  .page-frame {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-  }
-
+  /* ── Desktop wrapper — .page-frame base + media query come from styles.css ── */
   @media (min-width: 600px) {
-    body {
-      align-items: center;
-      justify-content: center;
-    }
-    .page-frame {
-      width: 420px;
-      height: 92dvh;
-      max-height: 820px;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 48px rgba(26,26,46,.18), 0 2px 8px rgba(26,26,46,.08);
-      border: 1px solid var(--border);
-    }
+    .page-frame { max-height: 820px; }
   }
 
   /* ── Header ── */
+  /* .site-label, header h1, .subtitle come from styles.css */
   header {
     text-align: center;
     padding: 10px 16px 6px;
@@ -73,60 +38,8 @@
     background-color: var(--parchment);
   }
 
-  .site-label {
-    font-family: 'Cinzel', serif;
-    font-size: .6rem;
-    font-weight: 400;
-    letter-spacing: .25em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 2px;
-  }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: .04em;
-    line-height: 1.2;
-  }
-
-  header h1 span { color: var(--gold); }
-
-  .subtitle {
-    font-size: 0.68rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
-
-  /* ── Mulligan bar — copied exactly from chargen.html ── */
-  .mulligan-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 5px 0 3px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    flex-shrink: 0;
-    background-color: var(--parchment);
-  }
-
-  .pip-row { display: flex; gap: 5px; }
-
-  .pip {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--gold);
-    transition: background 0.3s, transform 0.2s;
-  }
-  .pip.spent { background: var(--border); transform: scale(0.85); }
+  /* .mulligan-bar, .pip-row, .pip, .pip.spent come from styles.css
+     (they are identical to chargen.html — now centralised) */
 
   /* ── Main area ── */
   #app {
@@ -139,20 +52,7 @@
     background-color: var(--parchment);
   }
 
-  /* Loading state */
-  .loading {
-    text-align: center;
-    padding: 40px 24px;
-    color: var(--muted);
-    font-size: 0.9rem;
-    letter-spacing: 0.05em;
-  }
-  .loading .spinner {
-    font-size: 2rem;
-    margin-bottom: 12px;
-    display: inline-block;
-    animation: spin 1.2s linear infinite;
-  }
+  /* .loading + .loading .spinner come from styles.css */
 
   /* ── White card ── */
   .trait-card {
@@ -271,10 +171,8 @@
 
   .loot-image-slot.has-image img {
     width: 100%;
-    max-width: 160px;
     height: auto;
     display: block;
-    margin: 0 auto;
   }
 
   .loot-image-slot .slot-icon {
@@ -338,114 +236,18 @@
     text-align: center;
   }
 
-  /* ── Card footer ── */
-  .card-footer {
-    flex-shrink: 0;
-    border-top: 1px solid var(--border);
-    padding: 9px 14px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    align-items: center;
-    background: rgba(201,168,76,.02);
-  }
-
-  .roll-btn {
-    width: 100%;
-    background: var(--ink);
-    color: var(--parchment);
-    border: none;
-    border-radius: 8px;
-    padding: 11px;
-    font-family: 'Cinzel', serif;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .roll-btn:hover:not(:disabled) { background: #2e2e4a; }
-  .roll-btn:active { transform: scale(0.98); }
-  .roll-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* ── Lock notice — copied exactly from chargen.html ── */
-  .lock-notice {
-    width: 100%;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    cursor: default;
-  }
-
-  .lock-notice .lock-msg {
-    font-family: 'Lato', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    color: var(--muted);
-  }
-
-  .lock-notice .lock-countdown {
-    font-family: 'Cinzel', serif;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    color: var(--ink);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  /* ── Source badge ── */
-  .source-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.62rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2px 8px;
-  }
-
-  .source-badge .dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .source-badge.live .dot     { background: #2d7a5e; }
-  .source-badge.fallback .dot { background: #b8860b; }
+  /* .card-footer comes from styles.css */
+  /* .roll-btn + all states come from styles.css */
+  /* .lock-notice + .lock-msg + .lock-countdown come from styles.css */
+  /* .source-badge + .dot + .live/.fallback come from styles.css */
 
   /* ── Footer nav ── */
+  /* .nav-link comes from styles.css */
   footer {
     text-align: center;
     padding: 5px 0 7px;
     flex-shrink: 0;
     background-color: var(--parchment);
-  }
-
-  .nav-link {
-    font-family: 'Cinzel', serif;
-    font-size: 0.58rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color .2s, color .2s;
-  }
-  .nav-link:hover {
-    color: var(--gold);
-    border-color: var(--gold);
   }
 
   /* ================================================================
@@ -478,31 +280,37 @@
      END DEV RESET BUTTON STYLES
   ================================================================ */
 
-  /* ── Animations ── */
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-
+  /* @keyframes cardIn and @keyframes spin come from styles.css */
   .die.spinning { animation: spin 0.35s ease; }
 </style>
 </head>
 <body>
 
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
+
 <div class="page-frame">
 
+  <!-- ============================================
+       HEADER
+       Edit: site-label eyebrow, h1 title, subtitle.
+       The gold word in h1 is wrapped in a <span>.
+       The Reset button is injected here by JS when
+       the lockout is active — see devReset() in JS.
+       ============================================ -->
   <header>
-    <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+    <p class="site-label">No Dice &mdash; Improv RPG</p>
     <h1>The <span>Trait</span></h1>
     <p class="subtitle">One roll. One truth.</p>
-    <!-- DEV RESET BUTTON is injected here by JS when locked — see devReset() below -->
   </header>
 
+  <!-- ============================================
+       APP ROOT
+       JavaScript injects the .mulligan-bar and
+       .trait-card here via render().
+       The loading spinner shows until data loads.
+       Do not put static content in this div.
+       ============================================ -->
   <div id="app">
     <div class="loading">
       <span class="spinner">🎭</span><br>
@@ -510,6 +318,10 @@
     </div>
   </div>
 
+  <!-- ============================================
+       FOOTER
+       ← Back to the Vault nav link.
+       ============================================ -->
   <footer>
     <a class="nav-link" href="index.html">← Back to the Vault</a>
   </footer>
@@ -519,6 +331,9 @@
 <script>
 // ============================================================
 //  CONFIGURATION
+//  ► Change SHEET_ID + API_KEY to point to your own sheet.
+//  ► EXCLUDE_TABS: tab names to skip entirely (case-sensitive).
+//  ► LOOT_TAB: the one tab fetched with image + flavour columns.
 // ============================================================
 const CONFIG = {
   SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
@@ -752,6 +567,10 @@ async function loadData() {
 
 // ============================================================
 //  HELPERS
+//  pickTrait() — random draw from ALL_TRAITS.
+//  escHtml()   — sanitises text before inserting into innerHTML.
+//  sourceBadgeHTML() — builds the live/fallback badge markup.
+//  isLocked() / formatCountdown() — lockout state helpers.
 // ============================================================
 function pickTrait() {
   return ALL_TRAITS[Math.floor(Math.random() * ALL_TRAITS.length)];
@@ -790,7 +609,6 @@ function formatCountdown(ms) {
 function innerContentHTML() {
   if (!state.value) {
     return `<div class="trait-display">
-      <div class="trait-label">Your Trait</div>
       <div class="trait-value">&nbsp;</div>
       <div class="trait-divider"></div>
       <div class="trait-source">&nbsp;</div>
@@ -828,7 +646,6 @@ function innerContentHTML() {
 
   // ── Standard trait entry: big centred text ────────────
   return `<div class="trait-display">
-    <div class="trait-label">Your Trait</div>
     <div class="trait-value">${escHtml(state.value)}</div>
     <div class="trait-divider"></div>
     <div class="trait-source">from: ${escHtml(state.sheet)}</div>
@@ -857,6 +674,10 @@ function startCountdown() {
 
 // ============================================================
 //  RENDER
+//  Builds the entire DOM from state and writes to #app.
+//  Switches layout between standard trait text and loot card
+//  depending on whether the current roll is from CONFIG.LOOT_TAB.
+//  To change the card layout, edit the template literals here.
 // ============================================================
 function render() {
   const app    = document.getElementById('app');
@@ -919,6 +740,8 @@ function render() {
 
 // ============================================================
 //  ACTIONS
+//  doRoll()  — picks a trait, decrements mulligan, saves session.
+//  devReset() — dev-only: wipes session and re-rolls immediately.
 // ============================================================
 function doRoll() {
   if (isLocked()) return;
@@ -974,6 +797,7 @@ function devReset() {
 
 // ============================================================
 //  BOOT
+//  Entry point. Loads data, then restores session or auto-rolls.
 // ============================================================
 loadData().then(() => {
   const restored = loadSession();
@@ -984,6 +808,23 @@ loadData().then(() => {
     doRoll();
   }
 });
+
+// ── Theme toggle ──────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+(function(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+})();
+</script>
+<script type="module">
+import { mountProfileButton } from './profile-auth.js';
+mountProfileButton();
 </script>
 </body>
 </html>
