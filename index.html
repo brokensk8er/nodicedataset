@@ -3,328 +3,1514 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>No Dice — Improv D&D Tools</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>No Dice — The Vault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ink:       #1a1a2e;
-    --parchment: #faf7f2;
-    --gold:      #c9a84c;
-    --gold-dim:  #a07c2e;
-    --gold-bg:   #fffdf5;
-    --card-bg:   #ffffff;
-    --border:    #e8e2d9;
-    --muted:     #6b6676;
-    --shadow:    rgba(26,26,46,.10);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    background-color: var(--parchment);
-    color: var(--ink);
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  }
-
-  header {
-    width: 100%;
-    max-width: 520px;
-    padding: 2.5rem 1.5rem 1rem;
-    text-align: center;
-  }
-
-  .site-label {
-    font-family: 'Cinzel', serif;
-    font-size: .65rem;
-    font-weight: 400;
-    letter-spacing: .28em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: .5rem;
-  }
-
-  h1 {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(2rem, 6vw, 2.8rem);
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1.1;
-    letter-spacing: .04em;
-  }
-
-  h1 span { color: var(--gold); }
-
-  .tagline {
-    margin-top: .55rem;
-    font-size: .82rem;
-    font-weight: 300;
-    color: var(--muted);
-    letter-spacing: .06em;
-    line-height: 1.6;
-  }
-
-  .divider {
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 1.1rem auto 0;
-  }
-
-  main {
-    width: 100%;
-    max-width: 520px;
-    padding: 2rem 1.25rem 3rem;
-  }
-
-  .tools-label {
-    font-family: 'Cinzel', serif;
-    font-size: .6rem;
-    font-weight: 600;
-    letter-spacing: .2em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 1rem;
-    text-align: center;
-  }
-
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-
-  .tool-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.6rem 1.2rem 1.4rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .75rem;
-    text-decoration: none;
-    color: var(--ink);
-    box-shadow: 0 3px 18px var(--shadow);
-    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-  }
-
-  .tool-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity .2s;
-  }
-
-  .tool-card:hover::before { opacity: 1; }
-
-  .tool-card.active:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 28px rgba(201,168,76,.22), 0 3px 18px var(--shadow);
-    border-color: rgba(201,168,76,.45);
-  }
-
-  .tool-card.coming-soon {
-    cursor: default;
-    opacity: .6;
-  }
-
-  .tool-icon {
-    font-size: 2.4rem;
-    line-height: 1;
-    filter: drop-shadow(0 2px 4px rgba(26,26,46,.15));
-  }
-
-  .tool-name {
-    font-family: 'Cinzel', serif;
-    font-size: .82rem;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink);
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  .tool-desc {
-    font-size: .72rem;
-    font-weight: 300;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-    letter-spacing: .02em;
-  }
-
-  .tool-badge {
-    font-family: 'Cinzel', serif;
-    font-size: .55rem;
-    font-weight: 600;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 20px;
-    margin-top: .1rem;
-  }
-
-  .badge-ready {
-    color: var(--gold);
-    border: 1px solid rgba(201,168,76,.4);
-    background: rgba(201,168,76,.08);
-  }
-
-  .badge-soon {
-    color: var(--muted);
-    border: 1px solid var(--border);
-    background: transparent;
-  }
-
-  /* Wide card spans full width */
-  .tool-card.wide {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    gap: 1.1rem;
-    padding: 1.3rem 1.6rem;
-    align-items: center;
-    text-align: left;
-  }
-
-  .tool-card.wide .tool-name { text-align: left; }
-  .tool-card.wide .tool-desc { text-align: left; }
-
-  .tool-card.wide .tool-text {
-    display: flex;
-    flex-direction: column;
-    gap: .35rem;
-    flex: 1;
-  }
-
-  .tool-card.wide .tool-icon {
-    font-size: 2.8rem;
-    flex-shrink: 0;
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .tool-card {
-    animation: slideUp .45s cubic-bezier(.22,1,.36,1) both;
-  }
-
-  .tool-card:nth-child(1) { animation-delay: .08s; }
-  .tool-card:nth-child(2) { animation-delay: .14s; }
-  .tool-card:nth-child(3) { animation-delay: .20s; }
-  .tool-card:nth-child(4) { animation-delay: .26s; }
-  .tool-card:nth-child(5) { animation-delay: .32s; }
-  .tool-card:nth-child(6) { animation-delay: .38s; }
-  .tool-card:nth-child(7) { animation-delay: .44s; }
-  .tool-card:nth-child(8) { animation-delay: .50s; }
-
-  footer {
-    text-align: center;
-    padding-bottom: 1.5rem;
-    font-size: .65rem;
-    color: var(--muted);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-  }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Shared styles (colours, fonts, buttons, badges, animations) -->
+<link rel="stylesheet" href="styles.css">
+<!-- Prevent flash: apply saved theme before first paint -->
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 </head>
 <body>
 
-<header>
-  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
-  <h1>The <span>Vault</span></h1>
-  <p class="tagline">Tools for when the dice aren't doing their job.<br>Pick your poison.</p>
-  <div class="divider"></div>
-</header>
+<!-- Confetti canvas — full-screen overlay for coin flip pass animation.
+     pointer-events: none keeps it non-blocking. Do not remove. -->
+<canvas id="coin-confetti"></canvas>
 
-<main>
-  <p class="tools-label">Choose a tool</p>
-  <div class="tools-grid">
+<div class="page-wrap">
 
-    <!-- Coin Flip — ACTIVE -->
-    <a class="tool-card active" href="coinflip.html">
-      <div class="tool-icon">✨</div>
-      <div class="tool-name">Fate's Flip</div>
-      <div class="tool-desc">Pass or fail. One coin. No appeal.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+  <!-- ============================================
+       HEADER
+       Edit: site-label eyebrow, h1 title, tagline.
+       The gold word in h1 is wrapped in a <span>.
+       ============================================ -->
+  <header>
+    <p class="site-label">No Dice &mdash; Improv RPG</p>
+    <h1>The <span>Vault</span></h1>
+    <p class="tagline">Every tool. One scroll. Zero excuses.</p>
+    <div class="header-divider"></div>
+    <!-- THEME TOGGLE — sun/moon light/dark mode switch -->
+    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark mode"><span id="theme-toggle-icon">🌙</span></button>
+    <!-- END THEME TOGGLE -->
+    <!-- DEV RESET — remove this button when no longer needed -->
+    <button class="dev-reset-btn" id="cg-dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans" style="display:none">Reset</button>
+    <!-- END DEV RESET -->
+  </header>
 
-    <!-- Character Generator — ACTIVE -->
-    <a class="tool-card active" href="chargen.html">
-      <div class="tool-icon">🎲</div>
-      <div class="tool-name">Character Gen</div>
-      <div class="tool-desc">Roll a whole person in seconds.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+  <!-- ============================================
+       SHELF LIST — ACCORDION TOOL MENU
+       Each .shelf block is one collapsible tool
+       entry. Clicking the .shelf-header opens it.
 
-    <!-- Loot Table — ACTIVE -->
-    <a class="tool-card active" href="loot.html">
-      <div class="tool-icon">💰</div>
-      <div class="tool-name">Loot Table</div>
-      <div class="tool-desc">Reach into the pile. See what fate provides.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
+       To add a shelf:
+         1. Copy an entire .shelf block
+         2. Give it a unique id="shelf-X"
+         3. Add the shelf body content
+         4. Register its init function in JS below
+       ============================================ -->
+  <main>
 
-    <!-- The Poll — ACTIVE -->
-    <a class="tool-card active" href="poll.html">
-      <div class="tool-icon">🗳️</div>
-      <div class="tool-name">The Poll</div>
-      <div class="tool-desc">The crowd decides. Showrunner reveals.</div>
-      <span class="tool-badge badge-ready">Ready</span>
-    </a>
-
-    <!-- Trait Generator — ACTIVE -->
-    <a class="tool-card active wide" href="traitgen.html">
-      <div class="tool-icon">🎭</div>
-      <div class="tool-text">
-        <div class="tool-name">Trait Gen</div>
-        <div class="tool-desc">One roll. One truth. A single defining trait pulled from the whole pile.</div>
-        <span class="tool-badge badge-ready">Ready</span>
+    <!-- ============================================
+         SHELF 1 — COIN FLIP
+         Layout: left = button + result text,
+         right = animated coin (130×130).
+         JS logic: doFlip() in plain <script> below
+         ============================================ -->
+    <div class="shelf" id="shelf-coin">
+      <div class="shelf-header" onclick="toggleShelf('coin')">
+        <div class="shelf-icon">✨</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Fate's Flip</div>
+          <div class="shelf-desc">Pass or fail. One coin. No appeal.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
       </div>
-    </a>
-
-    <!-- Scenario Generator — COMING SOON (wide) -->
-    <div class="tool-card coming-soon wide">
-      <div class="tool-icon">🗺️</div>
-      <div class="tool-text">
-        <div class="tool-name">Scenario Gen</div>
-        <div class="tool-desc">Drop-in quest hooks, locations, and inciting incidents for when the GM blanks.</div>
-        <span class="tool-badge badge-soon">Coming Soon</span>
+      <div class="shelf-body" id="shelf-body-coin">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <!-- Wide layout: left = button+result, right = coin -->
+            <div class="coin-wide">
+              <div class="coin-left">
+                <button class="btn-coin-flip" id="btn-flip" onclick="doFlip()">⚔ Flip the Coin</button>
+                <div class="coin-result-wrap">
+                  <div class="coin-result-banner" id="coin-banner">&nbsp;</div>
+                  <div class="coin-result-sub"    id="coin-sub">&nbsp;</div>
+                </div>
+              </div>
+              <div class="coin-right">
+                <div class="coin-mini" id="coin-mini">
+                  <div class="face-mini face-mini-mystery" id="coin-face-mini">
+                    <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <polygon points="55,22 86,39 86,71 55,88 24,71 24,39" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+                      <text x="55" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="rgba(26,26,46,0.75)">?</text>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- NPC Generator — COMING SOON (wide) -->
-    <div class="tool-card coming-soon wide">
-      <div class="tool-icon">🧙</div>
-      <div class="tool-text">
-        <div class="tool-name">NPC Gen</div>
-        <div class="tool-desc">Instant strangers with agendas and terrible timing.</div>
-        <span class="tool-badge badge-soon">Coming Soon</span>
+    <!-- ============================================
+         SHELF 2 — CHARACTER GENERATOR
+         Shows category buttons to roll a single
+         character field. Links to full chargen.html.
+         JS init: _vaultInit_chargen()
+         ============================================ -->
+    <div class="shelf" id="shelf-chargen">
+      <div class="shelf-header" onclick="toggleShelf('chargen')">
+        <div class="shelf-icon">🎲</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Character Gen</div>
+          <div class="shelf-desc">Roll a whole person in seconds.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-chargen">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div id="cg-inner"><!-- rendered by JS --></div>
+            <div id="cg-quick" style="display:none"><!-- rendered by JS --></div>
+          </div>
+        </div>
       </div>
     </div>
 
-  </div>
-</main>
+    <!-- ============================================
+         SHELF 3 — LOOT TABLE
+         Shows item name + flavour + thumbnail image.
+         Content rendered into #loot-inner by JS.
+         JS init: _vaultInit_loot()
+         ============================================ -->
+    <div class="shelf" id="shelf-loot">
+      <div class="shelf-header" onclick="toggleShelf('loot')">
+        <div class="shelf-icon">💰</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Loot Table</div>
+          <div class="shelf-desc">Reach in. See what fate provides.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-loot">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div id="loot-inner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<footer>No Dice &mdash; Improv D&amp;D &mdash; 2025</footer>
+    <!-- ============================================
+         SHELF 4 — THE POLL
+         Audience voting via Firebase Realtime DB.
+         Content rendered into #poll-inner by JS.
+         Requires Firebase config in poll.html.
+         JS init: _vaultInit_poll()
+         ============================================ -->
+    <div class="shelf" id="shelf-poll">
+      <div class="shelf-header" onclick="toggleShelf('poll')">
+        <div class="shelf-icon">🗳️</div>
+        <div class="shelf-text">
+          <div class="shelf-name">The Poll</div>
+          <div class="shelf-desc">The crowd decides. Showrunner reveals.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-poll">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div id="poll-inner"></div>
+            <div class="poll-footer" id="poll-footer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- ============================================
+         SHELF 5 — TRAIT GENERATOR
+         Rolls one trait from any Sheet tab.
+         Content rendered into #trait-inner by JS.
+         JS init: _vaultInit_trait()
+         ============================================ -->
+    <div class="shelf" id="shelf-trait">
+      <div class="shelf-header" onclick="toggleShelf('trait')">
+        <div class="shelf-icon">🎭</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Trait Gen</div>
+          <div class="shelf-desc">One roll. One truth. From the whole pile.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-trait">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div id="trait-inner"></div>
+            <div class="trait-footer" id="trait-footer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         COMING SOON — IN THE FORGE
+         These are <div> cards (not links).
+         To promote one to live: create a new .shelf
+         block for it above and add its JS init.
+         ============================================ -->
+    <div>
+      <div class="section-rule"></div>
+      <p class="section-label">In the forge</p>
+      <div class="soon-grid">
+        <div class="soon-card"><div class="soon-icon">🗺️</div><div class="soon-name">Scenario Gen</div><div class="soon-desc">Drop-in quest hooks.</div><span class="soon-badge">Coming Soon</span></div>
+        <div class="soon-card" id="npc-gen-card"><div class="soon-icon">🧙</div><div class="soon-name">NPC Gen</div><div class="soon-desc">Instant strangers.</div><span class="soon-badge">Coming Soon</span></div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         SHELF — QR CODE
+         Renders a styled QR code for the current URL.
+         No data loading; lazy-init draws canvas on first open.
+         ============================================ -->
+    <div class="shelf" id="shelf-qr">
+      <div class="shelf-header" onclick="toggleShelf('qr')">
+        <div class="shelf-icon">📣</div>
+        <div class="shelf-text">
+          <div class="shelf-name">QR Code</div>
+          <div class="shelf-desc">Scan to join. Share the Vault.</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-qr">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div class="qr-wrap">
+              <img class="qr-img" src="qr.png" alt="No Dice QR Code" onclick="document.getElementById('qr-lightbox').style.display='flex'">
+              <p class="qr-hint">Tap to enlarge &middot; Scan to open the Vault</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>No Dice &mdash; Improv RPG &mdash; 2025</footer>
+</div>
+
+<!-- Plain script: toggleShelf must be on window BEFORE any click happens.
+     type="module" scripts are deferred — inline onclick attrs can't reach them. -->
+<script>
+// ============================================================
+// SHELF NAVIGATION
+// Manages which shelf is open. Only one can be open at a time.
+// _vaultInit_X() lazy-initialises each tool on first open.
+// ============================================================
+(function() {
+  var activeShelf = null;
+  window.toggleShelf = function(id) {
+    if (activeShelf === id) {
+      document.getElementById('shelf-' + id).classList.remove('open');
+      activeShelf = null;
+      return;
+    }
+    if (activeShelf) document.getElementById('shelf-' + activeShelf).classList.remove('open');
+    document.getElementById('shelf-' + id).classList.add('open');
+    activeShelf = id;
+    var fn = window['_vaultInit_' + id];
+    if (fn) fn();
+  };
+})();
+
+// ============================================================
+// COIN FLIP — SHELF 1
+// Must be in a plain script — onclick="doFlip()" can't reach
+// module scope. Contains the full flip + confetti animation.
+// ============================================================
+(function() {
+  var coinSpinning = false;
+
+  var PASS_LINES = ["The fates smile upon thee.","Fortune favours the bold.","Against all odds, glory.","A hero's moment — take it.","Not luck. Greatness.","The gods nod in your favour.","Victory tastes sweet today.","Your legend grows.","Boldness rewarded. Press on.","Written in the stars, apparently."];
+  var FAIL_LINES = ["The fates are unmoved.","Even heroes stumble.","Not today, adventurer.","The dice gods demand drama.","The tavern will hear of this.","Boldness penalised. Regroup.","Defeat tastes bitter today.","Your legend… continues building.","The gods look away.","Perhaps next time, adventurer."];
+
+  var MYSTERY_SVG = '<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="55,22 86,39 86,71 55,88 24,71 24,39" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/><text x="55" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="rgba(26,26,46,0.75)">?</text></svg>';
+
+  // Base64 coin face images — same strings used in coinflip.html
+  var FAIL_IMG = 'data:image/png;base64,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';
+  var PASS_IMG = 'data:image/png;base64,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';
+
+  function setFaceMystery() {
+    var f = document.getElementById('coin-face-mini');
+    if (!f) return;
+    f.className = 'face-mini face-mini-mystery';
+    f.innerHTML = MYSTERY_SVG;
+  }
+  function setFacePass() {
+    var f = document.getElementById('coin-face-mini');
+    if (!f) return;
+    f.className = 'face-mini face-mini-pass';
+    f.innerHTML = '<img src="' + PASS_IMG + '" alt="pass" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+  }
+  function setFaceFail() {
+    var f = document.getElementById('coin-face-mini');
+    if (!f) return;
+    f.className = 'face-mini face-mini-fail';
+    f.innerHTML = '<img src="' + FAIL_IMG + '" alt="fail" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  window.doFlip = function() {
+    if (coinSpinning) return;
+    coinSpinning = true;
+
+    var btn    = document.getElementById('btn-flip');
+    var banner = document.getElementById('coin-banner');
+    var sub    = document.getElementById('coin-sub');
+    var coin   = document.getElementById('coin-mini');
+
+    btn.disabled = true;
+    banner.className = 'coin-result-banner';
+    sub.className    = 'coin-result-sub';
+    banner.innerHTML = '&nbsp;';
+    sub.innerHTML    = '&nbsp;';
+
+    var result  = Math.random() < 0.5 ? 'pass' : 'fail';
+    var flips   = 5 + Math.floor(Math.random() * 4);
+    var halfDur = 0.13 + Math.random() * 0.04;   // seconds per half-flip
+    var iters   = flips - 0.5;                    // fractional keeps it on the reveal face
+    var totalMs = halfDur * iters * 1000;
+
+    setFaceMystery();
+
+    // Set animation directly on style — CSS custom properties in
+    // animation iteration-count are unreliable across browsers
+    coin.style.animation = 'none';
+    void coin.offsetWidth; // force reflow
+    coin.style.animation = 'coinFlipMini ' + halfDur + 's ease-in-out ' + iters + ' forwards';
+
+    // Attempt to play flip sound (may be blocked until user gesture — that's fine)
+    if (typeof playFlipSound === 'function') playFlipSound();
+
+    // Both animationend AND a setTimeout fallback — whichever fires first wins
+    var done = false;
+    function finish() {
+      if (done) return;
+      done = true;
+
+      coin.style.animation = 'none';
+      void coin.offsetWidth;
+
+      if (result === 'pass') setFacePass(); else setFaceFail();
+
+      setTimeout(function() {
+        coin.style.animation = 'wobbleMini 0.45s ease-out forwards';
+
+        if (result === 'pass') {
+          banner.textContent = 'Go Time';
+          banner.className   = 'coin-result-banner visible pass';
+          sub.textContent    = pick(PASS_LINES);
+          sub.className      = 'coin-result-sub visible';
+          if (typeof launchConfetti === 'function') launchConfetti();
+          if (typeof playCoinSound === 'function')  playCoinSound();
+        } else {
+          banner.textContent = 'No Time';
+          banner.className   = 'coin-result-banner visible fail';
+          sub.textContent    = pick(FAIL_LINES);
+          sub.className      = 'coin-result-sub visible';
+          if (typeof playWompWomp === 'function') playWompWomp();
+        }
+
+        setTimeout(function() {
+          coin.style.animation = '';
+          coinSpinning = false;
+          btn.disabled = false;
+        }, 500);
+      }, halfDur * 1000);
+    }
+
+    coin.addEventListener('animationend', function onEnd() {
+      coin.removeEventListener('animationend', onEnd);
+      finish();
+    });
+    setTimeout(finish, totalMs + 300); // fallback
+  };
+})();
+
+// ── THEME TOGGLE — must be in plain <script>, not type="module" ──
+window.toggleTheme = function() {
+  var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  var next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('theme-toggle-icon').textContent = next === 'dark' ? '🌙' : '☀️';
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+};
+// Sync icon on load to match whatever data-theme the head script set
+(function() {
+  var t = document.documentElement.getAttribute('data-theme') || 'dark';
+  var icon = document.getElementById('theme-toggle-icon');
+  if (icon) icon.textContent = t === 'dark' ? '🌙' : '☀️';
+})();
+</script>
+
+<!-- App logic + Firebase -->
+<script type="module">
+import { mountProfileButton } from './profile-auth.js';
+mountProfileButton();
+import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, get, onValue }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAIwTgubmE9V1XrSF3BS4rxSIr3uNua1a8",
+  authDomain:        "nodicetools.firebaseapp.com",
+  databaseURL:       "https://nodicetools-default-rtdb.firebaseio.com",
+  projectId:         "nodicetools",
+  storageBucket:     "nodicetools.firebasestorage.app",
+  messagingSenderId: "387258889697",
+  appId:             "1:387258889697:web:5467488ab109ea67b74ea0",
+};
+const IS_DEMO = Object.values(FIREBASE_CONFIG).some(v => v.startsWith('YOUR_'));
+
+const SHEETS_CONFIG = {
+  SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
+  API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+};
+
+const CHARGEN_TABS = [
+  { key: 'firstNames',  tab: 'First Names'  },
+  { key: 'lastNames',   tab: 'Last Names'   },
+  { key: 'races',       tab: 'Races'        },
+  { key: 'classes',     tab: 'Classes'      },
+  { key: 'backstories', tab: 'Backstories'  },
+  { key: 'quirks',      tab: 'Quirks'       },
+  { key: 'secrets',     tab: 'Secrets'      },
+];
+const LOOT_TAB         = 'Loot';
+const TRAIT_EXCLUDE    = ['First Names', 'Last Names'];
+const TRAIT_LOOT_TAB   = 'Loot';
+
+// ── Chargen category buttons config (what shows as buttons) ──
+const CHARGEN_CATS = [
+  { key: 'name',       label: 'Name',      pool: null          },
+  { key: 'race',       label: 'Race',      pool: 'races'       },
+  { key: 'class',      label: 'Class',     pool: 'classes'     },
+  { key: 'backstory',  label: 'Backstory', pool: 'backstories' },
+  { key: 'quirk',      label: 'Quirk',     pool: 'quirks'      },
+  { key: 'secret',     label: 'Secret',    pool: 'secrets'     },
+];
+
+// ═══════════════════════════════════════════════
+//  FALLBACK DATA
+// ═══════════════════════════════════════════════
+const CHARGEN_FALLBACK = {
+  firstNames:  ["Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert","Pambula","Gornak","Smitch","Quibble","Florp","Nutwig","Dravox","Grumblina","Zorp","Weeble","Crunchy","Pflop"],
+  lastNames:   ["Puddlesnort","the Adequate","Bonesworth","McFlumps","of the Bog","Cracklefingers","Thunderbutt","Noodlearm","Spigotface","the Slightly Heroic","Wobbleheim","Crumblewick","Snorkleson","Dinglebottom","of Questionable Origin"],
+  races:       ["A Halfling who insists they're actually a Gnome","A very small Dragon in a trenchcoat","An Elf who has never once been on time","A Dwarf with a surprisingly lovely singing voice","A Tiefling who keeps getting mistaken for the villain","A Goblin with an extensive collection of spoons","A Skeleton who hasn't told anyone yet","A Were-Accountant (transforms at quarter-end)","A Vampire who is very lactose intolerant"],
+  classes:     ["Barbarian (specialises in strongly-worded letters)","Bard (knows three chords, extremely confident)","Cleric of a god they've never actually met","Druid who mostly just turns into a slightly larger dog","Fighter who brings a clipboard to every battle","Ranger who gets lost indoors","Rogue who is an absolutely terrible liar","Wizard who still hasn't returned their library books","Warlock in a very awkward contractual situation"],
+  backstories: ["Fled their hometown after accidentally winning a yodeling competition","Was raised by wolves, but normal wolves — they were very supportive","Inherited a map to treasure, but the treasure turned out to be 'self-belief'","Joined the adventure after losing a bet to a seagull. Long story","Started adventuring to return a borrowed book; it escalated"],
+  quirks:      ["Narrates their own actions in third person at dramatic moments","Cannot resist correcting people's grammar mid-combat","Always speaks in rhyme when they lie, completely unaware of it","Refuses to be surprised. Will loudly claim they 'knew about this'","Cannot physically leave a room without saying goodbye to furniture"],
+  secrets:     ["Has never actually read the spell they claim is their signature move","The legendary sword was found in a bin","Their mortal enemy is a duck. They don't want to talk about it","Cannot actually read maps. Has been winging it the entire time","Once accidentally became mayor of a small village and never resigned"],
+};
+
+const LOOT_FALLBACK = [
+  { name: "The Sword of Mild Inconvenience",      flavour: "Causes enemies to briefly remember an embarrassing moment from their past.",             image: '' },
+  { name: "Boots of Confident Striding",          flavour: "Don't make you faster. Simply make you look like you know where you're going.",          image: '' },
+  { name: "The Amulet of Someone Else's Problem", flavour: "Once per day, designate any ongoing situation as definitively someone else's problem.",   image: '' },
+  { name: "Gloves of Excessive Gesturing",        flavour: "Compel sweeping hand movements when speaking. Intimidation: advantage. Credibility: disadvantage.", image: '' },
+  { name: "The Ring of Plausible Deniability",    flavour: "Witnesses become uncertain. Evidence becomes ambiguous.",                                 image: '' },
+  { name: "Cloak of Mild Weatherproofing",        flavour: "Handles light drizzle only. Smells faintly of cinnamon.",                                image: '' },
+  { name: "The Lantern of Inconvenient Truth",    flavour: "Illuminates truth in a ten-foot radius. Less helpful than advertised.",                  image: '' },
+  { name: "The Pouch of Exact Change",            flavour: "Always contains the precise amount needed. Never has more.",                             image: '' },
+];
+
+const TRAIT_FALLBACK = [
+  { value: "Cannot physically leave a room without saying goodbye to furniture", sheet: "Quirks",      flavour: '', image: '' },
+  { value: "Narrates their own actions in third person at dramatic moments",     sheet: "Quirks",      flavour: '', image: '' },
+  { value: "Their mortal enemy is a duck. They don't want to talk about it",     sheet: "Secrets",     flavour: '', image: '' },
+  { value: "A very small Dragon in a trenchcoat",                               sheet: "Races",       flavour: '', image: '' },
+  { value: "Ranger who gets lost indoors",                                       sheet: "Classes",     flavour: '', image: '' },
+  { value: "Started adventuring to return a borrowed book; it escalated",       sheet: "Backstories", flavour: '', image: '' },
+  { value: "The Amulet of Someone Else's Problem", sheet: "Loot",
+    flavour: "Once per day, designate any ongoing situation as someone else's problem.", image: '' },
+];
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function pick(arr)  { return arr[Math.floor(Math.random() * arr.length)]; }
+function esc(s)     { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function isConfigured() { return SHEETS_CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' && SHEETS_CONFIG.API_KEY !== 'YOUR_API_KEY_HERE'; }
+
+// ═══════════════════════════════════════════════
+//  REGISTER TOOL INITS
+// ═══════════════════════════════════════════════
+window._vaultInit_loot    = function() { if (!lootInitialised)    initLoot();    };
+window._vaultInit_poll    = function() { if (!pollInitialised)    initPoll();    };
+window._vaultInit_trait   = function() { if (!traitInitialised)   initTrait();   };
+window._vaultInit_chargen = function() { if (!chargenInitialised) initChargen(); };
+window._vaultInit_qr = function() {}; // QR image is static; no init needed
+
+// Confetti
+const canvas  = document.getElementById('coin-confetti');
+const ctx     = canvas.getContext('2d');
+let particles = [];
+let rafId     = null;
+const COLORS  = ['#c9a84c','#e2bc6a','#27ae60','#2ecc71','#ffffff','#0d0b00'];
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function makeParticle(x, angleDeg) {
+  const a = angleDeg * Math.PI / 180, spd = 12 + Math.random() * 14;
+  return { x, y: canvas.height, vx: Math.cos(a)*spd, vy: -Math.sin(a)*spd, w: 5+Math.random()*7, h: 3+Math.random()*4, color: COLORS[Math.floor(Math.random()*COLORS.length)], rot: Math.random()*360, rotV: (Math.random()-.5)*10, gravity: .25+Math.random()*.15, life: 1, decay: .005+Math.random()*.005 };
+}
+
+function launchConfetti() {
+  resizeCanvas(); particles = [];
+  const W = canvas.width;
+  [{ x: 0, min: 20, max: 70 },{ x: W*.25, min: 40, max: 85 },{ x: W*.5, min: 60, max: 120 },{ x: W*.75, min: 95, max: 140 },{ x: W, min: 110, max: 160 }]
+    .forEach(c => { for (let i=0;i<60;i++) particles.push(makeParticle(c.x, c.min+Math.random()*(c.max-c.min))); });
+  if (rafId) cancelAnimationFrame(rafId);
+  animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.rot += p.rotV; p.life -= p.decay;
+    ctx.save(); ctx.globalAlpha = Math.max(0, p.life); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+  });
+  if (particles.length > 0) rafId = requestAnimationFrame(animateConfetti);
+  else ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// Audio — identical to coinflip.html
+function playFlipSound() {
+  try {
+    const ac = new (window.AudioContext||window.webkitAudioContext)(), t = ac.currentTime;
+    const tb = ac.createBuffer(1, ac.sampleRate*.04, ac.sampleRate), td = tb.getChannelData(0);
+    for (let i=0;i<td.length;i++) td[i]=(Math.random()*2-1);
+    const tick=ac.createBufferSource(); tick.buffer=tb;
+    const hp=ac.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=3000;
+    const tg=ac.createGain(); tg.gain.setValueAtTime(.55,t); tg.gain.exponentialRampToValueAtTime(.001,t+.035);
+    tick.connect(hp); hp.connect(tg); tg.connect(ac.destination); tick.start(t);
+    for (let i=0;i<14;i++) {
+      const p=i/14, at=.04+i*(.025+p*.07)-(p*p*.04);
+      const b=ac.createBuffer(1,ac.sampleRate*.018,ac.sampleRate), d=b.getChannelData(0);
+      for (let j=0;j<d.length;j++) d[j]=(Math.random()*2-1);
+      const s=ac.createBufferSource(); s.buffer=b;
+      const f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2200-p*800; f.Q.value=1.2;
+      const g=ac.createGain(); const v=.18*(1-p*.5);
+      g.gain.setValueAtTime(v,t+at); g.gain.exponentialRampToValueAtTime(.001,t+at+.016);
+      s.connect(f); f.connect(g); g.connect(ac.destination); s.start(t+at);
+    }
+    const thb=ac.createBuffer(1,ac.sampleRate*.12,ac.sampleRate), thd=thb.getChannelData(0);
+    for (let i=0;i<thd.length;i++) thd[i]=(Math.random()*2-1);
+    const th=ac.createBufferSource(); th.buffer=thb;
+    const thl=ac.createBiquadFilter(); thl.type='lowpass'; thl.frequency.value=280;
+    const thg=ac.createGain(); thg.gain.setValueAtTime(.5,t+.72); thg.gain.exponentialRampToValueAtTime(.001,t+.72+.09);
+    th.connect(thl); thl.connect(thg); thg.connect(ac.destination); th.start(t+.72);
+    setTimeout(()=>ac.close(),1200);
+  } catch(e){}
+}
+
+function playCoinSound() {
+  try {
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const vol=ac.createGain(); vol.gain.setValueAtTime(.042,ac.currentTime); vol.connect(ac.destination);
+    [{freq:988,start:0,dur:.08},{freq:1319,start:.07,dur:.18}].forEach(({freq,start,dur})=>{
+      const osc=ac.createOscillator(), g=ac.createGain();
+      osc.type='square'; osc.frequency.setValueAtTime(freq,ac.currentTime+start); osc.frequency.linearRampToValueAtTime(freq*1.06,ac.currentTime+start+dur);
+      g.gain.setValueAtTime(0,ac.currentTime+start); g.gain.linearRampToValueAtTime(1,ac.currentTime+start+.01);
+      g.gain.setValueAtTime(1,ac.currentTime+start+dur*.6); g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+start+dur);
+      osc.connect(g); g.connect(vol); osc.start(ac.currentTime+start); osc.stop(ac.currentTime+start+dur+.02);
+    });
+    setTimeout(()=>ac.close(),600);
+  } catch(e){}
+}
+
+function playWompWomp() {
+  try {
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const vol=ac.createGain(); vol.gain.setValueAtTime(.042,ac.currentTime); vol.connect(ac.destination);
+    [{start:0,freqS:440,freqE:220,dur:.55},{start:.45,freqS:330,freqE:110,dur:.75}].forEach(({start,freqS,freqE,dur})=>{
+      const osc=ac.createOscillator(), g=ac.createGain();
+      osc.type='sawtooth'; osc.frequency.setValueAtTime(freqS,ac.currentTime+start); osc.frequency.exponentialRampToValueAtTime(freqE,ac.currentTime+start+dur);
+      const lfo=ac.createOscillator(), lg=ac.createGain(); lfo.frequency.value=5.5; lg.gain.value=8;
+      lfo.connect(lg); lg.connect(osc.frequency); lfo.start(ac.currentTime+start); lfo.stop(ac.currentTime+start+dur);
+      g.gain.setValueAtTime(0,ac.currentTime+start); g.gain.linearRampToValueAtTime(1,ac.currentTime+start+.04);
+      g.gain.setValueAtTime(1,ac.currentTime+start+dur-.12); g.gain.linearRampToValueAtTime(0,ac.currentTime+start+dur);
+      osc.connect(g); g.connect(vol); osc.start(ac.currentTime+start); osc.stop(ac.currentTime+start+dur+.05);
+    });
+    setTimeout(()=>ac.close(),1600);
+  } catch(e){}
+}
+
+// ── Expose to plain-script doFlip() ──────────────
+window.playFlipSound = playFlipSound;
+window.playCoinSound = playCoinSound;
+window.playWompWomp  = playWompWomp;
+window.launchConfetti = launchConfetti;
+
+// ═══════════════════════════════════════════════
+//  CHARACTER GENERATOR
+// ═══════════════════════════════════════════════
+let chargenInitialised = false;
+let CHARGEN_DATA = null;
+let chargenDataSource = 'fallback';
+
+function chargenGenName() {
+  return pick(CHARGEN_DATA.firstNames) + ' ' + pick(CHARGEN_DATA.lastNames);
+}
+
+async function chargenFetchData() {
+  if (!isConfigured()) { CHARGEN_DATA = CHARGEN_FALLBACK; chargenDataSource = 'fallback'; return; }
+  try {
+    const results = await Promise.all(CHARGEN_TABS.map(t => {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(t.tab)}!A:A?key=${SHEETS_CONFIG.API_KEY}`;
+      return fetch(url).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(j => (j.values||[]).flat().map(v=>v.trim()).filter(Boolean));
+    }));
+    CHARGEN_DATA = {};
+    CHARGEN_TABS.forEach((t,i) => { CHARGEN_DATA[t.key] = results[i]; });
+    chargenDataSource = 'live';
+  } catch(e) { CHARGEN_DATA = CHARGEN_FALLBACK; chargenDataSource = 'fallback'; }
+}
+
+// ── Mulligan state (in-session; separate key avoids conflicts with chargen.html) ──
+const CG_MAX_MULLIGANS  = 3;
+const CG_LOCK_DURATION  = 60 * 60 * 1000;
+const CG_STORAGE_KEY    = 'nodice_vault_chargen_session';
+let cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
+let cgCountdownInterval = null;
+let cgMode = 'full';
+let cgActiveQuickKey = null;
+
+window.cgSetMode = function(mode) {
+  cgMode = mode;
+  document.getElementById('cg-inner').style.display = mode === 'full' ? '' : 'none';
+  document.getElementById('cg-quick').style.display = mode === 'quick' ? '' : 'none';
+};
+
+function cgSaveSession() {
+  try { localStorage.setItem(CG_STORAGE_KEY, JSON.stringify(cgState)); } catch(e) {}
+}
+function cgLoadSession() {
+  try {
+    const raw = localStorage.getItem(CG_STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved.values || typeof saved.mulligans !== 'number') return false;
+    if (saved.lockedAt && Date.now() - saved.lockedAt >= CG_LOCK_DURATION) {
+      localStorage.removeItem(CG_STORAGE_KEY); return false;
+    }
+    cgState = saved; return true;
+  } catch(e) { return false; }
+}
+
+function cgIsLocked() { return cgState.lockedAt !== null; }
+function cgFormatCountdown(ms) {
+  if (ms <= 0) return '00:00';
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+
+function cgRender() {
+  const locked = cgIsLocked();
+  const pips = Array.from({length: CG_MAX_MULLIGANS}, (_,i) =>
+    `<div class="pip${i >= cgState.mulligans ? ' spent' : ''}"></div>`
+  ).join('');
+
+  const rows = CHARGEN_CATS.map(c => {
+    const canReroll = cgState.mulligans > 0 && !locked && cgState.rolled;
+    return `
+      <div class="cg-field-row">
+        <div class="cg-field-text">
+          <div class="cg-field-label">${esc(c.label)}</div>
+          <div class="cg-field-value" id="cgv-${c.key}">${esc(cgState.values[c.key] || '—')}</div>
+        </div>
+        <button class="cg-reroll-btn" onclick="cgRerollField('${c.key}')"
+          ${canReroll ? '' : 'disabled'}>⚄ Reroll</button>
+      </div>`;
+  }).join('');
+
+  const ctaBtn = cgIsLocked()
+    ? `<div class="lock-bar">
+         <span class="lock-msg">Out of rolls! Back in</span>
+         <span class="lock-cd" id="cg-lock-cd">${cgFormatCountdown(CG_LOCK_DURATION - (Date.now() - cgState.lockedAt))}</span>
+       </div>`
+    : `<button class="cg-roll-btn" onclick="cgDoRoll()"
+         ${(!cgState.rolled || cgState.mulligans > 0) ? '' : 'disabled'}>
+         🎲 ${cgState.rolled ? 'Roll New Character' : 'Roll Character'}
+       </button>`;
+
+  document.getElementById('cg-inner').innerHTML = `
+    <div class="mulligan-bar">Mulligans &nbsp;<div class="pip-row">${pips}</div></div>
+    <div class="cg-fields">${rows}</div>
+    <div class="cg-footer">
+      ${ctaBtn}
+      <button class="cg-mode-toggle" onclick="cgSetMode('quick')">Quick Pull →</button>
+      <div class="source-badge ${chargenDataSource}"><span class="dot"></span>${chargenDataSource === 'live' ? 'Live from Google Sheets' : 'Using built-in data'}</div>
+    </div>`;
+
+  if (cgIsLocked()) cgStartCountdown();
+  // DEV RESET — show button only when all mulligans are spent
+  const devBtn = document.getElementById('cg-dev-reset-btn');
+  if (devBtn) devBtn.style.display = cgState.mulligans === 0 ? '' : 'none';
+  // END DEV RESET
+}
+
+function cgStartCountdown() {
+  if (cgCountdownInterval) clearInterval(cgCountdownInterval);
+  cgCountdownInterval = setInterval(() => {
+    const el = document.getElementById('cg-lock-cd');
+    if (!el) { clearInterval(cgCountdownInterval); return; }
+    const remaining = CG_LOCK_DURATION - (Date.now() - cgState.lockedAt);
+    if (remaining <= 0) {
+      clearInterval(cgCountdownInterval);
+      localStorage.removeItem(CG_STORAGE_KEY);
+      cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
+      cgDoRoll();
+    } else {
+      el.textContent = cgFormatCountdown(remaining);
+    }
+  }, 1000);
+}
+
+// DEV RESET — remove this function when no longer needed
+window.cgDevReset = function() {
+  if (cgCountdownInterval) clearInterval(cgCountdownInterval);
+  localStorage.removeItem(CG_STORAGE_KEY);
+  cgState = { rolled: false, mulligans: CG_MAX_MULLIGANS, values: {}, lockedAt: null };
+  cgDoRoll();
+};
+// END DEV RESET
+
+window.cgDoRoll = function() {
+  if (cgIsLocked()) return;
+  if (cgState.rolled && cgState.mulligans <= 0) return;
+  if (cgState.rolled) cgState.mulligans--;
+  cgState.rolled = true;
+  const v = { name: chargenGenName() };
+  CHARGEN_CATS.forEach(c => { if (c.pool) v[c.key] = pick(CHARGEN_DATA[c.pool]); });
+  cgState.values = v;
+  if (cgState.mulligans === 0) cgState.lockedAt = Date.now();
+  cgSaveSession();
+  cgRender();
+};
+
+window.cgRerollField = function(key) {
+  if (cgIsLocked() || cgState.mulligans <= 0) return;
+  cgState.mulligans--;
+  const valEl = document.getElementById('cgv-' + key);
+  if (valEl) valEl.classList.add('fading');
+  setTimeout(() => {
+    const cat = CHARGEN_CATS.find(c => c.key === key);
+    cgState.values[key] = key === 'name' ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
+    if (cgState.mulligans === 0) cgState.lockedAt = Date.now();
+    cgSaveSession();
+    cgRender();
+  }, 180);
+};
+
+function cgQuickRender() {
+  document.getElementById('cg-quick').innerHTML = `
+    <div class="cg-quick-cats">
+      ${CHARGEN_CATS.map(c => `
+        <button class="cg-quick-cat-btn${cgActiveQuickKey === c.key ? ' active' : ''}"
+          onclick="cgQuickPick('${c.key}')">${esc(c.label)}</button>`).join('')}
+    </div>
+    <div class="cg-quick-result">
+      <div class="cg-quick-result-label" id="cg-qr-label"></div>
+      <div class="cg-quick-result-value" id="cg-qr-value"></div>
+    </div>
+    <div class="cg-footer">
+      <button class="cg-mode-toggle" onclick="cgSetMode('full')">← Full Character</button>
+    </div>`;
+}
+
+window.cgQuickPick = function(key) {
+  cgActiveQuickKey = key;
+  cgSetMode('quick');
+
+  // Update active button state
+  document.querySelectorAll('.cg-quick-cat-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === esc(CHARGEN_CATS.find(c=>c.key===key)?.label||''));
+  });
+
+  const labelEl = document.getElementById('cg-qr-label');
+  const valueEl = document.getElementById('cg-qr-value');
+  if (valueEl) { valueEl.classList.add('fading'); valueEl.classList.remove('visible'); }
+
+  setTimeout(() => {
+    const cat = CHARGEN_CATS.find(c => c.key === key);
+    const value = key === 'name' ? chargenGenName() : pick(CHARGEN_DATA[cat.pool]);
+    if (labelEl) { labelEl.textContent = cat.label; labelEl.className = 'cg-quick-result-label visible'; }
+    if (valueEl) {
+      valueEl.textContent = value;
+      valueEl.classList.remove('fading');
+      requestAnimationFrame(() => requestAnimationFrame(() => valueEl.classList.add('visible')));
+    }
+  }, 180);
+};
+
+async function initChargen() {
+  chargenInitialised = true;
+  document.getElementById('cg-inner').innerHTML =
+    `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+  await chargenFetchData();
+  const restored = cgLoadSession();
+  if (restored && cgState.rolled) { cgRender(); } else { cgDoRoll(); }
+  cgQuickRender();
+  cgSetMode('full');
+}
+
+// ═══════════════════════════════════════════════
+//  LOOT TABLE
+// ═══════════════════════════════════════════════
+let lootInitialised = false;
+let LOOT_ITEMS = null;
+let lootDataSource = 'fallback';
+let lootBag = [];
+let lootCurrent = null;
+
+function lootPick() {
+  if (lootBag.length === 0) {
+    lootBag = LOOT_ITEMS.map((_,i)=>i);
+    for (let i=lootBag.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [lootBag[i],lootBag[j]]=[lootBag[j],lootBag[i]]; }
+  }
+  if (lootCurrent && lootBag.length>1 && LOOT_ITEMS[lootBag[lootBag.length-1]]===lootCurrent) { const idx=lootBag.pop(); lootBag.unshift(idx); }
+  lootCurrent = LOOT_ITEMS[lootBag.pop()];
+  return lootCurrent;
+}
+
+function lootRender(item) {
+  const inner = document.getElementById('loot-inner');
+  const imgHtml = item.image
+    ? `<div class="loot-image-slot"><img src="${item.image}" alt="" /></div>`
+    : `<div class="loot-image-slot"><span class="loot-slot-icon">✨</span></div>`;
+
+  inner.innerHTML = `
+    <div class="loot-wide">
+      ${imgHtml}
+      <div class="loot-info">
+        <div>
+          <div class="loot-item-name-label">Magic Item</div>
+          <div class="loot-item-name" id="loot-name">${esc(item.name)}</div>
+        </div>
+        <div class="loot-divider"></div>
+        <div>
+          <div class="loot-item-flavour-label">Description</div>
+          <div class="loot-item-flavour" id="loot-flavour">${esc(item.flavour)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="loot-footer">
+      <button class="btn-pull" onclick="lootPull()">💰 Pull Another Item</button>
+      <div class="source-badge ${lootDataSource}"><span class="dot"></span>${lootDataSource === 'live' ? 'Live from Sheets' : 'Using built-in data'}</div>
+    </div>`;
+}
+
+window.lootPull = function() {
+  const n = document.getElementById('loot-name');
+  const f = document.getElementById('loot-flavour');
+  if (n) n.classList.add('fading');
+  if (f) f.classList.add('fading');
+  setTimeout(() => lootRender(lootPick()), 180);
+};
+
+async function initLoot() {
+  lootInitialised = true;
+  document.getElementById('loot-inner').innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+  if (!isConfigured()) { LOOT_ITEMS = LOOT_FALLBACK; lootDataSource = 'fallback'; }
+  else {
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(LOOT_TAB)}!A:C?key=${SHEETS_CONFIG.API_KEY}`;
+      const res = await fetch(url); if (!res.ok) throw new Error('HTTP '+res.status);
+      const json = await res.json();
+      const rows = (json.values||[]).filter(r=>r[0]&&r[0].trim());
+      if (!rows.length) throw new Error('empty');
+      LOOT_ITEMS = rows.map(r=>({ name:(r[0]||'').trim(), flavour:(r[1]||'').trim(), image:(r[2]||'').trim() }));
+      lootDataSource = 'live';
+    } catch(e) { LOOT_ITEMS = LOOT_FALLBACK; lootDataSource = 'fallback'; }
+  }
+  lootRender(lootPick());
+}
+
+// ═══════════════════════════════════════════════
+//  POLL
+// ═══════════════════════════════════════════════
+let pollInitialised = false;
+const POLL_LETTERS  = ['A','B','C','D','E'];
+const POLL_VOTER_KEY = 'nodice_vault_voter_id';
+
+function pollGetVoterId() {
+  let id = sessionStorage.getItem(POLL_VOTER_KEY);
+  if (!id) { id = 'v_' + Math.random().toString(36).slice(2,22); sessionStorage.setItem(POLL_VOTER_KEY, id); }
+  return id;
+}
+
+function pollBadge(live) {
+  return `<div class="source-badge ${live?'live':'fallback'}"><span class="dot"></span>${live?'Connected':'Firebase not configured'}</div>`;
+}
+
+function initPoll() {
+  pollInitialised = true;
+  if (IS_DEMO) {
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-setup-notice">
+        <div class="notice-icon">🔧</div>
+        <div class="notice-title">Firebase Setup Needed</div>
+        <div class="notice-body">The Poll needs a free Firebase project.<br>See <a href="FIREBASE_SETUP.md">FIREBASE_SETUP.md</a> or open <a href="poll.html">poll.html</a>.</div>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(false);
+    return;
+  }
+  document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  TRAIT GENERATOR
+// ═══════════════════════════════════════════════
+let traitInitialised = false;
+let TRAIT_DATA = null;
+let traitDataSource = 'fallback';
+let traitCurrent = null;
+
+async function traitFetchData() {
+  if (!isConfigured()) { TRAIT_DATA = TRAIT_FALLBACK; traitDataSource = 'fallback'; return; }
+  try {
+    const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}?key=${SHEETS_CONFIG.API_KEY}&fields=sheets.properties.title`;
+    const metaRes = await fetch(metaUrl); if (!metaRes.ok) throw new Error('meta');
+    const metaJson = await metaRes.json();
+    const allTabs = (metaJson.sheets||[]).map(s=>s.properties.title);
+    const tabs    = allTabs.filter(t=>!TRAIT_EXCLUDE.includes(t));
+    const lootTab = tabs.find(t=>t===TRAIT_LOOT_TAB);
+    const others  = tabs.filter(t=>t!==TRAIT_LOOT_TAB);
+    const [lootRows, ...otherResults] = await Promise.all([
+      lootTab ? fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(lootTab)}!A:C?key=${SHEETS_CONFIG.API_KEY}`).then(r=>r.json()).then(j=>(j.values||[]).filter(r=>r[0]&&r[0].trim()).map(r=>({value:r[0].trim(),sheet:lootTab,flavour:(r[1]||'').trim(),image:(r[2]||'').trim()}))) : Promise.resolve([]),
+      ...others.map(t=>fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.SHEET_ID}/values/${encodeURIComponent(t)}!A:A?key=${SHEETS_CONFIG.API_KEY}`).then(r=>r.json()).then(j=>(j.values||[]).flat().map(v=>v.trim()).filter(Boolean).map(v=>({value:v,sheet:t,flavour:'',image:''}))))
+    ]);
+    TRAIT_DATA = [...otherResults.flat(), ...lootRows];
+    if (!TRAIT_DATA.length) throw new Error('empty');
+    traitDataSource = 'live';
+  } catch(e) { TRAIT_DATA = TRAIT_FALLBACK; traitDataSource = 'fallback'; }
+}
+
+function traitRenderItem(item) {
+  const inner = document.getElementById('trait-inner');
+  const foot  = document.getElementById('trait-footer');
+  const isLoot = item && item.sheet === TRAIT_LOOT_TAB;
+
+  let content;
+  if (!item) {
+    content = `<div class="trait-wide"><div class="trait-big-value">&nbsp;</div></div>`;
+  } else if (isLoot) {
+    const imgHtml = item.image
+      ? `<div class="loot-image-slot"><img src="${item.image}" alt="" style="width:100%;height:auto;display:block;" /></div>`
+      : `<div class="loot-image-slot"><span class="loot-slot-icon">✨</span></div>`;
+    content = `<div class="trait-wide">
+      ${imgHtml}
+      <div>
+        <div class="loot-item-name-label">Magic Item</div>
+        <div class="loot-item-name">${esc(item.value)}</div>
+      </div>
+      <div class="loot-divider"></div>
+      ${item.flavour ? `<div>
+        <div class="loot-item-flavour-label">Description</div>
+        <div class="loot-item-flavour">${esc(item.flavour)}</div>
+      </div>` : ''}
+      <div class="trait-source-tag">from: ${esc(item.sheet)}</div>
+    </div>`;
+  } else {
+    content = `<div class="trait-wide">
+      <div class="trait-big-value">${esc(item.value)}</div>
+      <div class="trait-source-tag">from: ${esc(item.sheet)}</div>
+    </div>`;
+  }
+
+  inner.innerHTML = content;
+  foot.innerHTML = `
+    <button class="btn-draw-trait" onclick="traitDraw()">🎭 Draw a Trait</button>
+    <div class="source-badge ${traitDataSource}"><span class="dot"></span>${traitDataSource === 'live' ? 'Live from Sheets' : 'Using built-in data'}</div>`;
+}
+
+window.traitDraw = function() {
+  const inner = document.getElementById('trait-inner');
+  const valEl = inner ? inner.querySelector('.trait-big-value, .trait-loot-name') : null;
+  if (valEl) valEl.classList.add('fading');
+
+  setTimeout(() => {
+    let next;
+    if (TRAIT_DATA.length > 1) {
+      do { next = TRAIT_DATA[Math.floor(Math.random()*TRAIT_DATA.length)]; }
+      while (traitCurrent && next.value === traitCurrent.value && TRAIT_DATA.length > 1);
+    } else { next = TRAIT_DATA[0]; }
+    traitCurrent = next;
+    traitRenderItem(next);
+  }, 200);
+};
+
+async function initTrait() {
+  traitInitialised = true;
+  document.getElementById('trait-inner').innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+  document.getElementById('trait-footer').innerHTML = '';
+  await traitFetchData();
+  traitRenderItem(null);
+}
+
+// ═══════════════════════════════════════════════
+//  FIREBASE POLL LIVE LISTENER
+// ═══════════════════════════════════════════════
+if (!IS_DEMO) {
+  let app2, db2, pollRef2, votesRef2;
+  try {
+    app2      = initializeApp(FIREBASE_CONFIG, 'vault-poll');
+    db2       = getDatabase(app2);
+    pollRef2  = ref(db2, 'nodice/poll');
+    votesRef2 = ref(db2, 'nodice/votes');
+  } catch(e) {}
+
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    sessionStorage.setItem('nodice_vault_admin', '1');
+    // Auto-open the poll shelf so admin doesn't have to hunt for it
+    if (typeof window.toggleShelf === 'function') window.toggleShelf('poll');
+  } else {
+    sessionStorage.removeItem('nodice_vault_admin'); // always start as audience unless ?admin is in URL
+  }
+  let isAdmin = sessionStorage.getItem('nodice_vault_admin') === '1'; // audience by default; admin managed via profile.html or ?admin param
+  const pollVoterId    = pollGetVoterId();
+  let pollCurrentSnap  = null;
+  let pollUnsubVotes   = null;
+  let pollAdminOptCount = 2;
+  const POLL_MIN_OPTS  = 2;
+  const POLL_MAX_OPTS  = 5;
+  const POLL_PLACEHOLDERS = ['The first option…','The second option…','A third choice…','Or maybe this…','One more possibility…'];
+
+  // ── Admin render: form (no active poll) ──────────────────
+  function pollRenderAdminForm(preserveValues) {
+    const optRowsHtml = POLL_LETTERS.slice(0, pollAdminOptCount).map((letter, i) => {
+      const isReq = i < POLL_MIN_OPTS;
+      const removeBtn = isReq
+        ? `<div class="poll-btn-remove-placeholder"></div>`
+        : `<button class="poll-btn-remove-option" data-index="${i}" title="Remove">✕</button>`;
+      const val = preserveValues && preserveValues[i] ? esc(preserveValues[i]) : '';
+      return `<div class="poll-option-row" id="padmin-row-${i}">
+        <span class="poll-option-letter-tag">${letter}</span>
+        <input class="poll-form-input" id="padmin-opt-${i}" type="text"
+          placeholder="${POLL_PLACEHOLDERS[i]}" maxlength="80" autocomplete="off" value="${val}">
+        ${removeBtn}</div>`;
+    }).join('');
+    const addBtnHtml = pollAdminOptCount < POLL_MAX_OPTS
+      ? `<button class="poll-btn-add-option" id="padmin-add-btn">
+           <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
+           Add another option (${pollAdminOptCount}/${POLL_MAX_OPTS})</button>`
+      : '';
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-admin-section">
+        <div class="poll-admin-badge">⚔ Showrunner</div>
+        <div class="poll-form-group">
+          <label class="poll-form-label" for="padmin-q">Question</label>
+          <input class="poll-form-input" id="padmin-q" type="text"
+            placeholder="What does the crowd choose?" maxlength="120" autocomplete="off"
+            value="${preserveValues && preserveValues.question ? esc(preserveValues.question) : ''}">
+        </div>
+        <div class="poll-options-section-label">
+          <span class="poll-form-label" style="margin-bottom:0;">Options</span>
+          <span class="poll-options-count-hint">Min 2 · Max 5</span>
+        </div>
+        <div id="padmin-opts">${optRowsHtml}</div>
+        ${addBtnHtml}
+        <button class="poll-btn-launch" id="padmin-launch-btn">⚔ Launch Poll</button>
+        ${pollBadge(true)}
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    document.getElementById('padmin-launch-btn').onclick = pollAdminLaunch;
+    document.getElementById('padmin-q').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('padmin-opt-0')?.focus();
+    });
+    for (let i = 0; i < pollAdminOptCount; i++) {
+      document.getElementById(`padmin-opt-${i}`).addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const next = document.getElementById(`padmin-opt-${i+1}`);
+          if (next) next.focus(); else pollAdminLaunch();
+        }
+      });
+    }
+    document.getElementById('padmin-add-btn')?.addEventListener('click', () => {
+      const vals = pollAdminGatherValues();
+      pollAdminOptCount++;
+      pollRenderAdminForm(vals);
+      setTimeout(() => document.getElementById(`padmin-opt-${pollAdminOptCount-1}`)?.focus(), 50);
+    });
+    document.querySelectorAll('.poll-btn-remove-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.index);
+        const vals = pollAdminGatherValues();
+        vals.splice(idx, 1);
+        pollAdminOptCount--;
+        pollRenderAdminForm(vals);
+      });
+    });
+  }
+
+  function pollAdminGatherValues() {
+    const vals = [];
+    vals.question = document.getElementById('padmin-q')?.value ?? '';
+    for (let i = 0; i < pollAdminOptCount; i++) {
+      vals.push(document.getElementById(`padmin-opt-${i}`)?.value ?? '');
+    }
+    return vals;
+  }
+
+  async function pollAdminLaunch() {
+    const q = document.getElementById('padmin-q')?.value.trim();
+    const options = [];
+    for (let i = 0; i < pollAdminOptCount; i++) {
+      options.push((document.getElementById(`padmin-opt-${i}`)?.value ?? '').trim());
+    }
+    let hasError = false;
+    if (!q) {
+      const el = document.getElementById('padmin-q');
+      el.style.borderColor = '#c0392b'; el.focus();
+      setTimeout(() => { el.style.borderColor = ''; }, 1200);
+      hasError = true;
+    }
+    options.forEach((val, i) => {
+      if (!val) {
+        const el = document.getElementById(`padmin-opt-${i}`);
+        if (el) { el.style.borderColor = '#c0392b'; if (!hasError) el.focus(); setTimeout(() => { el.style.borderColor = ''; }, 1200); }
+        hasError = true;
+      }
+    });
+    if (hasError) return;
+    const btn = document.getElementById('padmin-launch-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+    await set(pollRef2, { question: q, options, active: true, revealed: false, ts: Date.now() });
+    await set(votesRef2, {});
+    pollAdminOptCount = POLL_MIN_OPTS;
+  }
+
+  // ── Admin render: pre-reveal (votes hidden from audience) ─
+  function pollRenderAdminPreReveal(poll, votes) {
+    const opts = poll.options||[], counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
+    const total = counts.reduce((a,b)=>a+b,0), pcts = counts.map(c=>total?Math.round(c/total*100):0), maxC = Math.max(...counts);
+    const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+      <div class="poll-result-label-row">
+        <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span>
+        <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+    </div>`).join('');
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-admin-section">
+        <div class="poll-admin-badge">⚔ Showrunner</div>
+        <div class="poll-admin-results-header">
+          <div class="poll-question-label">Active Poll</div>
+          <div class="poll-live-indicator"><span class="poll-live-dot"></span>Votes incoming</div>
+        </div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="poll-result-wrap">${barsHtml}</div>
+        <p class="total-votes" style="margin-bottom:8px;">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
+        <button class="poll-btn-reveal" id="padmin-reveal-btn">🎲 Reveal Results to Audience</button>
+        <button class="poll-btn-danger" id="padmin-close-btn">Close Poll &amp; Clear</button>
+        ${pollBadge(true)}
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    document.getElementById('padmin-reveal-btn').onclick = pollAdminReveal;
+    document.getElementById('padmin-close-btn').onclick  = pollAdminClear;
+  }
+
+  // ── Admin render: post-reveal (results shown to audience) ─
+  function pollRenderAdminPostReveal(poll, votes) {
+    const opts = poll.options||[], counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
+    const total = counts.reduce((a,b)=>a+b,0), pcts = counts.map(c=>total?Math.round(c/total*100):0), maxC = Math.max(...counts);
+    const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+      <div class="poll-result-label-row">
+        <span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span>
+        <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+    </div>`).join('');
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-admin-section">
+        <div class="poll-admin-badge">⚔ Showrunner</div>
+        <div class="poll-admin-results-header">
+          <div class="poll-question-label">Results Revealed</div>
+          <div class="poll-live-indicator" style="color:var(--gold);">
+            <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
+          </div>
+        </div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="poll-result-wrap">${barsHtml}</div>
+        <p class="total-votes" style="margin-bottom:8px;">${total} vote${total!==1?'s':''} cast</p>
+        <button class="poll-btn-new" id="padmin-new-btn">New Poll</button>
+        <button class="poll-btn-danger" id="padmin-close2-btn">Close Poll &amp; Clear</button>
+        ${pollBadge(true)}
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+    document.getElementById('padmin-new-btn').onclick    = pollAdminClear;
+    document.getElementById('padmin-close2-btn').onclick = pollAdminClear;
+  }
+
+  async function pollAdminReveal() {
+    const btn = document.getElementById('padmin-reveal-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Revealing…'; }
+    await set(ref(db2, 'nodice/poll/revealed'), true);
+  }
+
+  async function pollAdminClear() {
+    await set(pollRef2, { active: false });
+    await set(votesRef2, {});
+    pollAdminOptCount = POLL_MIN_OPTS;
+  }
+
+  function pollRenderWaiting() {
+    document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">🎲</span><br>No poll active right now.<br><small>The showrunner will start one.</small></p></div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  function pollRenderVote(poll) {
+    const opts = (poll.options||[]);
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <div class="vote-options">${opts.map((o,i)=>`<button class="vote-btn" id="pvbtn-${i}" onclick="pollCastVote(${i})"><span class="opt-letter">${POLL_LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  function pollRenderAwaiting(poll, myIdx) {
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-section">
+        <div class="poll-question-label">The Question</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        <p class="voted-chip" style="margin-top:4px;">✔ Voted — ${POLL_LETTERS[myIdx]}: ${esc((poll.options||[])[myIdx]||'')}</p>
+        <p class="poll-waiting" style="margin-top:8px;"><span class="poll-waiting-pulse">⚔</span><br>Waiting for reveal…</p>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  function pollRenderResults(poll, votes, myIdx) {
+    const opts   = poll.options||[], counts = opts.map((_,i)=>Object.values(votes).filter(v=>v===String(i)).length);
+    const total  = counts.reduce((a,b)=>a+b,0), pcts = counts.map(c=>total?Math.round(c/total*100):0), maxC = Math.max(...counts);
+    document.getElementById('poll-inner').innerHTML = `
+      <div class="poll-section">
+        <div class="poll-question-label">Results</div>
+        <p class="poll-question-text">${esc(poll.question)}</p>
+        ${myIdx!==null?`<p class="voted-chip" style="margin-top:2px;">✔ You voted ${POLL_LETTERS[myIdx]}</p>`:''}
+        <div class="poll-result-wrap" style="margin-top:8px;">${opts.map((o,i)=>`<div class="poll-result-row"><div class="poll-result-label-row"><span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span><span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span></div><div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div></div>`).join('')}</div>
+        <p class="total-votes" style="margin-top:6px;">${total} vote${total!==1?'s':''}</p>
+      </div>`;
+    document.getElementById('poll-footer').innerHTML = pollBadge(true);
+  }
+
+  window.pollCastVote = async function(index) {
+    const poll = pollCurrentSnap; if (!poll) return;
+    sessionStorage.setItem('nodice_vault_vote_ts', poll.ts);
+    sessionStorage.setItem('nodice_vault_vote_choice', String(index));
+    (poll.options||[]).forEach((_,i)=>{ const b=document.getElementById('pvbtn-'+i); if(b) b.disabled=true; });
+    const vref = ref(db2, `nodice/votes/${pollVoterId}`);
+    await set(vref, String(index));
+    pollRenderAwaiting(poll, index);
+    if (pollUnsubVotes) pollUnsubVotes();
+    pollUnsubVotes = onValue(votesRef2, snap => {
+      if (pollCurrentSnap && pollCurrentSnap.revealed) pollRenderResults(pollCurrentSnap, snap.val()||{}, index);
+    });
+  };
+
+  // Override initPoll to start listener
+  const _orig = initPoll;
+  initPoll = function() {
+    pollInitialised = true;
+    document.getElementById('poll-inner').innerHTML = `<div class="poll-section"><p class="poll-waiting"><span class="poll-waiting-pulse">⚔</span><br>Connecting…</p></div>`;
+    document.getElementById('poll-footer').innerHTML = '';
+
+    onValue(pollRef2, snap => {
+      const poll = snap.val(); pollCurrentSnap = poll;
+      if (isAdmin) {
+        if (!poll || !poll.active) {
+          if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
+          pollRenderAdminForm();
+        } else {
+          if (pollUnsubVotes) pollUnsubVotes();
+          pollUnsubVotes = onValue(votesRef2, votesSnap => {
+            const votes = votesSnap.val() || {};
+            if (poll.revealed) pollRenderAdminPostReveal(poll, votes);
+            else               pollRenderAdminPreReveal(poll, votes);
+          });
+        }
+        return;
+      }
+      if (!poll||!poll.active) { if(pollUnsubVotes){pollUnsubVotes();pollUnsubVotes=null;} sessionStorage.removeItem('nodice_vault_vote_ts'); sessionStorage.removeItem('nodice_vault_vote_choice'); pollRenderWaiting(); return; }
+      const ts=sessionStorage.getItem('nodice_vault_vote_ts'), choice=sessionStorage.getItem('nodice_vault_vote_choice');
+      if (ts && parseInt(ts)===poll.ts && choice!==null) {
+        const idx=parseInt(choice);
+        if (poll.revealed) { get(votesRef2).then(vs=>pollRenderResults(poll,vs.val()||{},idx)); }
+        else { pollRenderAwaiting(poll,idx); if(!pollUnsubVotes){pollUnsubVotes=onValue(votesRef2,vs=>{if(pollCurrentSnap&&pollCurrentSnap.revealed) pollRenderResults(pollCurrentSnap,vs.val()||{},idx);});} }
+        return;
+      }
+      if(pollUnsubVotes){pollUnsubVotes();pollUnsubVotes=null;}
+      pollRenderVote(poll);
+    }, (error) => {
+      // Firebase read failed — show clear error instead of freezing on "Connecting…"
+      document.getElementById('poll-inner').innerHTML = `
+        <div class="poll-setup-notice">
+          <div class="notice-icon">⚠️</div>
+          <div class="notice-title">Database Unreachable</div>
+          <div class="notice-body">Firebase returned: <strong>${error.code}</strong><br><br>
+            Check Realtime Database → Rules in Firebase Console and ensure<br>
+            <code>".read": true, ".write": true</code> are set.</div>
+        </div>`;
+      document.getElementById('poll-footer').innerHTML = pollBadge(false);
+    });
+  };
+
+  // ── Re-render after admin toggle ─────────────────────────
+  function pollRerenderForAdminChange() {
+    const poll = pollCurrentSnap;
+    if (pollUnsubVotes) { pollUnsubVotes(); pollUnsubVotes = null; }
+    if (isAdmin) {
+      if (!poll || !poll.active) {
+        pollRenderAdminForm();
+      } else {
+        pollUnsubVotes = onValue(votesRef2, snap => {
+          const votes = snap.val() || {};
+          if (poll.revealed) pollRenderAdminPostReveal(poll, votes);
+          else               pollRenderAdminPreReveal(poll, votes);
+        });
+      }
+    } else {
+      sessionStorage.removeItem('nodice_vault_vote_ts');
+      sessionStorage.removeItem('nodice_vault_vote_choice');
+      if (!poll || !poll.active) pollRenderWaiting();
+      else pollRenderVote(poll);
+    }
+  }
+
+}
+
+</script>
+<!-- ============================================================
+     SHELF REORDER — long-press a shelf header (400 ms) to drag
+     and reorder. Uses Pointer Events API for unified mouse+touch.
+     Order persisted to localStorage as 'nodice_shelf_order'.
+     ============================================================ -->
+<script>
+(function() {
+  var HOLD_MS     = 400;
+  var MOVE_CANCEL_H = 35;  // px horizontal — cancel on clear sideways-swipe intent
+  var MOVE_CANCEL_V = 55;  // px vertical   — more permissive; natural thumb drift is vertical
+
+  // ── Restore saved order on page load ───────────────────────────
+  function restoreShelfOrder() {
+    var saved;
+    try { saved = JSON.parse(localStorage.getItem('nodice_shelf_order')); } catch(e) {}
+    if (!Array.isArray(saved) || !saved.length) return;
+    var main = document.querySelector('main');
+    if (!main) return;
+    // Snapshot non-shelf children BEFORE moving shelves.
+    // Without this, main.appendChild() on shelves displaces the
+    // "In the Forge" div to the top of <main>.
+    var nonShelves = Array.from(main.children).filter(function(c) {
+      return !c.classList.contains('shelf');
+    });
+    saved.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.parentNode === main) main.appendChild(el);
+    });
+    // Re-append non-shelf sections at the end (e.g. "In the Forge")
+    nonShelves.forEach(function(el) { main.appendChild(el); });
+  }
+
+  // ── Save current DOM order ─────────────────────────────────────
+  function saveShelfOrder() {
+    var main = document.querySelector('main');
+    if (!main) return;
+    var ids = Array.from(main.querySelectorAll(':scope > .shelf')).map(function(s) { return s.id; });
+    localStorage.setItem('nodice_shelf_order', JSON.stringify(ids));
+  }
+
+  // ── Wire up long-press detection on every shelf header ─────────
+  function initReorder() {
+    var main = document.querySelector('main');
+    if (!main) return;
+
+    main.querySelectorAll('.shelf-header').forEach(function(header) {
+      header.addEventListener('pointerdown', function(e) {
+        // Only primary pointer (left-click or single touch)
+        if (e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+        var shelf = header.closest('.shelf');
+        if (!shelf) return;
+
+        var sx = e.clientX, sy = e.clientY;
+        var holdStart = Date.now(); // grace period reference
+        var timer = null;
+
+        function cleanup() {
+          clearTimeout(timer);
+          document.removeEventListener('pointermove', onEarlyMove);
+          document.removeEventListener('pointerup',     cleanup);
+          document.removeEventListener('pointercancel', cleanup);
+        }
+
+        function onEarlyMove(ev) {
+          // 50ms grace: ignore the synthetic pointermove browsers often fire
+          // immediately after pointerdown (0–5px artifact, not real movement)
+          if (Date.now() - holdStart < 50) return;
+          var dx = ev.clientX - sx, dy = ev.clientY - sy;
+          if (Math.abs(dx) > MOVE_CANCEL_H || Math.abs(dy) > MOVE_CANCEL_V) cleanup();
+        }
+
+        document.addEventListener('pointermove',   onEarlyMove);
+        document.addEventListener('pointerup',     cleanup);
+        document.addEventListener('pointercancel', cleanup);
+
+        timer = setTimeout(function() {
+          cleanup();
+          startDrag(main, shelf, header, e.pointerId, sx, sy);
+        }, HOLD_MS);
+      });
+    });
+  }
+
+  // ── Handle the actual drag after long-press activates ──────────
+  function startDrag(main, shelf, header, pointerId, sx, sy) {
+    if (navigator.vibrate) navigator.vibrate(30); // haptic feedback on mobile
+
+    var rect = shelf.getBoundingClientRect();
+    var grabOffsetY = sy - rect.top;
+
+    // Placeholder holds the empty slot while shelf is floating
+    var ph = document.createElement('div');
+    ph.className = 'shelf drag-placeholder';
+    ph.style.height = rect.height + 'px';
+    main.insertBefore(ph, shelf);
+
+    // Lift shelf out of flow
+    shelf.style.position = 'fixed';
+    shelf.style.top      = rect.top  + 'px';
+    shelf.style.left     = rect.left + 'px';
+    shelf.style.width    = rect.width + 'px';
+    shelf.style.zIndex   = '1000';
+    shelf.style.margin   = '0';
+    shelf.classList.add('dragging');
+    header.classList.add('reorder-active');
+    header.setPointerCapture(pointerId);
+
+    function onMove(e) {
+      e.preventDefault(); // prevent page scroll during drag
+      shelf.style.top = (e.clientY - grabOffsetY) + 'px';
+
+      // Find insertion point based on midpoints of sibling shelves
+      var midY     = e.clientY;
+      var siblings = Array.from(main.querySelectorAll(':scope > .shelf:not(.dragging)'));
+      var insertRef = null; // null = append at end
+
+      for (var i = 0; i < siblings.length; i++) {
+        var r = siblings[i].getBoundingClientRect();
+        if (midY < r.top + r.height / 2) { insertRef = siblings[i]; break; }
+      }
+
+      if (insertRef) {
+        if (ph.nextSibling !== insertRef) main.insertBefore(ph, insertRef);
+      } else {
+        if (main.lastChild !== ph) main.appendChild(ph);
+      }
+    }
+
+    function onUp() {
+      // Restore shelf to normal flow at placeholder position
+      shelf.style.position = '';
+      shelf.style.top      = '';
+      shelf.style.left     = '';
+      shelf.style.width    = '';
+      shelf.style.zIndex   = '';
+      shelf.style.margin   = '';
+      shelf.classList.remove('dragging');
+      header.classList.remove('reorder-active');
+      main.insertBefore(shelf, ph);
+      ph.parentNode.removeChild(ph);
+
+      saveShelfOrder();
+
+      header.removeEventListener('pointermove',   onMove);
+      header.removeEventListener('pointerup',     onUp);
+      header.removeEventListener('pointercancel', onUp);
+
+      // Suppress the click that fires immediately after pointerup so
+      // the shelf doesn't accidentally toggle open/closed after a drag.
+      header.addEventListener('click', function eatClick(ev) {
+        ev.stopImmediatePropagation();
+        header.removeEventListener('click', eatClick, true);
+      }, { capture: true, once: true });
+    }
+
+    header.addEventListener('pointermove',   onMove);
+    header.addEventListener('pointerup',     onUp);
+    header.addEventListener('pointercancel', onUp);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { restoreShelfOrder(); initReorder(); });
+  } else {
+    restoreShelfOrder();
+    initReorder();
+  }
+})();
+</script>
+<!-- QR lightbox overlay — tap anywhere to dismiss -->
+<div id="qr-lightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;cursor:pointer;">
+  <img src="qr.png" alt="No Dice QR Code" style="max-width:95vmin;max-height:95vmin;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.6);">
+</div>
 </body>
 </html>

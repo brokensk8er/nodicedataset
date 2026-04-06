@@ -3,78 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>No Dice — The Poll</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<!-- Shared styles (colours, fonts, buttons, badges, animations) -->
+<link rel="stylesheet" href="styles.css">
+<!-- Prevent theme flash: apply saved theme before first paint -->
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
-  :root {
-    --ink:       #1a1a2e;
-    --parchment: #faf7f2;
-    --gold:      #c9a84c;
-    --gold-dim:  #a07c2e;
-    --gold-bg:   #fffdf5;
-    --card-bg:   #ffffff;
-    --border:    #e8e2d9;
-    --muted:     #6b6676;
-    --shadow:    rgba(26,26,46,.12);
-    --pass-grn:  #27ae60;
-    --fail-red:  #c0392b;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+  /* ── Page layout ── */
   html, body { height: 100%; }
 
   body {
-    font-family: 'Lato', sans-serif;
-    font-weight: 300;
-    background-color: var(--parchment);
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,.06) 0%, transparent 60%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    color: var(--ink);
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
   }
 
   /* ── Header ── */
+  /* .site-label, header h1, .subtitle come from styles.css */
   header {
     text-align: center;
     padding: 12px 16px 8px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-  }
-
-  .site-label {
-    font-family: 'Cinzel', serif;
-    font-size: .6rem;
-    font-weight: 400;
-    letter-spacing: .25em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 2px;
-  }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: .04em;
-    line-height: 1.2;
-  }
-
-  header h1 span { color: var(--gold); }
-
-  .subtitle {
-    font-size: 0.68rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-top: 2px;
   }
 
   /* ── Main ── */
@@ -103,15 +57,9 @@
     padding: 22px 22px 0;
   }
 
-  .card-footer {
-    border-top: 1px solid var(--border);
-    padding: 10px 22px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    align-items: center;
-    background: rgba(201,168,76,.02);
-  }
+  /* .card-footer base comes from styles.css
+     Padding override: poll uses extra side padding */
+  .card-footer { padding: 10px 22px 12px; }
 
   /* ── Admin badge ── */
   .admin-badge {
@@ -327,24 +275,7 @@
   }
 
   /* ── Buttons ── */
-  .btn-primary {
-    width: 100%;
-    background: var(--ink);
-    color: var(--parchment);
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-family: 'Cinzel', serif;
-    font-size: .88rem;
-    font-weight: 600;
-    letter-spacing: .08em;
-    cursor: pointer;
-    transition: background .2s, transform .1s;
-  }
-
-  .btn-primary:hover:not(:disabled) { background: #2e2e4a; }
-  .btn-primary:active { transform: scale(.98); }
-  .btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+  /* .btn-primary base + hover/active/disabled come from styles.css */
 
   .btn-danger {
     width: 100%;
@@ -421,28 +352,9 @@
     word-break: break-all;
   }
 
-  /* Source badge */
-  .source-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.62rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2px 8px;
-  }
-
-  .source-badge .dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .source-badge.live .dot   { background: #2d7a5e; }
-  .source-badge.demo .dot   { background: #c0392b; }
+  /* .source-badge base + .live .dot come from styles.css */
+  /* .demo is poll-specific (red dot = demo mode) */
+  .source-badge.demo .dot   { background: var(--fail-red); }
 
   /* Admin result admin controls */
   .admin-results-header {
@@ -476,34 +388,14 @@
   }
 
   /* ── Footer nav ── */
+  /* .nav-link comes from styles.css */
   footer {
     text-align: center;
     padding: 6px 0 10px;
     flex-shrink: 0;
   }
 
-  .nav-link {
-    font-family: 'Cinzel', serif;
-    font-size: .58rem;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color .2s, color .2s;
-  }
-  .nav-link:hover { color: var(--gold); border-color: var(--gold); }
-
-  /* ── Animations ── */
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
+  /* @keyframes cardIn + @keyframes spin come from styles.css */
 
   .spinner {
     display: inline-block;
@@ -637,12 +529,32 @@
 </head>
 <body>
 
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
+
+<!-- ============================================
+     HEADER
+     Edit: site-label eyebrow, h1 title. The
+     subtitle (#headerSubtitle) is updated by JS
+     to reflect admin vs audience mode.
+     ============================================ -->
 <header>
-  <p class="site-label">No Dice &mdash; Improv D&amp;D</p>
+  <p class="site-label">No Dice &mdash; Improv RPG</p>
   <h1>The <span>Poll</span></h1>
   <p class="subtitle" id="headerSubtitle">The crowd decides</p>
 </header>
 
+<!-- ============================================
+     MAIN CARD
+     JavaScript fills #cardBody with the current
+     screen (loading, admin form, vote buttons,
+     results, or waiting state). Do not add
+     static content here.
+
+     Access modes:
+       Audience: poll.html (default)
+       Admin:    tap the <h1> title 5× quickly to toggle
+     ============================================ -->
 <main>
   <div class="card" id="card">
     <div class="card-body" id="cardBody">
@@ -652,6 +564,10 @@
   </div>
 </main>
 
+<!-- ============================================
+     FOOTER
+     ← Back to the Vault nav link.
+     ============================================ -->
 <footer>
   <a class="nav-link" href="index.html">← Back to the Vault</a>
 </footer>
@@ -680,19 +596,27 @@
 ============================================================ -->
 
 <script type="module">
+import { mountProfileButton } from './profile-auth.js';
+mountProfileButton();
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, get, onValue }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 // ============================================================
-//  🔧 REPLACE THIS CONFIG WITH YOUR OWN FIREBASE PROJECT
+//  CONFIGURATION — FIREBASE PROJECT
+//  ► Replace ALL values below with your own Firebase project.
+//    See FIREBASE_SETUP.md for step-by-step instructions.
+//  ► If these values start with "YOUR_", the tool runs in
+//    demo mode (no live voting, just shows setup instructions).
+//  ► The poll.html?admin URL is the showrunner's view.
+//    Audience visits poll.html (no ?admin).
 // ============================================================
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAIwTgubmE9V1XrSF3BS4rxSIr3uNua1a8",
-  authDomain:        "nodicepolls.firebaseapp.com",
-  databaseURL:       "https://nodicepolls-default-rtdb.firebaseio.com",
-  projectId:         "nodicepolls",
-  storageBucket:     "nodicepolls.appspot.com",
+  authDomain:        "nodicetools.firebaseapp.com",
+  databaseURL:       "https://nodicetools-default-rtdb.firebaseio.com",
+  projectId:         "nodicetools",
+  storageBucket:     "nodicetools.firebasestorage.app",
   messagingSenderId: "387258889697",
   appId:             "1:387258889697:web:5467488ab109ea67b74ea0",
 };
@@ -702,9 +626,13 @@ const IS_DEMO = Object.values(FIREBASE_CONFIG).some(v => v.startsWith('YOUR_'));
 
 // ============================================================
 //  IS ADMIN?
-//  Showrunner adds ?admin to the URL: poll.html?admin
+//  Visit poll.html?admin to enter showrunner mode.
+//  State persists in sessionStorage for the tab's lifetime.
 // ============================================================
-const isAdmin = new URLSearchParams(window.location.search).has('admin');
+if (new URLSearchParams(window.location.search).has('admin')) {
+  sessionStorage.setItem('nodice_admin', '1');
+}
+let isAdmin = sessionStorage.getItem('nodice_admin') === '1';
 
 // ============================================================
 //  SESSION VOTER ID
@@ -770,7 +698,11 @@ if (IS_DEMO) {
   showFooter(`<div class="source-badge demo"><span class="dot"></span>Firebase not configured</div>`);
 
 // ============================================================
-//  FIREBASE CONNECTED
+//  FIREBASE CONNECTED — MAIN POLL LOGIC
+//  Runs only when FIREBASE_CONFIG has real values.
+//  Two paths:
+//    isAdmin = true  → showrunner view (create/reveal polls)
+//    isAdmin = false → audience view (vote + wait for reveal)
 // ============================================================
 } else {
   let app, db, pollRef, votesRef;
@@ -1262,13 +1194,52 @@ if (IS_DEMO) {
       if (unsubVotes) { unsubVotes(); unsubVotes = null; }
       myVote = null;
       renderAudienceVote(poll);
+    }, (error) => {
+      // Firebase read failed — show a clear error instead of freezing on spinner
+      cardBody.innerHTML = `
+        <span class="status-icon">⚠️</span>
+        <p class="status-heading">Database Unreachable</p>
+        <p class="status-body">
+          Firebase returned: <code>${error.code}</code><br><br>
+          Most likely your Realtime Database rules are blocking reads.<br><br>
+          In Firebase Console → Realtime Database → Rules, set:<br>
+          <code>{ "rules": { ".read": true, ".write": true } }</code>
+        </p>`;
+      showFooter(`<div class="source-badge demo"><span class="dot"></span>${error.code}</div>`);
     });
+  }
+
+  // ── RE-RENDER after admin toggle ─────────────────────────
+  function rerenderForAdminChange() {
+    const poll = currentPollSnap;
+    if (unsubVotes) { unsubVotes(); unsubVotes = null; }
+    if (isAdmin) {
+      subtitle.textContent = 'Showrunner controls';
+      if (!poll || !poll.active) {
+        renderAdminForm();
+      } else {
+        unsubVotes = onValue(votesRef, snap => {
+          const votes = snap.val() || {};
+          if (poll.revealed) renderAdminPostReveal(poll, votes);
+          else renderAdminPreReveal(poll, votes);
+        });
+      }
+    } else {
+      subtitle.textContent = 'The crowd decides';
+      myVote = null;
+      sessionStorage.removeItem('nodice_poll_vote_ts');
+      sessionStorage.removeItem('nodice_poll_vote_choice');
+      if (!poll || !poll.active) renderAudienceWaiting();
+      else renderAudienceVote(poll);
+    }
   }
 
   startListening();
 }
 
-// ── HELPERS ──────────────────────────────────────────────
+// ============================================================
+// HELPERS — utility functions used by both admin + audience
+// ============================================================
 function esc(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -1276,6 +1247,19 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+
+// ── Theme toggle ──────────────────────────────
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+(function(){
+  const t = document.documentElement.getAttribute('data-theme') || 'dark';
+  const btn = document.getElementById('themeBtn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+})();
 </script>
 </body>
 </html>

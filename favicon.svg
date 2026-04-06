@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Red background circle -->
+  <circle cx="50" cy="50" r="50" fill="#E8222A"/>
+
+  <!-- Black ring (with gaps for arrow notches) -->
+  <!-- Using a thick stroke arc approach via path -->
+  <!-- Top-left gap: ~315° to ~45° (i.e. gap at top-left) -->
+  <!-- Bottom-right gap: ~135° to ~225° -->
+  <!-- Ring is roughly r=36, stroke=10, so inner r=31, outer r=41 -->
+
+  <!-- Draw ring as two arcs with gaps -->
+  <!-- Arc 1: from 45° to 135° (bottom-right portion) -->
+  <path d="M 75.46 25.46 A 36 36 0 0 1 75.46 74.54" stroke="#1A1A1A" stroke-width="10" fill="none" stroke-linecap="butt"/>
+  <!-- Arc 2: from 225° to 315° (top-left portion) -->
+  <path d="M 24.54 74.54 A 36 36 0 0 1 24.54 25.46" stroke="#1A1A1A" stroke-width="10" fill="none" stroke-linecap="butt"/>
+
+  <!-- Arrow tips at gap ends (small filled triangles) -->
+  <!-- Top-left arrow pointing upper-left -->
+  <polygon points="24.54,25.46 17,22 28,15" fill="#1A1A1A"/>
+  <!-- Bottom-right arrow pointing lower-right -->
+  <polygon points="75.46,74.54 83,78 72,85" fill="#1A1A1A"/>
+
+  <!-- White hexagon (flat-top) centered -->
+  <polygon points="50,22 72,35 72,65 50,78 28,65 28,35" fill="#FFFFFF"/>
+
+  <!-- Black exclamation mark -->
+  <!-- Stem -->
+  <rect x="46" y="33" width="8" height="28" rx="2" fill="#1A1A1A"/>
+  <!-- Dot -->
+  <rect x="46" y="66" width="8" height="8" rx="2" fill="#1A1A1A"/>
+</svg>

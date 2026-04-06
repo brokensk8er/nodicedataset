@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>No Dice — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+<style>
+  /* ── Profile page local styles ── */
+  .profile-page { max-width: 540px; margin: 0 auto; padding: 24px 16px 80px; }
+
+  /* sign-in panel */
+  .signin-panel { display: flex; flex-direction: column; gap: 16px; }
+  .signin-panel h1 { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700;
+    color: var(--gold); text-align: center; margin: 32px 0 8px; letter-spacing: .06em; }
+  .signin-panel p.tagline { text-align: center; color: var(--text-muted); font-size: .85rem;
+    margin: 0 0 8px; }
+
+  .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card-bg); color: var(--text); font-family: 'Lato', sans-serif;
+    font-size: .95rem; font-weight: 700; cursor: pointer;
+    transition: border-color .2s, box-shadow .2s; }
+  .btn-google:hover { border-color: var(--gold); box-shadow: 0 2px 8px var(--shadow-gold); }
+
+  .divider { display: flex; align-items: center; gap: 10px; color: var(--text-muted);
+    font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px;
+    background: var(--border); }
+
+  .auth-form { display: flex; flex-direction: column; gap: 10px; }
+  .auth-form input { width: 100%; padding: 10px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
+    font-family: 'Lato', sans-serif; font-size: .95rem; box-sizing: border-box;
+    transition: border-color .2s; }
+  .auth-form input:focus { outline: none; border-color: var(--gold); }
+  .auth-form .btn-primary { width: 100%; padding: 11px; border-radius: 6px;
+    border: none; background: var(--gold-dim); color: #1a1200;
+    font-family: 'Cinzel', serif; font-size: .85rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
+    transition: background .2s, box-shadow .2s; }
+  .auth-form .btn-primary:hover { background: var(--gold);
+    box-shadow: 0 2px 10px var(--shadow-gold); }
+
+  .auth-toggle { text-align: center; font-size: .83rem; color: var(--text-muted); }
+  .auth-toggle button { background: none; border: none; color: var(--gold); cursor: pointer;
+    font-size: .83rem; font-family: 'Lato', sans-serif; text-decoration: underline;
+    padding: 0; }
+
+  .auth-error { background: rgba(200,60,60,.15); border: 1px solid rgba(200,60,60,.4);
+    color: #f08080; border-radius: 6px; padding: 8px 12px;
+    font-size: .83rem; display: none; }
+  .auth-error.visible { display: block; }
+
+  /* profile/sign-in visibility */
+  .profile-panel { display: flex; flex-direction: column; gap: 20px; }
+  .profile-panel.hidden, .signin-panel.hidden { display: none; }
+
+  /* profile header */
+  .profile-header { display: flex; align-items: center; gap: 14px;
+    padding: 16px; background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; }
+  .profile-avatar { width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--gold-dim); object-fit: cover; flex-shrink: 0; }
+  .profile-avatar-placeholder { width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--gold-dim); background: var(--bg-alt);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0; }
+  .profile-header-info { flex: 1; min-width: 0; }
+  .profile-header-info .name { font-family: 'Cinzel', serif; font-size: 1rem;
+    font-weight: 700; color: var(--gold); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; }
+  .profile-header-info .email { font-size: .78rem; color: var(--text-muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn-signout { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: none; color: var(--text-muted); font-family: 'Lato', sans-serif;
+    font-size: .78rem; cursor: pointer; white-space: nowrap;
+    transition: border-color .2s, color .2s; }
+  .btn-signout:hover { border-color: var(--gold-dim); color: var(--text); }
+
+  /* section cards */
+  .profile-card { background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .profile-card h2 { font-family: 'Cinzel', serif; font-size: .9rem; font-weight: 700;
+    color: var(--gold-dim); letter-spacing: .07em; text-transform: uppercase; margin: 0; }
+
+  /* attendance + badges */
+  .attendance-row { display: flex; align-items: center; gap: 10px; }
+  .attendance-count { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700;
+    color: var(--gold); line-height: 1; }
+  .attendance-label { font-size: .8rem; color: var(--text-muted); }
+  .badges-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .badge-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .badge-item svg { width: 48px; height: 48px; }
+  .badge-item .badge-name { font-size: .65rem; color: var(--text-muted);
+    text-align: center; max-width: 56px; line-height: 1.2; }
+  .no-badges { font-size: .83rem; color: var(--text-muted); }
+
+  /* ticket verification */
+  .ticket-status { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+  .pill { padding: 2px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+    letter-spacing: .05em; text-transform: uppercase; }
+  .pill--verified { background: rgba(60,180,80,.2); color: #6fda88;
+    border: 1px solid rgba(60,180,80,.4); }
+  .pill--pending { background: rgba(200,160,50,.15); color: var(--gold-dim);
+    border: 1px solid rgba(200,160,50,.3); }
+  .pill--none { background: rgba(120,120,120,.15); color: var(--text-muted);
+    border: 1px solid var(--border); }
+  .ticket-form { display: flex; gap: 8px; }
+  .ticket-form input { flex: 1; padding: 9px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
+    font-family: 'Lato', sans-serif; font-size: .9rem; box-sizing: border-box; }
+  .ticket-form input:focus { outline: none; border-color: var(--gold); }
+  .ticket-form button { padding: 9px 16px; border-radius: 6px; border: none;
+    background: var(--gold-dim); color: #1a1200; font-family: 'Cinzel', serif;
+    font-size: .75rem; font-weight: 700; letter-spacing: .06em; cursor: pointer;
+    text-transform: uppercase; white-space: nowrap; transition: background .2s; }
+  .ticket-form button:hover { background: var(--gold); }
+  .ticket-msg { font-size: .78rem; color: var(--text-muted); display: none; }
+  .ticket-msg.visible { display: block; }
+
+  /* character sheet */
+  .char-field { display: flex; flex-direction: column; gap: 4px; }
+  .char-field label { font-size: .75rem; font-family: 'Cinzel', serif;
+    letter-spacing: .06em; color: var(--text-muted); text-transform: uppercase; }
+  .char-field input, .char-field textarea {
+    padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--card-bg); color: var(--text); font-family: 'Lato', sans-serif;
+    font-size: .9rem; box-sizing: border-box; resize: vertical; width: 100%; }
+  .char-field input:focus, .char-field textarea:focus {
+    outline: none; border-color: var(--gold); }
+  .char-field input[readonly], .char-field textarea[readonly] {
+    opacity: .65; cursor: default; }
+  .char-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-save { padding: 9px 20px; border-radius: 6px; border: none;
+    background: var(--gold-dim); color: #1a1200; font-family: 'Cinzel', serif;
+    font-size: .78rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    cursor: pointer; transition: background .2s; }
+  .btn-save:hover { background: var(--gold); }
+  .btn-save:disabled { opacity: .4; cursor: default; }
+  .char-locked-note { font-size: .75rem; color: var(--text-muted); }
+  .char-save-msg { font-size: .78rem; color: var(--text-muted); display: none; }
+  .char-save-msg.visible { display: block; }
+  .char-save-msg.error { color: #f08080; }
+
+  /* character sheet — randomize additions */
+  .char-sheet-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .char-sheet-header h2 { margin: 0; }
+  .mulligan-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .72rem; color: var(--text-muted);
+    font-family: 'Cinzel', serif; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .char-pip-row { display: flex; gap: 5px; align-items: center; }
+  .char-pip {
+    width: 9px; height: 9px; background: var(--gold);
+    transform: rotate(45deg); border-radius: 2px;
+    transition: opacity .2s, background .2s;
+  }
+  .char-pip.spent { opacity: .18; }
+
+  .btn-full-rand {
+    width: 100%; padding: 9px; border-radius: 6px;
+    border: 1px solid var(--gold-dim); background: transparent;
+    color: var(--gold-dim); font-family: 'Cinzel', serif; font-size: .78rem;
+    font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    cursor: pointer; transition: background .2s, color .2s, border-color .2s;
+  }
+  .btn-full-rand:hover:not(:disabled) { background: var(--gold-dim); color: #1a1200; }
+  .btn-full-rand:disabled { opacity: .32; cursor: default; }
+
+  .char-input-row { display: flex; align-items: flex-start; gap: 6px; }
+  .char-input-row input, .char-input-row textarea {
+    flex: 1; min-width: 0;
+  }
+  .btn-rand, .btn-field-pin {
+    flex-shrink: 0; padding: 7px 9px; border-radius: 6px;
+    border: 1px solid var(--border); background: none; color: var(--text-muted);
+    font-size: .82rem; line-height: 1; cursor: pointer; align-self: flex-start;
+    transition: border-color .2s, color .2s, background .2s;
+  }
+  .btn-rand:hover:not(:disabled), .btn-field-pin:hover:not(:disabled) {
+    border-color: var(--gold-dim); color: var(--gold-dim);
+  }
+  .btn-rand:disabled, .btn-field-pin:disabled { opacity: .28; cursor: default; }
+  .btn-field-pin.pinned {
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(201,168,76,.12);
+  }
+
+  /* ── Admin Showrunner Panel ── */
+  /* Note: drawer open/close and layout now use shared .shelf / .shelf-* classes
+     from styles.css. Only the admin-badge-pill remains here. */
+  .admin-badge-pill {
+    font-size: .56rem; padding: 1px 7px; border-radius: 12px; font-weight: 700;
+    background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.4);
+    letter-spacing: .1em; color: var(--gold-dim); vertical-align: middle;
+  }
+
+  /* poll form + results (shared with index.html) */
+  .poll-admin-section { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 0; }
+  .poll-admin-badge {
+    display: inline-block; font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
+    border: 1px solid rgba(201,168,76,.35); background: rgba(201,168,76,.10);
+    border-radius: 20px; padding: 3px 10px; margin-bottom: 12px; align-self: flex-start;
+  }
+  .poll-form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .poll-form-label {
+    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
+    color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
+  }
+  .poll-options-section-label {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .poll-options-count-hint { font-size: .65rem; color: var(--text-muted); }
+  .poll-form-input {
+    width: 100%; box-sizing: border-box;
+    background: rgba(255,255,255,.04); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    font-family: 'Lato', sans-serif; font-size: .92rem; color: var(--text);
+    outline: none; transition: border-color .18s;
+  }
+  .poll-form-input:focus { border-color: var(--gold); }
+  .poll-form-input::placeholder { color: var(--text-muted); opacity: .7; }
+  .poll-option-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .poll-option-letter-tag {
+    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
+    letter-spacing: .1em; color: var(--gold); flex-shrink: 0; width: 16px; text-align: center;
+  }
+  .poll-btn-remove-option {
+    flex-shrink: 0; width: 28px; height: 28px; background: none;
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted);
+    font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .poll-btn-remove-option:hover { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,.08); }
+  .poll-btn-remove-placeholder { flex-shrink: 0; width: 28px; height: 28px; }
+  .poll-btn-add-option {
+    width: 100%; background: none; border: 1.5px dashed var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    font-family: 'Lato', sans-serif; font-size: .82rem;
+    color: var(--text-muted); cursor: pointer; text-align: left;
+    transition: border-color .18s, color .18s, background .18s;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .poll-btn-add-option:hover { border-color: var(--gold); color: var(--gold); }
+  .poll-btn-launch {
+    width: 100%; background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
+    color: #1a1a2e; border: none; border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    box-shadow: 0 3px 10px rgba(201,168,76,.35); transition: opacity .18s;
+  }
+  .poll-btn-launch:hover { opacity: .9; }
+  .poll-btn-launch:disabled { opacity: .4; cursor: not-allowed; }
+  .poll-btn-reveal {
+    width: 100%; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #27ae60 100%);
+    color: #fff; border: none; border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    box-shadow: 0 3px 10px rgba(39,174,96,.35); transition: opacity .18s;
+  }
+  .poll-btn-reveal:disabled { opacity: .4; cursor: not-allowed; }
+  .poll-btn-new {
+    width: 100%; background: rgba(201,168,76,.12); color: var(--gold);
+    border: 1px solid rgba(201,168,76,.4); border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px; transition: background .2s;
+  }
+  .poll-btn-new:hover { background: rgba(201,168,76,.22); }
+  .poll-btn-danger {
+    width: 100%; background: none; color: #c0392b;
+    border: 1px solid rgba(192,57,43,.35); border-radius: 8px; padding: 10px;
+    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
+    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
+    transition: background .2s, border-color .2s;
+  }
+  .poll-btn-danger:hover { background: rgba(192,57,43,.10); border-color: #c0392b; }
+  .poll-admin-results-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .poll-question-label {
+    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 4px;
+  }
+  .poll-question-text { font-size: .92rem; color: var(--text); margin: 0 0 10px; }
+  .poll-live-indicator {
+    display: flex; align-items: center; gap: 5px; font-size: .65rem;
+    letter-spacing: .08em; text-transform: uppercase; color: #27ae60; font-weight: 700;
+  }
+  .poll-live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #27ae60;
+    animation: livePulse 1.4s ease-in-out infinite;
+  }
+  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+  .poll-result-wrap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; }
+  .poll-result-row {}
+  .poll-result-label-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .poll-result-opt-name { font-size: .82rem; color: var(--text); }
+  .poll-result-pct { font-size: .82rem; font-weight: 700; color: var(--gold); margin-right: 5px; }
+  .poll-result-count { font-size: .72rem; color: var(--text-muted); }
+  .bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--gold-dim); border-radius: 3px; transition: width .4s; }
+  .bar-fill.winner { background: var(--gold); }
+  .total-votes { font-size: .75rem; color: var(--text-muted); margin: 4px 0 8px; }
+  .poll-waiting {
+    text-align: center; padding: 20px 12px;
+    font-size: .82rem; color: var(--text-muted); line-height: 1.8;
+  }
+
+  /* back to vault cutout tab */
+  .btn-back-vault {
+    position: fixed; top: 0; right: 130px; z-index: 900;
+    font-family: 'Cinzel', serif; font-size: .68rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    color: var(--gold-dim); background: var(--card-bg);
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 8px 8px; padding: 6px 14px; cursor: pointer;
+    box-shadow: 0 3px 10px var(--shadow); opacity: .85;
+    transition: opacity .2s, border-color .2s, color .2s, box-shadow .2s;
+  }
+  .btn-back-vault:hover {
+    opacity: 1; border-color: var(--gold); color: var(--gold);
+    box-shadow: 0 4px 14px var(--shadow-gold);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="profile-page">
+
+    <!-- ── SIGN-IN PANEL ── -->
+    <div class="signin-panel hidden" id="signin-panel">
+      <h1>⚔ Adventurer Login</h1>
+      <p class="tagline">Sign in to track your journey through the realm.</p>
+
+      <button class="btn-google" id="btn-google">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+          <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider">or</div>
+
+      <div id="auth-error" class="auth-error"></div>
+
+      <form class="auth-form" id="auth-form" autocomplete="on">
+        <input type="email" id="auth-email" placeholder="Email address"
+          autocomplete="email" required>
+        <input type="password" id="auth-password" placeholder="Password (min 6 chars)"
+          autocomplete="current-password" required minlength="6">
+        <button type="submit" class="btn-primary" id="auth-submit">Sign In</button>
+      </form>
+
+      <div class="auth-toggle">
+        <span id="auth-toggle-text">No account?</span>
+        <button type="button" id="auth-toggle-btn">Create one</button>
+      </div>
+    </div>
+
+    <!-- ── PROFILE PANEL ── -->
+    <div class="profile-panel hidden" id="profile-panel">
+
+      <!-- Header -->
+      <div class="profile-header">
+        <div class="profile-avatar-placeholder" id="profile-avatar-wrap">🧙</div>
+        <div class="profile-header-info">
+          <div class="name" id="profile-name">—</div>
+          <div class="email" id="profile-email"></div>
+        </div>
+        <button class="btn-signout" id="btn-signout">Sign out</button>
+      </div>
+
+      <!-- ── SHELF: Attendance & Badges ── -->
+      <div class="shelf" id="profile-shelf-attendance">
+        <div class="shelf-header" onclick="toggleProfileShelf('attendance')">
+          <div class="shelf-icon">🏅</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Attendance &amp; Badges</div>
+          </div>
+          <div class="shelf-chevron">▼</div>
+        </div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+              <div class="attendance-row">
+                <div class="attendance-count" id="attendance-count">0</div>
+                <div class="attendance-label">sessions<br>attended</div>
+              </div>
+              <div class="badges-grid" id="badges-grid">
+                <span class="no-badges">Attend your first session to earn a badge.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SHELF: Ticket Verification ── -->
+      <div class="shelf" id="profile-shelf-ticket">
+        <div class="shelf-header" onclick="toggleProfileShelf('ticket')">
+          <div class="shelf-icon">🎟️</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Ticket Verification</div>
+          </div>
+          <div class="shelf-chevron">▼</div>
+        </div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+              <div class="ticket-status">
+                <span>Status:</span>
+                <span class="pill pill--none" id="ticket-pill">Not submitted</span>
+              </div>
+              <p class="ticket-hint">
+                Submit the email used to purchase your ticket. An admin will verify it
+                and credit your attendance.
+              </p>
+              <div class="ticket-form" id="ticket-form-row">
+                <input type="email" id="ticket-email-input" placeholder="Ticket email address">
+                <button type="button" id="btn-ticket-submit">Submit</button>
+              </div>
+              <div class="ticket-msg" id="ticket-msg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SHELF: Character Sheet ── -->
+      <div class="shelf" id="profile-shelf-charsheet">
+        <div class="shelf-header" onclick="toggleProfileShelf('charsheet')">
+          <div class="shelf-icon">📜</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Character Sheet</div>
+          </div>
+          <!-- Mulligan pips shown inline next to chevron when active -->
+          <div class="mulligan-row" id="char-mulligan-row" style="display:none">
+            Mulligans
+            <div class="char-pip-row">
+              <div class="char-pip" id="cp-0"></div>
+              <div class="char-pip" id="cp-1"></div>
+              <div class="char-pip" id="cp-2"></div>
+            </div>
+          </div>
+          <div class="shelf-chevron">▼</div>
+        </div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+              <button class="btn-full-rand" id="btn-full-rand">🎲 Fully Randomize</button>
+
+              <div class="char-field">
+                <label for="char-name">Character Name</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-name" placeholder="e.g. Aldric Stonemantle" maxlength="60">
+                  <button class="btn-rand" id="rand-name" title="Roll a random name">⚄</button>
+                  <button class="btn-field-pin" id="pin-name" title="Pin this value (skip on full randomize)">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-race">Race / Species</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-race" placeholder="e.g. Half-elf" maxlength="60">
+                  <button class="btn-rand" id="rand-race" title="Roll a random race">⚄</button>
+                  <button class="btn-field-pin" id="pin-race" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-class">Class / Role</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-class" placeholder="e.g. Rogue" maxlength="60">
+                  <button class="btn-rand" id="rand-class" title="Roll a random class">⚄</button>
+                  <button class="btn-field-pin" id="pin-class" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-backstory">Backstory</label>
+                <div class="char-input-row">
+                  <textarea id="char-backstory" rows="3"
+                    placeholder="A few sentences about your character's past…" maxlength="500"></textarea>
+                  <div class="char-btn-stack">
+                    <button class="btn-rand" id="rand-backstory" title="Roll a random backstory">⚄</button>
+                    <button class="btn-field-pin" id="pin-backstory" title="Pin this value">✓</button>
+                  </div>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-quirk">Quirk</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-quirk" placeholder="e.g. Hums when nervous" maxlength="120">
+                  <button class="btn-rand" id="rand-quirk" title="Roll a random quirk">⚄</button>
+                  <button class="btn-field-pin" id="pin-quirk" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-field">
+                <label for="char-secret">Secret</label>
+                <div class="char-input-row">
+                  <input type="text" id="char-secret" placeholder="Something only you know…" maxlength="120">
+                  <button class="btn-rand" id="rand-secret" title="Roll a random secret">⚄</button>
+                  <button class="btn-field-pin" id="pin-secret" title="Pin this value">✓</button>
+                </div>
+              </div>
+              <div class="char-actions">
+                <button class="btn-save" id="btn-char-save">Save Character</button>
+                <span class="char-save-msg" id="char-save-msg"></span>
+              </div>
+              <div class="char-locked-note hidden" id="char-locked-note">
+                🔒 Character sheet locked until <span id="char-locked-date"></span>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SHELF: Admin Showrunner Panel — only shown when isAdmin: true ── -->
+      <div class="shelf hidden" id="admin-poll-card">
+        <div class="shelf-header" id="admin-poll-toggle" onclick="toggleProfileShelf('admin')">
+          <div class="shelf-icon">⚔</div>
+          <div class="shelf-text">
+            <div class="shelf-name">
+              Showrunner Panel
+              <span class="admin-badge-pill">ADMIN</span>
+            </div>
+            <div class="shelf-desc">Launch &amp; manage live audience polls</div>
+          </div>
+          <div class="shelf-chevron">▼</div>
+        </div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div id="poll-inner"></div>
+            <div id="poll-footer"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /profile-panel -->
+  </div><!-- /profile-page -->
+</div><!-- /page-wrap -->
+
+<button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+<button class="btn-back-vault" onclick="window.location.href='index.html'">&#8592; Vault</button>
+
+<script>
+(function () {
+  const btn  = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  function apply(t) {
+    html.setAttribute('data-theme', t);
+    localStorage.setItem('vaultTheme', t);
+    if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+  }
+  apply(localStorage.getItem('vaultTheme') || 'dark');
+  if (btn) btn.addEventListener('click', () => {
+    apply(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
+
+<!-- ============================================================
+     PROFILE SHELF NAVIGATION
+     Mirrors toggleShelf() from index.html.
+     Only one shelf open at a time (accordion behaviour).
+     The admin shelf has a Firebase lazy-init hook — the module
+     script registers window._onProfileShelfOpen() for that callback.
+     ============================================================ -->
+<script>
+(function() {
+  var activeProfileShelf = null;
+  window.toggleProfileShelf = function(id) {
+    var shelf = document.getElementById('profile-shelf-' + id);
+    // Admin shelf uses a different ID root (admin-poll-card)
+    if (!shelf) shelf = id === 'admin' ? document.getElementById('admin-poll-card') : null;
+    if (!shelf) return;
+    var isOpening = !shelf.classList.contains('open');
+    // Close previously open shelf
+    if (activeProfileShelf) {
+      var prevId = 'profile-shelf-' + activeProfileShelf;
+      var prev   = document.getElementById(prevId) ||
+                   (activeProfileShelf === 'admin' ? document.getElementById('admin-poll-card') : null);
+      if (prev) prev.classList.remove('open');
+    }
+    if (!isOpening) {
+      activeProfileShelf = null;
+      return;
+    }
+    shelf.classList.add('open');
+    activeProfileShelf = id;
+    // Notify module script (e.g. admin Firebase lazy-init)
+    if (typeof window._onProfileShelfOpen === 'function') {
+      window._onProfileShelfOpen(id);
+    }
+  };
+})();
+</script>
+
+<!-- ============================================================
+     PROFILE SHELF REORDER — long-press (400 ms) to drag/reorder
+     Same Pointer Events pattern as the index.html shelf reorder.
+     Container: #profile-panel (auth-gated). A MutationObserver
+     waits for the panel to become visible before wiring listeners.
+     localStorage key: 'nodice_profile_shelf_order'
+     ============================================================ -->
+<script>
+(function() {
+  var HOLD_MS     = 400;
+  var MOVE_CANCEL_H = 35;  // px horizontal — cancel on clear sideways-swipe intent
+  var MOVE_CANCEL_V = 55;  // px vertical   — more permissive; natural thumb drift is vertical
+  var LSKEY       = 'nodice_profile_shelf_order';
+
+  function getContainer() { return document.getElementById('profile-panel'); }
+
+  // ── Restore saved shelf order on page load ─────────────────────
+  function restoreShelfOrder() {
+    var saved;
+    try { saved = JSON.parse(localStorage.getItem(LSKEY)); } catch(e) {}
+    if (!Array.isArray(saved) || !saved.length) return;
+    var c = getContainer(); if (!c) return;
+    // Snapshot non-shelf children before moving shelves so they
+    // aren't displaced to the top of the container.
+    var nonShelves = Array.from(c.children).filter(function(ch) {
+      return !ch.classList.contains('shelf');
+    });
+    saved.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.parentNode === c) c.appendChild(el);
+    });
+    nonShelves.forEach(function(el) { c.appendChild(el); });
+  }
+
+  // ── Persist current DOM order ──────────────────────────────────
+  function saveShelfOrder() {
+    var c = getContainer(); if (!c) return;
+    var ids = Array.from(c.querySelectorAll(':scope > .shelf')).map(function(s) { return s.id; });
+    localStorage.setItem(LSKEY, JSON.stringify(ids));
+  }
+
+  // ── Wire long-press listeners on every profile shelf header ────
+  function initReorder() {
+    var c = getContainer(); if (!c) return;
+    c.querySelectorAll('.shelf-header').forEach(function(header) {
+      header.addEventListener('pointerdown', function(e) {
+        if (e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+        var shelf = header.closest('.shelf'); if (!shelf) return;
+        var sx = e.clientX, sy = e.clientY;
+        var holdStart = Date.now(); // grace period reference
+        var timer = null;
+
+        function cleanup() {
+          clearTimeout(timer);
+          document.removeEventListener('pointermove',   onEarlyMove);
+          document.removeEventListener('pointerup',     cleanup);
+          document.removeEventListener('pointercancel', cleanup);
+        }
+        function onEarlyMove(ev) {
+          // 50ms grace: skip the synthetic pointermove browsers fire right
+          // after pointerdown (browser artifact, not real finger movement)
+          if (Date.now() - holdStart < 50) return;
+          var dx = ev.clientX - sx, dy = ev.clientY - sy;
+          if (Math.abs(dx) > MOVE_CANCEL_H || Math.abs(dy) > MOVE_CANCEL_V) cleanup();
+        }
+        document.addEventListener('pointermove',   onEarlyMove);
+        document.addEventListener('pointerup',     cleanup);
+        document.addEventListener('pointercancel', cleanup);
+        timer = setTimeout(function() {
+          cleanup();
+          startDrag(c, shelf, header, e.pointerId, sx, sy);
+        }, HOLD_MS);
+      });
+    });
+  }
+
+  // ── Handle drag after long-press activates ─────────────────────
+  function startDrag(c, shelf, header, pointerId, sx, sy) {
+    if (navigator.vibrate) navigator.vibrate(30);
+    var rect        = shelf.getBoundingClientRect();
+    var grabOffsetY = sy - rect.top;
+
+    // Placeholder preserves the gap while the shelf floats
+    var ph = document.createElement('div');
+    ph.className = 'shelf drag-placeholder';
+    ph.style.height = rect.height + 'px';
+    c.insertBefore(ph, shelf);
+
+    // Lift shelf out of flow
+    shelf.style.position = 'fixed';
+    shelf.style.top      = rect.top  + 'px';
+    shelf.style.left     = rect.left + 'px';
+    shelf.style.width    = rect.width + 'px';
+    shelf.style.zIndex   = '1000';
+    shelf.style.margin   = '0';
+    shelf.classList.add('dragging');
+    header.classList.add('reorder-active');
+    header.setPointerCapture(pointerId);
+
+    function onMove(e) {
+      e.preventDefault();
+      shelf.style.top = (e.clientY - grabOffsetY) + 'px';
+      var midY     = e.clientY;
+      var siblings = Array.from(c.querySelectorAll(':scope > .shelf:not(.dragging)'));
+      var insertRef = null;
+      for (var i = 0; i < siblings.length; i++) {
+        var r = siblings[i].getBoundingClientRect();
+        if (midY < r.top + r.height / 2) { insertRef = siblings[i]; break; }
+      }
+      if (insertRef) {
+        if (ph.nextSibling !== insertRef) c.insertBefore(ph, insertRef);
+      } else {
+        if (c.lastChild !== ph) c.appendChild(ph);
+      }
+    }
+
+    function onUp() {
+      shelf.style.position = '';
+      shelf.style.top      = '';
+      shelf.style.left     = '';
+      shelf.style.width    = '';
+      shelf.style.zIndex   = '';
+      shelf.style.margin   = '';
+      shelf.classList.remove('dragging');
+      header.classList.remove('reorder-active');
+      c.insertBefore(shelf, ph);
+      ph.parentNode.removeChild(ph);
+      saveShelfOrder();
+      header.removeEventListener('pointermove',   onMove);
+      header.removeEventListener('pointerup',     onUp);
+      header.removeEventListener('pointercancel', onUp);
+      // Suppress the click that fires immediately after pointerup
+      header.addEventListener('click', function eatClick(ev) {
+        ev.stopImmediatePropagation();
+        header.removeEventListener('click', eatClick, true);
+      }, { capture: true, once: true });
+    }
+
+    header.addEventListener('pointermove',   onMove);
+    header.addEventListener('pointerup',     onUp);
+    header.addEventListener('pointercancel', onUp);
+  }
+
+  // ── Init — wait for profile-panel to become visible after auth ──
+  document.addEventListener('DOMContentLoaded', function() {
+    restoreShelfOrder(); // safe to run even while panel is hidden
+    var panel = document.getElementById('profile-panel');
+    if (!panel) return;
+    if (!panel.classList.contains('hidden')) { initReorder(); return; }
+    // MutationObserver fires when profile-auth.js removes the 'hidden' class
+    var obs = new MutationObserver(function() {
+      if (!panel.classList.contains('hidden')) { obs.disconnect(); initReorder(); }
+    });
+    obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
+  });
+})();
+</script>
+
+<script>
+// ── Character sheet randomize system ─────────────────────────
+// Mirrors chargen.html's data layer; runs in plain (non-module) scope
+// so button event listeners can reference functions directly.
+
+const CS_CONFIG = {
+  SHEET_ID: '1IAbZc7e47S4u28E2gT1QCVxid1s5Y3bvxu_a0-82KTs',
+  API_KEY:  'AIzaSyCntxgMGOCFW34wA-AUYWMgafS-A44UXr0',
+  TABS: [
+    { key: 'firstNames',  sheetTab: 'First Names'  },
+    { key: 'lastNames',   sheetTab: 'Last Names'   },
+    { key: 'races',       sheetTab: 'Races'        },
+    { key: 'classes',     sheetTab: 'Classes'      },
+    { key: 'backstories', sheetTab: 'Backstories'  },
+    { key: 'quirks',      sheetTab: 'Quirks'       },
+    { key: 'secrets',     sheetTab: 'Secrets'      },
+  ]
+};
+
+const CS_FALLBACK = {
+  firstNames: [
+    "Glorb","Twinkle","Mungus","Brisket","Fleeb","Wumbo","Snorgle","Dinglebert",
+    "Pambula","Gornak","Smitch","Quibble","Florp","Nutwig","Dravox","Grumblina",
+    "Zorp","Weeble","Crunchy","Pflop","Thumdar","Snibbly","Ruckus","Blorfen",
+    "Twonk","Gundula","Snazzle","Murphbert","Clobba","Flibnor"
+  ],
+  lastNames: [
+    "Puddlesnort","the Adequate","Bonesworth","McFlumps","of the Bog","Cracklefingers",
+    "Thunderbutt","Noodlearm","Spigotface","the Slightly Heroic","Wobbleheim",
+    "Crumblewick","Snorkleson","Dinglebottom","of Questionable Origin","Fumblegrip",
+    "the Unready","Blunderpants","Gnarlytoe","Wobblechin","the Forgettable",
+    "Toadsworth","Bumbleshire","Flapjaw","of Nowhere in Particular"
+  ],
+  races: [
+    "A Halfling who insists they're actually a Gnome",
+    "A very small Dragon in a trenchcoat",
+    "An Elf who has never once been on time",
+    "A Dwarf with a surprisingly lovely singing voice",
+    "A Tiefling who keeps getting mistaken for the villain",
+    "A Human who is absolutely convinced they have magic powers (they don't)",
+    "A Goblin with an extensive collection of spoons",
+    "An Orc who trained as a pastry chef",
+    "A Gnome who is 400 years old and still described as 'gifted'",
+    "A Skeleton who hasn't told anyone yet",
+    "A Centaur who refuses to go anywhere that has stairs",
+    "A Merfolk out of water, extremely inconvenienced",
+    "A Were-Accountant (transforms at quarter-end, not full moon)",
+    "A Vampire who is very lactose intolerant",
+    "A Rock Golem who has recently discovered feelings",
+    "A Cloud Giant who has shrunk in the wash",
+    "A Fairy who lost their wings in a card game"
+  ],
+  classes: [
+    "Barbarian (specialises in strongly-worded letters)",
+    "Bard (knows three chords, extremely confident)",
+    "Cleric of a god they've never actually met",
+    "Druid who mostly just turns into a slightly larger dog",
+    "Fighter who brings a clipboard to every battle",
+    "Monk whose vow of silence only applies to Tuesdays",
+    "Paladin who is really into morally grey areas actually",
+    "Ranger who gets lost indoors",
+    "Rogue who is an absolutely terrible liar",
+    "Sorcerer who got their powers from a particularly weird sneeze",
+    "Warlock in a very awkward contractual situation",
+    "Wizard who still hasn't returned their library books",
+    "Artificer who insists everything is 'in beta'",
+    "Blood Hunter who just found out what that means",
+    "Necromancer with excellent customer service skills",
+    "Illusionist who can't turn it off when nervous",
+    "Cavalier who lost their horse in a bet"
+  ],
+  backstories: [
+    "Fled their hometown after accidentally winning a yodeling competition and the expectations became too much",
+    "Was raised by wolves, but normal wolves — they were very supportive and helped with homework",
+    "Worked for ten years as a professional adventurer reviewer; decided to try it themselves",
+    "Left a promising career in cheese-making after a prophetic dream that was almost certainly just indigestion",
+    "Was turned into a frog for three years. Won't say by whom. Still angry",
+    "Inherited a map to treasure, but the treasure turned out to be 'self-belief' and they are furious",
+    "Joined the adventure after losing a bet to a seagull. Long story",
+    "Spent seven years as an apprentice to a wizard who turned out to be a raccoon in a hat",
+    "Former town crier who got tired of only reporting bad news",
+    "Accidentally married royalty during a festival, quietly left before breakfast",
+    "Was a professional monster bait for three seasons — looking to try a different role now",
+    "Woke up one day knowing sword skills with no memory of learning them. Went with it",
+    "Started adventuring to return a borrowed book; it escalated",
+    "Exiled from their village for consistently giving unsolicited quest advice",
+    "Has been chasing the same cart for six years. Nobody knows why"
+  ],
+  quirks: [
+    "Narrates their own actions in third person at dramatic moments",
+    "Cannot resist correcting people's grammar mid-combat",
+    "Insists on taking meeting minutes during every dungeon encounter",
+    "Has given a nickname to every door they've ever opened",
+    "Always speaks in rhyme when they lie, completely unaware of it",
+    "Refuses to be surprised. Will loudly claim they 'knew about this'",
+    "Applauds after every spell, including enemies'",
+    "Has never once walked into a room without pausing for effect",
+    "Keeps a journal but only writes the boring parts",
+    "Maintains extremely strong opinions about inn ratings",
+    "Asks 'but what's their motivation?' about every monster",
+    "Dramatically misremembers every adventure they've been on",
+    "Refers to all taverns as 'the office'",
+    "Cannot physically leave a room without saying goodbye to furniture",
+    "Insists on a brief debrief after every combat"
+  ],
+  secrets: [
+    "Has never actually read the spell they claim is their signature move",
+    "Secretly fluent in three additional languages but finds it easier to pretend otherwise",
+    "The legendary sword was found in a bin. The bin was outside a blacksmith's. It had a 'free' sign on it",
+    "Is on the run from a bakers' guild for reasons they decline to specify",
+    "Secretly writes a serialised adventure novel featuring a thinly-veiled version of the party",
+    "Has a wanted poster — looks nothing like them, but they're still worried",
+    "Owes money to a god. Not a lot of money. Still very inconvenient",
+    "Was once a villain. Briefly. Didn't care for it",
+    "Their impressive backstory was purchased from a retired bard for 40 gold",
+    "Cannot actually read maps. Has been winging it the entire time",
+    "Adopted by mistake — was handed to their family at a festival, chaos ensued, nobody corrected it",
+    "Their mortal enemy is a duck. They don't want to talk about it",
+    "Has a whole other name they use in different towns. Keeping them apart is getting complicated",
+    "Once accidentally became mayor of a small village and just... never resigned",
+    "Their weapon has a name. The weapon does not like the name they gave it"
+  ]
+};
+
+const CS_FIELDS = [
+  { key: 'name',      inputId: 'char-name',      pool: null          },
+  { key: 'race',      inputId: 'char-race',      pool: 'races'       },
+  { key: 'class',     inputId: 'char-class',     pool: 'classes'     },
+  { key: 'backstory', inputId: 'char-backstory', pool: 'backstories' },
+  { key: 'quirk',     inputId: 'char-quirk',     pool: 'quirks'      },
+  { key: 'secret',    inputId: 'char-secret',    pool: 'secrets'     },
+];
+
+const CS_MAX_MULLIGANS = 3;
+let CS_DATA  = null;
+// In-memory state — resets on page refresh, separate from Firestore 24h lock
+let csState  = { rolled: false, mulligans: CS_MAX_MULLIGANS, pinned: new Set() };
+
+function csIsConfigured() {
+  return CS_CONFIG.SHEET_ID !== 'YOUR_SHEET_ID_HERE' &&
+         CS_CONFIG.API_KEY  !== 'YOUR_API_KEY_HERE';
+}
+
+async function csFetchTab(tabName) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CS_CONFIG.SHEET_ID}`
+            + `/values/${encodeURIComponent(tabName)}!A2:A?key=${CS_CONFIG.API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Tab "${tabName}" returned HTTP ${res.status}`);
+  const json = await res.json();
+  return (json.values || []).flat().map(v => v.trim()).filter(Boolean);
+}
+
+async function csLoadData() {
+  if (!csIsConfigured()) { CS_DATA = CS_FALLBACK; return; }
+  try {
+    const results = await Promise.all(CS_CONFIG.TABS.map(t => csFetchTab(t.sheetTab)));
+    CS_DATA = {};
+    CS_CONFIG.TABS.forEach((t, i) => { CS_DATA[t.key] = results[i]; });
+  } catch (err) {
+    console.warn('Sheets fetch failed — using fallback data.', err);
+    CS_DATA = CS_FALLBACK;
+  }
+}
+
+function csPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function csGenName()  { return csPick(CS_DATA.firstNames) + ' ' + csPick(CS_DATA.lastNames); }
+
+function csUpdateMulliganDisplay() {
+  const row = document.getElementById('char-mulligan-row');
+  if (row) row.style.display = csState.rolled ? 'flex' : 'none';
+  for (let i = 0; i < CS_MAX_MULLIGANS; i++) {
+    const pip = document.getElementById('cp-' + i);
+    if (pip) pip.classList.toggle('spent', i >= csState.mulligans);
+  }
+  const canRand = !csState.rolled || csState.mulligans > 0;
+  document.querySelectorAll('.btn-rand')
+    .forEach(b => { b.disabled = !canRand; });
+  const fullBtn = document.getElementById('btn-full-rand');
+  if (fullBtn) fullBtn.disabled = !canRand;
+}
+
+function csRandomizeField(key) {
+  if (!CS_DATA) return;
+  if (csState.rolled && csState.mulligans <= 0) return;
+  if (csState.rolled) csState.mulligans--;
+  csState.rolled = true;
+  const f = CS_FIELDS.find(x => x.key === key);
+  const val = (key === 'name') ? csGenName() : csPick(CS_DATA[f.pool]);
+  const el = document.getElementById(f.inputId);
+  if (el && !el.readOnly) el.value = val;
+  csUpdateMulliganDisplay();
+}
+
+function csRandomizeAll() {
+  if (!CS_DATA) return;
+  if (csState.rolled && csState.mulligans <= 0) return;
+  if (csState.rolled) csState.mulligans--;
+  csState.rolled = true;
+  CS_FIELDS.forEach(f => {
+    if (csState.pinned.has(f.key)) return;
+    const val = (f.key === 'name') ? csGenName() : csPick(CS_DATA[f.pool]);
+    const el = document.getElementById(f.inputId);
+    if (el && !el.readOnly) el.value = val;
+  });
+  csUpdateMulliganDisplay();
+}
+
+function csTogglePin(key) {
+  if (csState.pinned.has(key)) csState.pinned.delete(key);
+  else csState.pinned.add(key);
+  const btn = document.getElementById('pin-' + key);
+  if (btn) btn.classList.toggle('pinned', csState.pinned.has(key));
+}
+
+function csInitButtons() {
+  csUpdateMulliganDisplay();
+  document.getElementById('btn-full-rand')
+    ?.addEventListener('click', csRandomizeAll);
+  CS_FIELDS.forEach(f => {
+    document.getElementById('rand-' + f.key)
+      ?.addEventListener('click', () => csRandomizeField(f.key));
+    document.getElementById('pin-' + f.key)
+      ?.addEventListener('click', () => csTogglePin(f.key));
+  });
+}
+
+csLoadData().then(csInitButtons);
+</script>
+
+<script type="module">
+import {
+  mountProfileButton, onUser, ensureUserDoc, signOutUser,
+  signInGoogle, signInEmail, createEmail, earnedBadges, currentUser, db,
+} from './profile-auth.js';
+import {
+  doc, updateDoc, serverTimestamp,
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref as rtdbRef, set as rtdbSet, onValue }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+mountProfileButton();
+
+// ── DOM refs ──
+const signinPanel   = document.getElementById('signin-panel');
+const profilePanel  = document.getElementById('profile-panel');
+const authError     = document.getElementById('auth-error');
+const authForm      = document.getElementById('auth-form');
+const authEmail     = document.getElementById('auth-email');
+const authPassword  = document.getElementById('auth-password');
+const authSubmit    = document.getElementById('auth-submit');
+const authToggleBtn = document.getElementById('auth-toggle-btn');
+const authToggleTxt = document.getElementById('auth-toggle-text');
+const btnGoogle     = document.getElementById('btn-google');
+
+let isCreating = false;
+
+function showError(msg) {
+  authError.textContent = msg;
+  authError.classList.add('visible');
+}
+function clearError() {
+  authError.textContent = '';
+  authError.classList.remove('visible');
+}
+
+authToggleBtn.addEventListener('click', () => {
+  isCreating = !isCreating;
+  if (isCreating) {
+    authSubmit.textContent    = 'Create Account';
+    authToggleTxt.textContent = 'Have an account?';
+    authToggleBtn.textContent = 'Sign in';
+    authPassword.setAttribute('autocomplete', 'new-password');
+  } else {
+    authSubmit.textContent    = 'Sign In';
+    authToggleTxt.textContent = 'No account?';
+    authToggleBtn.textContent = 'Create one';
+    authPassword.setAttribute('autocomplete', 'current-password');
+  }
+  clearError();
+});
+
+authForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  clearError();
+  try {
+    if (isCreating) {
+      await createEmail(authEmail.value.trim(), authPassword.value);
+    } else {
+      await signInEmail(authEmail.value.trim(), authPassword.value);
+    }
+  } catch (err) {
+    const msgs = {
+      'auth/user-not-found':       'No account with that email.',
+      'auth/wrong-password':       'Incorrect password.',
+      'auth/email-already-in-use': 'An account with that email already exists.',
+      'auth/weak-password':        'Password must be at least 6 characters.',
+      'auth/invalid-email':        'Please enter a valid email address.',
+    };
+    showError(msgs[err.code] || err.message);
+  }
+});
+
+btnGoogle.addEventListener('click', async () => {
+  clearError();
+  try {
+    await signInGoogle();
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') showError(err.message);
+  }
+});
+
+document.getElementById('btn-signout').addEventListener('click', signOutUser);
+
+// ── Auth state → toggle panels ──
+onUser(async user => {
+  if (!user) {
+    signinPanel.classList.remove('hidden');
+    profilePanel.classList.add('hidden');
+    return;
+  }
+  signinPanel.classList.add('hidden');
+  profilePanel.classList.remove('hidden');
+  const data = await ensureUserDoc(user);
+  renderProfile(user, data);
+});
+
+// ── Render ──
+function renderProfile(user, data) {
+  document.getElementById('profile-name').textContent =
+    user.displayName || user.email.split('@')[0];
+  document.getElementById('profile-email').textContent = user.email;
+
+  if (user.photoURL) {
+    document.getElementById('profile-avatar-wrap').innerHTML =
+      `<img class="profile-avatar" src="${user.photoURL}" alt="avatar">`;
+  }
+
+  const count = data.attendanceCount ?? 0;
+  document.getElementById('attendance-count').textContent = count;
+
+  const earned = earnedBadges(count);
+  const badgesGrid = document.getElementById('badges-grid');
+  if (earned.length === 0) {
+    badgesGrid.innerHTML =
+      '<span class="no-badges">Attend your first session to earn a badge.</span>';
+  } else {
+    badgesGrid.innerHTML = earned.map(b =>
+      `<div class="badge-item" title="${b.name}">${b.svg}` +
+      `<span class="badge-name">${b.name}</span></div>`
+    ).join('');
+  }
+
+  renderTicket(data);
+  renderCharSheet(data);
+  initAdminPanel(!!data.isAdmin);
+}
+
+function renderTicket(data) {
+  const pill    = document.getElementById('ticket-pill');
+  const formRow = document.getElementById('ticket-form-row');
+  const msg     = document.getElementById('ticket-msg');
+  if (data.ticketVerified) {
+    pill.textContent    = 'Verified';
+    pill.className      = 'pill pill--verified';
+    formRow.style.display = 'none';
+    msg.textContent     = `Verified with: ${data.ticketEmail}`;
+    msg.classList.add('visible');
+  } else if (data.ticketEmail) {
+    pill.textContent    = 'Pending review';
+    pill.className      = 'pill pill--pending';
+    formRow.style.display = 'none';
+    msg.textContent     = `Submitted: ${data.ticketEmail} — an admin will review soon.`;
+    msg.classList.add('visible');
+  }
+}
+
+document.getElementById('btn-ticket-submit').addEventListener('click', async () => {
+  const ticketEmail = document.getElementById('ticket-email-input').value.trim();
+  if (!ticketEmail) return;
+  const msg = document.getElementById('ticket-msg');
+  const uid = currentUser()?.uid;
+  if (!uid) return;
+  try {
+    await updateDoc(doc(db(), 'users', uid), { ticketEmail, ticketVerified: false });
+    document.getElementById('ticket-form-row').style.display = 'none';
+    document.getElementById('ticket-pill').textContent = 'Pending review';
+    document.getElementById('ticket-pill').className   = 'pill pill--pending';
+    msg.textContent = `Submitted: ${ticketEmail} — an admin will review soon.`;
+    msg.classList.add('visible');
+  } catch (err) {
+    msg.textContent = 'Error: ' + err.message;
+    msg.classList.add('visible');
+  }
+});
+
+function renderCharSheet(data) {
+  const ch = data.character || {};
+  document.getElementById('char-name').value      = ch.name      || '';
+  document.getElementById('char-race').value      = ch.race      || '';
+  document.getElementById('char-class').value     = ch.class     || '';
+  document.getElementById('char-backstory').value = ch.backstory || '';
+  document.getElementById('char-quirk').value     = ch.quirk     || '';
+  document.getElementById('char-secret').value    = ch.secret    || '';
+
+  const lockMs = ch.lockedAt?.toDate?.().getTime()
+              ?? (ch.lockedAt ? Number(ch.lockedAt) : null);
+  const LOCK_DURATION = 24 * 60 * 60 * 1000;
+  const isLocked = lockMs && (Date.now() - lockMs < LOCK_DURATION);
+
+  if (isLocked) {
+    ['char-name','char-race','char-class','char-backstory','char-quirk','char-secret']
+      .forEach(id => document.getElementById(id).setAttribute('readonly', ''));
+    document.getElementById('btn-char-save').disabled = true;
+    document.querySelectorAll('.btn-rand, .btn-field-pin, #btn-full-rand')
+      .forEach(b => { b.disabled = true; });
+    const note = document.getElementById('char-locked-note');
+    note.classList.remove('hidden');
+    const unlockDate = new Date(lockMs + LOCK_DURATION);
+    document.getElementById('char-locked-date').textContent =
+      unlockDate.toLocaleString(undefined,
+        { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+}
+
+document.getElementById('btn-char-save').addEventListener('click', async () => {
+  const saveBtn = document.getElementById('btn-char-save');
+  const saveMsg = document.getElementById('char-save-msg');
+  const uid = currentUser()?.uid;
+  if (!uid) return;
+  saveBtn.disabled = true;
+  saveMsg.classList.remove('visible', 'error');
+  try {
+    await updateDoc(doc(db(), 'users', uid), {
+      character: {
+        name:      document.getElementById('char-name').value.trim(),
+        race:      document.getElementById('char-race').value.trim(),
+        class:     document.getElementById('char-class').value.trim(),
+        backstory: document.getElementById('char-backstory').value.trim(),
+        quirk:     document.getElementById('char-quirk').value.trim(),
+        secret:    document.getElementById('char-secret').value.trim(),
+        lockedAt:  serverTimestamp(),
+      },
+    });
+    saveMsg.textContent = 'Saved!';
+    saveMsg.classList.add('visible');
+    setTimeout(() => saveMsg.classList.remove('visible'), 2500);
+  } catch (err) {
+    saveMsg.textContent = 'Error: ' + err.message;
+    saveMsg.classList.add('visible', 'error');
+  }
+  saveBtn.disabled = false;
+});
+
+// ══════════════════════════════════════════════════════════════
+//  ADMIN SHOWRUNNER PANEL
+//  Replicates the poll admin from index.html.
+//  Only mounted when data.isAdmin === true in Firestore.
+// ══════════════════════════════════════════════════════════════
+
+function pEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+const P_LETTERS       = ['A','B','C','D','E'];
+const P_MIN_OPTS      = 2;
+const P_MAX_OPTS      = 5;
+const P_PLACEHOLDERS  = ['The first option…','The second option…','A third choice…','Or maybe this…','One more possibility…'];
+
+// Reuse the already-initialized 'ndt-profile' Firebase app for Realtime Database
+const _pollApp   = getApps().find(a => a.name === 'ndt-profile');
+const _rtdb      = _pollApp ? getDatabase(_pollApp) : null;
+const _pollRef   = _rtdb ? rtdbRef(_rtdb, 'nodice/poll')  : null;
+const _votesRef  = _rtdb ? rtdbRef(_rtdb, 'nodice/votes') : null;
+
+let _pollListenerSetUp = false;
+let _pollCurrentSnap   = null;
+let _pollUnsubVotes    = null;
+let _pollOptCount      = P_MIN_OPTS;
+
+function pBadge() {
+  const live = !!_rtdb;
+  return `<div class="source-badge ${live?'live':'fallback'}"><span class="dot"></span>${live?'Connected':'Firebase not configured'}</div>`;
+}
+
+function pRenderAdminForm(preserveValues) {
+  const optRowsHtml = P_LETTERS.slice(0, _pollOptCount).map((letter, i) => {
+    const isReq = i < P_MIN_OPTS;
+    const removeBtn = isReq
+      ? `<div class="poll-btn-remove-placeholder"></div>`
+      : `<button class="poll-btn-remove-option" data-index="${i}" title="Remove">✕</button>`;
+    const val = preserveValues && preserveValues[i] ? pEsc(preserveValues[i]) : '';
+    return `<div class="poll-option-row" id="padmin-row-${i}">
+      <span class="poll-option-letter-tag">${letter}</span>
+      <input class="poll-form-input" id="padmin-opt-${i}" type="text"
+        placeholder="${P_PLACEHOLDERS[i]}" maxlength="80" autocomplete="off" value="${val}">
+      ${removeBtn}</div>`;
+  }).join('');
+  const addBtnHtml = _pollOptCount < P_MAX_OPTS
+    ? `<button class="poll-btn-add-option" id="padmin-add-btn">
+         <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
+         Add another option (${_pollOptCount}/${P_MAX_OPTS})</button>`
+    : '';
+  document.getElementById('poll-inner').innerHTML = `
+    <div class="poll-admin-section">
+      <div class="poll-admin-badge">⚔ Showrunner</div>
+      <div class="poll-form-group">
+        <label class="poll-form-label" for="padmin-q">Question</label>
+        <input class="poll-form-input" id="padmin-q" type="text"
+          placeholder="What does the crowd choose?" maxlength="120" autocomplete="off"
+          value="${preserveValues && preserveValues.question ? pEsc(preserveValues.question) : ''}">
+      </div>
+      <div class="poll-options-section-label">
+        <span class="poll-form-label" style="margin-bottom:0;">Options</span>
+        <span class="poll-options-count-hint">Min 2 · Max 5</span>
+      </div>
+      <div id="padmin-opts">${optRowsHtml}</div>
+      ${addBtnHtml}
+      <button class="poll-btn-launch" id="padmin-launch-btn">⚔ Launch Poll</button>
+      ${pBadge()}
+    </div>`;
+  document.getElementById('poll-footer').innerHTML = '';
+  document.getElementById('padmin-launch-btn').onclick = pAdminLaunch;
+  document.getElementById('padmin-q').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('padmin-opt-0')?.focus();
+  });
+  for (let i = 0; i < _pollOptCount; i++) {
+    document.getElementById(`padmin-opt-${i}`).addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const next = document.getElementById(`padmin-opt-${i+1}`);
+        if (next) next.focus(); else pAdminLaunch();
+      }
+    });
+  }
+  document.getElementById('padmin-add-btn')?.addEventListener('click', () => {
+    const vals = pGatherValues();
+    _pollOptCount++;
+    pRenderAdminForm(vals);
+    setTimeout(() => document.getElementById(`padmin-opt-${_pollOptCount-1}`)?.focus(), 50);
+  });
+  document.querySelectorAll('.poll-btn-remove-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index);
+      const vals = pGatherValues();
+      vals.splice(idx, 1);
+      _pollOptCount--;
+      pRenderAdminForm(vals);
+    });
+  });
+}
+
+function pGatherValues() {
+  const vals = [];
+  vals.question = document.getElementById('padmin-q')?.value ?? '';
+  for (let i = 0; i < _pollOptCount; i++) {
+    vals.push(document.getElementById(`padmin-opt-${i}`)?.value ?? '');
+  }
+  return vals;
+}
+
+async function pAdminLaunch() {
+  if (!_pollRef) return;
+  const q = document.getElementById('padmin-q')?.value.trim();
+  const options = [];
+  for (let i = 0; i < _pollOptCount; i++) {
+    options.push((document.getElementById(`padmin-opt-${i}`)?.value ?? '').trim());
+  }
+  let hasError = false;
+  if (!q) {
+    const el = document.getElementById('padmin-q');
+    el.style.borderColor = '#c0392b'; el.focus();
+    setTimeout(() => { el.style.borderColor = ''; }, 1200);
+    hasError = true;
+  }
+  options.forEach((val, i) => {
+    if (!val) {
+      const el = document.getElementById(`padmin-opt-${i}`);
+      if (el) { el.style.borderColor = '#c0392b'; if (!hasError) el.focus(); setTimeout(() => { el.style.borderColor = ''; }, 1200); }
+      hasError = true;
+    }
+  });
+  if (hasError) return;
+  const btn = document.getElementById('padmin-launch-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
+  await rtdbSet(_pollRef, { question: q, options, active: true, revealed: false, ts: Date.now() });
+  await rtdbSet(_votesRef, {});
+  _pollOptCount = P_MIN_OPTS;
+}
+
+function pRenderAdminPreReveal(poll, votes) {
+  const opts = poll.options || [];
+  const counts = opts.map((_,i) => Object.values(votes).filter(v => v === String(i)).length);
+  const total = counts.reduce((a,b) => a+b, 0);
+  const pcts  = counts.map(c => total ? Math.round(c/total*100) : 0);
+  const maxC  = Math.max(...counts);
+  const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+    <div class="poll-result-label-row">
+      <span class="poll-result-opt-name">${P_LETTERS[i]} — ${pEsc(o)}</span>
+      <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+    </div>
+    <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+  </div>`).join('');
+  document.getElementById('poll-inner').innerHTML = `
+    <div class="poll-admin-section">
+      <div class="poll-admin-badge">⚔ Showrunner</div>
+      <div class="poll-admin-results-header">
+        <div>
+          <div class="poll-question-label">Active Poll</div>
+        </div>
+        <div class="poll-live-indicator"><span class="poll-live-dot"></span>Votes incoming</div>
+      </div>
+      <p class="poll-question-text">${pEsc(poll.question)}</p>
+      <div class="poll-result-wrap">${barsHtml}</div>
+      <p class="total-votes">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
+      <button class="poll-btn-reveal" id="padmin-reveal-btn">🎲 Reveal Results to Audience</button>
+      <button class="poll-btn-danger" id="padmin-close-btn">Close Poll &amp; Clear</button>
+      ${pBadge()}
+    </div>`;
+  document.getElementById('poll-footer').innerHTML = '';
+  document.getElementById('padmin-reveal-btn').onclick = pAdminReveal;
+  document.getElementById('padmin-close-btn').onclick  = pAdminClear;
+}
+
+function pRenderAdminPostReveal(poll, votes) {
+  const opts   = poll.options || [];
+  const counts = opts.map((_,i) => Object.values(votes).filter(v => v === String(i)).length);
+  const total  = counts.reduce((a,b) => a+b, 0);
+  const pcts   = counts.map(c => total ? Math.round(c/total*100) : 0);
+  const maxC   = Math.max(...counts);
+  const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
+    <div class="poll-result-label-row">
+      <span class="poll-result-opt-name">${P_LETTERS[i]} — ${pEsc(o)}</span>
+      <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
+    </div>
+    <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
+  </div>`).join('');
+  document.getElementById('poll-inner').innerHTML = `
+    <div class="poll-admin-section">
+      <div class="poll-admin-badge">⚔ Showrunner</div>
+      <div class="poll-admin-results-header">
+        <div>
+          <div class="poll-question-label">Results Revealed</div>
+        </div>
+        <div class="poll-live-indicator" style="color:var(--gold);">
+          <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
+        </div>
+      </div>
+      <p class="poll-question-text">${pEsc(poll.question)}</p>
+      <div class="poll-result-wrap">${barsHtml}</div>
+      <p class="total-votes">${total} vote${total!==1?'s':''} cast</p>
+      <button class="poll-btn-new" id="padmin-new-btn">New Poll</button>
+      <button class="poll-btn-danger" id="padmin-close2-btn">Close Poll &amp; Clear</button>
+      ${pBadge()}
+    </div>`;
+  document.getElementById('poll-footer').innerHTML = '';
+  document.getElementById('padmin-new-btn').onclick    = pAdminClear;
+  document.getElementById('padmin-close2-btn').onclick = pAdminClear;
+}
+
+async function pAdminReveal() {
+  if (!_rtdb) return;
+  const btn = document.getElementById('padmin-reveal-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Revealing…'; }
+  await rtdbSet(rtdbRef(_rtdb, 'nodice/poll/revealed'), true);
+}
+
+async function pAdminClear() {
+  if (!_pollRef || !_votesRef) return;
+  await rtdbSet(_pollRef, { active: false });
+  await rtdbSet(_votesRef, {});
+  _pollOptCount = P_MIN_OPTS;
+}
+
+function pStartListener() {
+  if (!_pollRef) {
+    document.getElementById('poll-inner').innerHTML =
+      '<div class="poll-waiting">Firebase not configured.</div>';
+    return;
+  }
+  document.getElementById('poll-inner').innerHTML =
+    '<div class="poll-waiting"><span style="font-size:1.2rem">⚔</span><br>Connecting…</div>';
+
+  onValue(_pollRef, snap => {
+    const poll = snap.val(); _pollCurrentSnap = poll;
+    if (!poll || !poll.active) {
+      if (_pollUnsubVotes) { _pollUnsubVotes(); _pollUnsubVotes = null; }
+      pRenderAdminForm();
+    } else {
+      if (_pollUnsubVotes) _pollUnsubVotes();
+      _pollUnsubVotes = onValue(_votesRef, votesSnap => {
+        const votes = votesSnap.val() || {};
+        if (poll.revealed) pRenderAdminPostReveal(poll, votes);
+        else               pRenderAdminPreReveal(poll, votes);
+      });
+    }
+  });
+}
+
+function initAdminPanel(isAdmin) {
+  const card = document.getElementById('admin-poll-card');
+  if (!card) return;
+  if (!isAdmin) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+
+  // Open/close is driven by toggleProfileShelf('admin') via onclick on .shelf-header.
+  // Register a hook so toggleProfileShelf can lazy-start the Firebase listener
+  // the first time the admin shelf is opened.
+  window._onProfileShelfOpen = function(id) {
+    if (id === 'admin' && !_pollListenerSetUp) {
+      _pollListenerSetUp = true;
+      pStartListener();
+    }
+  };
+}
+</script>
+</body>
+</html>
