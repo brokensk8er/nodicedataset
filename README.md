@@ -1,7 +1,7 @@
-# NO DICE — THE TOOLSET
-### Improv RPG · Static GitHub Pages · Mobile-First
+# NO DICE — IMPROV RPG - NO DICE TOOLS (NDT)
+### RPG-TOOL · GitHub Pages · Mobile-First
 
-*A suite of tools for live improv RPG shows. Players scan a QR code. Fate does the rest. No actual dice required or permitted.*
+*A suite of tools for live improv RPG shows and TTRPG inspiration. Pull a couple variables; fate does the rest. No actual dice required or permitted.*
 
 ---
 
@@ -24,13 +24,13 @@
 
 ## How It Works
 
-Players scan a QR code at the show and land on the Vault (`index.html`) — a scrollable accordion of every tool, usable without leaving the page. Each tool also has a standalone full-page URL for direct linking.
+Users land on the page (`index.html`) — a scrollable accordion of every tool, usable without leaving the page. Each tool also has a standalone full-page URL for direct linking.
 
 **Data:** Every Google Sheets–backed tool falls back silently to hardcoded data if the sheet is unreachable. Nobody sees a broken screen mid-session.
 
-**Theme:** All pages share a dark/light mode toggle (☀️ / 🌙, top-left). The choice persists across pages via `localStorage` key `vaultTheme`.
+**Theme:** All pages share a dark/light mode toggle (☀️ / 🌙, top-left). The choice persists across pages via `localStorage` key `vaultTheme`. Planning on additional themes based on potential alternate show styles -- current visual focus is on instituting a pop-art white/black/green/red color.
 
-**Auth:** A fixed `⚔ Login` / `⚔ Name` cutout tab appears top-right on every page, linking to `profile.html`. Powered by Firebase Auth (Google sign-in + email/password).
+**Auth:** A fixed `⚔ Login` / `⚔ Name` cutout tab appears top-right on every page, linking to `profile.html`. Powered by Firebase Auth (Google sign-in + email/password). Profile auth has admin permission checks to for special "showrunner" tools.
 
 ---
 
@@ -51,7 +51,6 @@ Players scan a QR code at the show and land on the Vault (`index.html`) — a sc
 ├── design-system.css   — Visual reference (not linked — docs only)
 ├── character-data.csv  — Starter data for Google Sheets import
 ├── FIREBASE_SETUP.md   — Firebase setup guide for poll.html and profile.html
-├── ndtgenerator.html   — NDT generator (standalone)
 ├── icons/              — AI-generated loot item artwork (55 images, JPEG ≤450 KB)
 └── README.md           — You are here
 ```
@@ -61,7 +60,7 @@ Players scan a QR code at the show and land on the Vault (`index.html`) — a sc
 ## Tool Details
 
 ### The Vault (`index.html`)
-Accordion of collapsible shelves — one per tool. Each shelf expands inline so players never need to navigate away. A theme toggle (☀️ / 🌙) sits in the top-left corner and persists the choice across all pages.
+Accordion of collapsible shelves — one per tool. Each shelf expands inline so players never need to navigate away. A theme toggle (☀️ / 🌙 -- one additional mode to come utilizing 🛑) sits in the top-left corner and persists the choice across all pages.
 
 ### Adventurer Profile (`profile.html` + `profile-auth.js`)
 Persistent per-player profile backed by **Firebase Auth + Firestore**. Accessible from any page via the `⚔ Login` / `⚔ Name` cutout tab at the top-right.
@@ -248,7 +247,7 @@ All shared styles live in `styles.css`. Each tool page has a small inline `<styl
 
 ---
 
-## Mulligan System
+## Mulligan System -- TO BE REMOVED, ADMIN DRAWER CAN BE UTILIZED FOR RESETTING MULLIGAN STATUS
 
 *The dice gods giveth three chances. After that, they want you to sit with your choices.*
 
@@ -291,17 +290,7 @@ Two implementations exist — same rules, different lock durations:
 
 ## Show Night Checklist
 
-- [ ] Google Sheet is current; Loot tab has all three columns filled
-- [ ] GitHub Pages live and loading on a real phone
-- [ ] QR code (`qrcode.html`) tested and points to the live URL
-- [ ] Firebase rules not expired (test mode expires 30 days — check the Rules tab)
-- [ ] Poll tested end-to-end: create, vote, reveal, clear
-- [ ] Showrunner account has `isAdmin: true` set in Firestore (`users/{uid}`)
-- [ ] Showrunner can see the Showrunner Panel on their profile page and launch a test poll
-- [ ] Long-press (3s) on the 🧙 NPC Gen card toggles admin mode on `index.html` as backup
-- [ ] Dev Reset button in `chargen.html` auto-hides until mulligans run out — verify it's not visible before first spend
-- [ ] API key restrictions include the live GitHub Pages URL
-- [ ] All tools tested on the actual show device in dark mode
+TBD
 
 ---
 
