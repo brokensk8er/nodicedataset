@@ -35,7 +35,7 @@
     <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark mode"><span id="theme-toggle-icon">🌙</span></button>
     <!-- END THEME TOGGLE -->
     <!-- DEV RESET — remove this button when no longer needed -->
-    <button class="dev-reset-btn" id="cg-dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans" style="display:none">Reset</button>
+    <button class="dev-reset-btn" id="cg-dev-reset-btn" onclick="cgDevReset()" title="Reset character generator mulligans" hidden>Reset</button>
     <!-- END DEV RESET -->
   </header>
 
@@ -114,7 +114,7 @@
         <div class="shelf-body-inner">
           <div class="shelf-content">
             <div id="cg-inner"><!-- rendered by JS --></div>
-            <div id="cg-quick" style="display:none"><!-- rendered by JS --></div>
+            <div id="cg-quick" hidden><!-- rendered by JS --></div>
           </div>
         </div>
       </div>
@@ -292,13 +292,13 @@
     var f = document.getElementById('coin-face-mini');
     if (!f) return;
     f.className = 'face-mini face-mini-pass';
-    f.innerHTML = '<img src="' + PASS_IMG + '" alt="pass" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+    f.innerHTML = '<img src="' + PASS_IMG + '" alt="pass" />';
   }
   function setFaceFail() {
     var f = document.getElementById('coin-face-mini');
     if (!f) return;
     f.className = 'face-mini face-mini-fail';
-    f.innerHTML = '<img src="' + FAIL_IMG + '" alt="fail" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+    f.innerHTML = '<img src="' + FAIL_IMG + '" alt="fail" />';
   }
 
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -805,7 +805,7 @@ window.cgQuickPick = function(key) {
 async function initChargen() {
   chargenInitialised = true;
   document.getElementById('cg-inner').innerHTML =
-    `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+    `<div class="inline-loading">Loading…</div>`;
   await chargenFetchData();
   const restored = cgLoadSession();
   if (restored && cgState.rolled) { cgRender(); } else { cgDoRoll(); }
@@ -869,7 +869,7 @@ window.lootPull = function() {
 
 async function initLoot() {
   lootInitialised = true;
-  document.getElementById('loot-inner').innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+  document.getElementById('loot-inner').innerHTML = `<div class="inline-loading">Loading…</div>`;
   if (!isConfigured()) { LOOT_ITEMS = LOOT_FALLBACK; lootDataSource = 'fallback'; }
   else {
     try {
@@ -955,7 +955,7 @@ function traitRenderItem(item) {
     content = `<div class="trait-wide"><div class="trait-big-value">&nbsp;</div></div>`;
   } else if (isLoot) {
     const imgHtml = item.image
-      ? `<div class="loot-image-slot"><img src="${item.image}" alt="" style="width:100%;height:auto;display:block;" /></div>`
+      ? `<div class="loot-image-slot"><img src="${item.image}" alt="" /></div>`
       : `<div class="loot-image-slot"><span class="loot-slot-icon">✨</span></div>`;
     content = `<div class="trait-wide">
       ${imgHtml}
@@ -1001,7 +1001,7 @@ window.traitDraw = function() {
 
 async function initTrait() {
   traitInitialised = true;
-  document.getElementById('trait-inner').innerHTML = `<div style="padding:20px;text-align:center;color:var(--muted);font-size:.8rem;">Loading…</div>`;
+  document.getElementById('trait-inner').innerHTML = `<div class="inline-loading">Loading…</div>`;
   document.getElementById('trait-footer').innerHTML = '';
   await traitFetchData();
   traitRenderItem(null);
@@ -1051,7 +1051,7 @@ if (!IS_DEMO) {
     }).join('');
     const addBtnHtml = pollAdminOptCount < POLL_MAX_OPTS
       ? `<button class="poll-btn-add-option" id="padmin-add-btn">
-           <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
+           <span class="poll-add-icon">＋</span>
            Add another option (${pollAdminOptCount}/${POLL_MAX_OPTS})</button>`
       : '';
     document.getElementById('poll-inner').innerHTML = `
@@ -1064,7 +1064,7 @@ if (!IS_DEMO) {
             value="${preserveValues && preserveValues.question ? esc(preserveValues.question) : ''}">
         </div>
         <div class="poll-options-section-label">
-          <span class="poll-form-label" style="margin-bottom:0;">Options</span>
+          <span class="poll-form-label poll-options-label-compact">Options</span>
           <span class="poll-options-count-hint">Min 2 · Max 5</span>
         </div>
         <div id="padmin-opts">${optRowsHtml}</div>
@@ -1159,7 +1159,7 @@ if (!IS_DEMO) {
         </div>
         <p class="poll-question-text">${esc(poll.question)}</p>
         <div class="poll-result-wrap">${barsHtml}</div>
-        <p class="total-votes" style="margin-bottom:8px;">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
+        <p class="total-votes u-mb-8">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
         <button class="poll-btn-reveal" id="padmin-reveal-btn">🎲 Reveal Results to Audience</button>
         <button class="poll-btn-danger" id="padmin-close-btn">Close Poll &amp; Clear</button>
         ${pollBadge(true)}
@@ -1185,13 +1185,13 @@ if (!IS_DEMO) {
         <div class="poll-admin-badge">⚔ Showrunner</div>
         <div class="poll-admin-results-header">
           <div class="poll-question-label">Results Revealed</div>
-          <div class="poll-live-indicator" style="color:var(--gold);">
-            <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
+          <div class="poll-live-indicator poll-live-indicator--gold">
+            <span class="poll-live-dot poll-live-dot--gold"></span>Visible to audience
           </div>
         </div>
         <p class="poll-question-text">${esc(poll.question)}</p>
         <div class="poll-result-wrap">${barsHtml}</div>
-        <p class="total-votes" style="margin-bottom:8px;">${total} vote${total!==1?'s':''} cast</p>
+        <p class="total-votes u-mb-8">${total} vote${total!==1?'s':''} cast</p>
         <button class="poll-btn-new" id="padmin-new-btn">New Poll</button>
         <button class="poll-btn-danger" id="padmin-close2-btn">Close Poll &amp; Clear</button>
         ${pollBadge(true)}
@@ -1234,8 +1234,8 @@ if (!IS_DEMO) {
       <div class="poll-section">
         <div class="poll-question-label">The Question</div>
         <p class="poll-question-text">${esc(poll.question)}</p>
-        <p class="voted-chip" style="margin-top:4px;">✔ Voted — ${POLL_LETTERS[myIdx]}: ${esc((poll.options||[])[myIdx]||'')}</p>
-        <p class="poll-waiting" style="margin-top:8px;"><span class="poll-waiting-pulse">⚔</span><br>Waiting for reveal…</p>
+        <p class="voted-chip u-mt-4">✔ Voted — ${POLL_LETTERS[myIdx]}: ${esc((poll.options||[])[myIdx]||'')}</p>
+        <p class="poll-waiting u-mt-8"><span class="poll-waiting-pulse poll-waiting-icon">⚔</span><br>Waiting for reveal…</p>
       </div>`;
     document.getElementById('poll-footer').innerHTML = pollBadge(true);
   }
@@ -1247,9 +1247,9 @@ if (!IS_DEMO) {
       <div class="poll-section">
         <div class="poll-question-label">Results</div>
         <p class="poll-question-text">${esc(poll.question)}</p>
-        ${myIdx!==null?`<p class="voted-chip" style="margin-top:2px;">✔ You voted ${POLL_LETTERS[myIdx]}</p>`:''}
-        <div class="poll-result-wrap" style="margin-top:8px;">${opts.map((o,i)=>`<div class="poll-result-row"><div class="poll-result-label-row"><span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span><span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span></div><div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div></div>`).join('')}</div>
-        <p class="total-votes" style="margin-top:6px;">${total} vote${total!==1?'s':''}</p>
+        ${myIdx!==null?`<p class="voted-chip u-mt-2">✔ You voted ${POLL_LETTERS[myIdx]}</p>`:''}
+        <div class="poll-result-wrap u-mt-8">${opts.map((o,i)=>`<div class="poll-result-row"><div class="poll-result-label-row"><span class="poll-result-opt-name">${POLL_LETTERS[i]} — ${esc(o)}</span><span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span></div><div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div></div>`).join('')}</div>
+        <p class="total-votes u-mt-6">${total} vote${total!==1?'s':''}</p>
       </div>`;
     document.getElementById('poll-footer').innerHTML = pollBadge(true);
   }
@@ -1509,8 +1509,8 @@ if (!IS_DEMO) {
 })();
 </script>
 <!-- QR lightbox overlay — tap anywhere to dismiss -->
-<div id="qr-lightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;cursor:pointer;">
-  <img src="qr.png" alt="No Dice QR Code" style="max-width:95vmin;max-height:95vmin;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.6);">
+<div id="qr-lightbox" class="qr-lightbox" hidden onclick="this.hidden=true;">
+  <img src="qr.png" alt="No Dice QR Code">
 </div>
 </body>
 </html>

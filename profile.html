@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,351 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
-<style>
-  /* ── Profile page local styles ── */
-  .profile-page { max-width: 540px; margin: 0 auto; padding: 24px 16px 80px; }
-
-  /* sign-in panel */
-  .signin-panel { display: flex; flex-direction: column; gap: 16px; }
-  .signin-panel h1 { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700;
-    color: var(--gold); text-align: center; margin: 32px 0 8px; letter-spacing: .06em; }
-  .signin-panel p.tagline { text-align: center; color: var(--text-muted); font-size: .85rem;
-    margin: 0 0 8px; }
-
-  .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--card-bg); color: var(--text); font-family: 'Lato', sans-serif;
-    font-size: .95rem; font-weight: 700; cursor: pointer;
-    transition: border-color .2s, box-shadow .2s; }
-  .btn-google:hover { border-color: var(--gold); box-shadow: 0 2px 8px var(--shadow-gold); }
-
-  .divider { display: flex; align-items: center; gap: 10px; color: var(--text-muted);
-    font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px;
-    background: var(--border); }
-
-  .auth-form { display: flex; flex-direction: column; gap: 10px; }
-  .auth-form input { width: 100%; padding: 10px 12px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
-    font-family: 'Lato', sans-serif; font-size: .95rem; box-sizing: border-box;
-    transition: border-color .2s; }
-  .auth-form input:focus { outline: none; border-color: var(--gold); }
-  .auth-form .btn-primary { width: 100%; padding: 11px; border-radius: 6px;
-    border: none; background: var(--gold-dim); color: #1a1200;
-    font-family: 'Cinzel', serif; font-size: .85rem; font-weight: 700;
-    letter-spacing: .07em; text-transform: uppercase; cursor: pointer;
-    transition: background .2s, box-shadow .2s; }
-  .auth-form .btn-primary:hover { background: var(--gold);
-    box-shadow: 0 2px 10px var(--shadow-gold); }
-
-  .auth-toggle { text-align: center; font-size: .83rem; color: var(--text-muted); }
-  .auth-toggle button { background: none; border: none; color: var(--gold); cursor: pointer;
-    font-size: .83rem; font-family: 'Lato', sans-serif; text-decoration: underline;
-    padding: 0; }
-
-  .auth-error { background: rgba(200,60,60,.15); border: 1px solid rgba(200,60,60,.4);
-    color: #f08080; border-radius: 6px; padding: 8px 12px;
-    font-size: .83rem; display: none; }
-  .auth-error.visible { display: block; }
-
-  /* profile/sign-in visibility */
-  .profile-panel { display: flex; flex-direction: column; gap: 20px; }
-  .profile-panel.hidden, .signin-panel.hidden { display: none; }
-
-  /* profile header */
-  .profile-header { display: flex; align-items: center; gap: 14px;
-    padding: 16px; background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 10px; }
-  .profile-avatar { width: 52px; height: 52px; border-radius: 50%;
-    border: 2px solid var(--gold-dim); object-fit: cover; flex-shrink: 0; }
-  .profile-avatar-placeholder { width: 52px; height: 52px; border-radius: 50%;
-    border: 2px solid var(--gold-dim); background: var(--bg-alt);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; flex-shrink: 0; }
-  .profile-header-info { flex: 1; min-width: 0; }
-  .profile-header-info .name { font-family: 'Cinzel', serif; font-size: 1rem;
-    font-weight: 700; color: var(--gold); overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap; }
-  .profile-header-info .email { font-size: .78rem; color: var(--text-muted);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .btn-signout { padding: 7px 14px; border-radius: 6px; border: 1px solid var(--border);
-    background: none; color: var(--text-muted); font-family: 'Lato', sans-serif;
-    font-size: .78rem; cursor: pointer; white-space: nowrap;
-    transition: border-color .2s, color .2s; }
-  .btn-signout:hover { border-color: var(--gold-dim); color: var(--text); }
-
-  /* section cards */
-  .profile-card { background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .profile-card h2 { font-family: 'Cinzel', serif; font-size: .9rem; font-weight: 700;
-    color: var(--gold-dim); letter-spacing: .07em; text-transform: uppercase; margin: 0; }
-
-  /* attendance + badges */
-  .attendance-row { display: flex; align-items: center; gap: 10px; }
-  .attendance-count { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700;
-    color: var(--gold); line-height: 1; }
-  .attendance-label { font-size: .8rem; color: var(--text-muted); }
-  .badges-grid { display: flex; flex-wrap: wrap; gap: 12px; }
-  .badge-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .badge-item svg { width: 48px; height: 48px; }
-  .badge-item .badge-name { font-size: .65rem; color: var(--text-muted);
-    text-align: center; max-width: 56px; line-height: 1.2; }
-  .no-badges { font-size: .83rem; color: var(--text-muted); }
-
-  /* ticket verification */
-  .ticket-status { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
-  .pill { padding: 2px 10px; border-radius: 20px; font-size: .72rem; font-weight: 700;
-    letter-spacing: .05em; text-transform: uppercase; }
-  .pill--verified { background: rgba(60,180,80,.2); color: #6fda88;
-    border: 1px solid rgba(60,180,80,.4); }
-  .pill--pending { background: rgba(200,160,50,.15); color: var(--gold-dim);
-    border: 1px solid rgba(200,160,50,.3); }
-  .pill--none { background: rgba(120,120,120,.15); color: var(--text-muted);
-    border: 1px solid var(--border); }
-  .ticket-form { display: flex; gap: 8px; }
-  .ticket-form input { flex: 1; padding: 9px 12px; border-radius: 6px;
-    border: 1px solid var(--border); background: var(--card-bg); color: var(--text);
-    font-family: 'Lato', sans-serif; font-size: .9rem; box-sizing: border-box; }
-  .ticket-form input:focus { outline: none; border-color: var(--gold); }
-  .ticket-form button { padding: 9px 16px; border-radius: 6px; border: none;
-    background: var(--gold-dim); color: #1a1200; font-family: 'Cinzel', serif;
-    font-size: .75rem; font-weight: 700; letter-spacing: .06em; cursor: pointer;
-    text-transform: uppercase; white-space: nowrap; transition: background .2s; }
-  .ticket-form button:hover { background: var(--gold); }
-  .ticket-msg { font-size: .78rem; color: var(--text-muted); display: none; }
-  .ticket-msg.visible { display: block; }
-
-  /* character sheet */
-  .char-field { display: flex; flex-direction: column; gap: 4px; }
-  .char-field label { font-size: .75rem; font-family: 'Cinzel', serif;
-    letter-spacing: .06em; color: var(--text-muted); text-transform: uppercase; }
-  .char-field input, .char-field textarea {
-    padding: 9px 12px; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--card-bg); color: var(--text); font-family: 'Lato', sans-serif;
-    font-size: .9rem; box-sizing: border-box; width: 100%; }
-  .char-field input:focus, .char-field textarea:focus {
-    outline: none; border-color: var(--gold); }
-  .char-field input[readonly], .char-field textarea[readonly] {
-    opacity: .65; cursor: default; }
-  .char-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .btn-save { padding: 9px 20px; border-radius: 6px; border: none;
-    background: var(--gold-dim); color: #1a1200; font-family: 'Cinzel', serif;
-    font-size: .78rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-    cursor: pointer; transition: background .2s; }
-  .btn-save:hover { background: var(--gold); }
-  .btn-save:disabled { opacity: .4; cursor: default; }
-  .char-locked-note { font-size: .75rem; color: var(--text-muted); }
-  .char-save-msg { font-size: .78rem; color: var(--text-muted); display: none; }
-  .char-save-msg.visible { display: block; }
-  .char-save-msg.error { color: #f08080; }
-
-  /* character sheet — randomize additions */
-  .char-sheet-header {
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 8px;
-  }
-  .char-sheet-header h2 { margin: 0; }
-  .mulligan-row {
-    display: flex; align-items: center; gap: 8px;
-    font-size: .72rem; color: var(--text-muted);
-    font-family: 'Cinzel', serif; letter-spacing: .06em; text-transform: uppercase;
-  }
-  .char-pip-row { display: flex; gap: 5px; align-items: center; }
-  .char-pip {
-    width: 9px; height: 9px; background: var(--gold);
-    transform: rotate(45deg); border-radius: 2px;
-    transition: opacity .2s, background .2s;
-  }
-  .char-pip.spent { opacity: .18; }
-
-  .btn-full-rand {
-    width: 100%; padding: 9px; border-radius: 6px;
-    border: 1px solid var(--gold-dim); background: transparent;
-    color: var(--gold-dim); font-family: 'Cinzel', serif; font-size: .78rem;
-    font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-    cursor: pointer; transition: background .2s, color .2s, border-color .2s;
-  }
-  .btn-full-rand:hover:not(:disabled) { background: var(--gold-dim); color: #1a1200; }
-  .btn-full-rand:disabled { opacity: .32; cursor: default; }
-
-  .char-input-row { display: flex; align-items: flex-start; gap: 6px; }
-  .char-input-row input, .char-input-row textarea {
-    flex: 1; min-width: 0;
-  }
-  .char-input-row textarea {
-    min-height: 2.9rem;
-    resize: none;
-    overflow: hidden;
-    line-height: 1.45;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-  .char-btn-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex-shrink: 0;
-    align-self: stretch;
-  }
-  .char-btn-stack .btn-rand,
-  .char-btn-stack .btn-field-pin {
-    width: 100%;
-  }
-  .btn-rand, .btn-field-pin {
-    flex-shrink: 0; padding: 7px 9px; border-radius: 6px;
-    border: 1px solid var(--border); background: none; color: var(--text-muted);
-    font-size: .82rem; line-height: 1; cursor: pointer; align-self: flex-start;
-    transition: border-color .2s, color .2s, background .2s;
-  }
-  .btn-rand:hover:not(:disabled), .btn-field-pin:hover:not(:disabled) {
-    border-color: var(--gold-dim); color: var(--gold-dim);
-  }
-  .btn-rand:disabled, .btn-field-pin:disabled { opacity: .28; cursor: default; }
-  .btn-field-pin.pinned {
-    border-color: var(--gold); color: var(--gold);
-    background: rgba(201,168,76,.12);
-  }
-
-  /* ── Admin Showrunner Panel ── */
-  /* Note: drawer open/close and layout now use shared .shelf / .shelf-* classes
-     from styles.css. Only the admin-badge-pill remains here. */
-  .admin-badge-pill {
-    font-size: .56rem; padding: 1px 7px; border-radius: 12px; font-weight: 700;
-    background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.4);
-    letter-spacing: .1em; color: var(--gold-dim); vertical-align: middle;
-  }
-
-  /* poll form + results (shared with index.html) */
-  .poll-admin-section { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 0; }
-  .poll-admin-badge {
-    display: inline-block; font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
-    border: 1px solid rgba(201,168,76,.35); background: rgba(201,168,76,.10);
-    border-radius: 20px; padding: 3px 10px; margin-bottom: 12px; align-self: flex-start;
-  }
-  .poll-form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-  .poll-form-label {
-    font-family: 'Cinzel', serif; font-size: .58rem; font-weight: 600;
-    color: var(--gold); letter-spacing: .14em; text-transform: uppercase;
-  }
-  .poll-options-section-label {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
-  }
-  .poll-options-count-hint { font-size: .65rem; color: var(--text-muted); }
-  .poll-form-input {
-    width: 100%; box-sizing: border-box;
-    background: rgba(255,255,255,.04); border: 1.5px solid var(--border);
-    border-radius: 8px; padding: 10px 12px;
-    font-family: 'Lato', sans-serif; font-size: .92rem; color: var(--text);
-    outline: none; transition: border-color .18s;
-  }
-  .poll-form-input:focus { border-color: var(--gold); }
-  .poll-form-input::placeholder { color: var(--text-muted); opacity: .7; }
-  .poll-option-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .poll-option-letter-tag {
-    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
-    letter-spacing: .1em; color: var(--gold); flex-shrink: 0; width: 16px; text-align: center;
-  }
-  .poll-btn-remove-option {
-    flex-shrink: 0; width: 28px; height: 28px; background: none;
-    border: 1px solid var(--border); border-radius: 6px; color: var(--text-muted);
-    font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: border-color .15s, color .15s, background .15s;
-  }
-  .poll-btn-remove-option:hover { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,.08); }
-  .poll-btn-remove-placeholder { flex-shrink: 0; width: 28px; height: 28px; }
-  .poll-btn-add-option {
-    width: 100%; background: none; border: 1.5px dashed var(--border);
-    border-radius: 8px; padding: 9px 12px;
-    font-family: 'Lato', sans-serif; font-size: .82rem;
-    color: var(--text-muted); cursor: pointer; text-align: left;
-    transition: border-color .18s, color .18s, background .18s;
-    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-  }
-  .poll-btn-add-option:hover { border-color: var(--gold); color: var(--gold); }
-  .poll-btn-launch {
-    width: 100%; background: linear-gradient(135deg, var(--gold) 0%, #e2bc6a 50%, var(--gold) 100%);
-    color: #1a1a2e; border: none; border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
-    box-shadow: 0 3px 10px rgba(201,168,76,.35); transition: opacity .18s;
-  }
-  .poll-btn-launch:hover { opacity: .9; }
-  .poll-btn-launch:disabled { opacity: .4; cursor: not-allowed; }
-  .poll-btn-reveal {
-    width: 100%; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #27ae60 100%);
-    color: #fff; border: none; border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .82rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
-    box-shadow: 0 3px 10px rgba(39,174,96,.35); transition: opacity .18s;
-  }
-  .poll-btn-reveal:disabled { opacity: .4; cursor: not-allowed; }
-  .poll-btn-new {
-    width: 100%; background: rgba(201,168,76,.12); color: var(--gold);
-    border: 1px solid rgba(201,168,76,.4); border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px; transition: background .2s;
-  }
-  .poll-btn-new:hover { background: rgba(201,168,76,.22); }
-  .poll-btn-danger {
-    width: 100%; background: none; color: #c0392b;
-    border: 1px solid rgba(192,57,43,.35); border-radius: 8px; padding: 10px;
-    font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 600;
-    letter-spacing: .08em; cursor: pointer; margin-bottom: 6px;
-    transition: background .2s, border-color .2s;
-  }
-  .poll-btn-danger:hover { background: rgba(192,57,43,.10); border-color: #c0392b; }
-  .poll-admin-results-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-  }
-  .poll-question-label {
-    font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 700;
-    letter-spacing: .12em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 4px;
-  }
-  .poll-question-text { font-size: .92rem; color: var(--text); margin: 0 0 10px; }
-  .poll-live-indicator {
-    display: flex; align-items: center; gap: 5px; font-size: .65rem;
-    letter-spacing: .08em; text-transform: uppercase; color: #27ae60; font-weight: 700;
-  }
-  .poll-live-dot {
-    width: 6px; height: 6px; border-radius: 50%; background: #27ae60;
-    animation: livePulse 1.4s ease-in-out infinite;
-  }
-  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
-  .poll-result-wrap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; }
-  .poll-result-row {}
-  .poll-result-label-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 3px;
-  }
-  .poll-result-opt-name { font-size: .82rem; color: var(--text); }
-  .poll-result-pct { font-size: .82rem; font-weight: 700; color: var(--gold); margin-right: 5px; }
-  .poll-result-count { font-size: .72rem; color: var(--text-muted); }
-  .bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .bar-fill { height: 100%; background: var(--gold-dim); border-radius: 3px; transition: width .4s; }
-  .bar-fill.winner { background: var(--gold); }
-  .total-votes { font-size: .75rem; color: var(--text-muted); margin: 4px 0 8px; }
-  .poll-waiting {
-    text-align: center; padding: 20px 12px;
-    font-size: .82rem; color: var(--text-muted); line-height: 1.8;
-  }
-
-  /* back to vault cutout tab */
-  .btn-back-vault {
-    position: fixed; top: 0; right: 130px; z-index: 900;
-    font-family: 'Cinzel', serif; font-size: .68rem; font-weight: 700;
-    letter-spacing: .07em; text-transform: uppercase;
-    color: var(--gold-dim); background: var(--card-bg);
-    border: 1px solid var(--border); border-top: none;
-    border-radius: 0 0 8px 8px; padding: 6px 14px; cursor: pointer;
-    box-shadow: 0 3px 10px var(--shadow); opacity: .85;
-    transition: opacity .2s, border-color .2s, color .2s, box-shadow .2s;
-  }
-  .btn-back-vault:hover {
-    opacity: 1; border-color: var(--gold); color: var(--gold);
-    box-shadow: 0 4px 14px var(--shadow-gold);
-  }
-</style>
 </head>
 <body>
 
@@ -469,7 +124,7 @@
             <div class="shelf-name">Character Sheet</div>
           </div>
           <!-- Mulligan pips shown inline next to chevron when active -->
-          <div class="mulligan-row" id="char-mulligan-row" style="display:none">
+          <div class="mulligan-row" id="char-mulligan-row" hidden>
             Mulligans
             <div class="char-pip-row">
               <div class="char-pip" id="cp-0"></div>
@@ -1309,7 +964,7 @@ function pRenderAdminForm(preserveValues) {
   }).join('');
   const addBtnHtml = _pollOptCount < P_MAX_OPTS
     ? `<button class="poll-btn-add-option" id="padmin-add-btn">
-         <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
+          <span class="poll-add-icon">＋</span>
          Add another option (${_pollOptCount}/${P_MAX_OPTS})</button>`
     : '';
   document.getElementById('poll-inner').innerHTML = `
@@ -1322,7 +977,7 @@ function pRenderAdminForm(preserveValues) {
           value="${preserveValues && preserveValues.question ? pEsc(preserveValues.question) : ''}">
       </div>
       <div class="poll-options-section-label">
-        <span class="poll-form-label" style="margin-bottom:0;">Options</span>
+        <span class="poll-form-label poll-options-label-compact">Options</span>
         <span class="poll-options-count-hint">Min 2 · Max 5</span>
       </div>
       <div id="padmin-opts">${optRowsHtml}</div>
@@ -1452,8 +1107,8 @@ function pRenderAdminPostReveal(poll, votes) {
         <div>
           <div class="poll-question-label">Results Revealed</div>
         </div>
-        <div class="poll-live-indicator" style="color:var(--gold);">
-          <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
+          <div class="poll-live-indicator poll-live-indicator--gold">
+          <span class="poll-live-dot poll-live-dot--gold"></span>Visible to audience
         </div>
       </div>
       <p class="poll-question-text">${pEsc(poll.question)}</p>
@@ -1489,7 +1144,7 @@ function pStartListener() {
     return;
   }
   document.getElementById('poll-inner').innerHTML =
-    '<div class="poll-waiting"><span style="font-size:1.2rem">⚔</span><br>Connecting…</div>';
+    '<div class="poll-waiting"><span class="poll-waiting-icon">⚔</span><br>Connecting…</div>';
 
   onValue(_pollRef, snap => {
     const poll = snap.val(); _pollCurrentSnap = poll;
