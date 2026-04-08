@@ -128,9 +128,27 @@ body {
   margin-bottom: 2px;
 }
 
+/* Hub page: larger site-label */
+@media (min-width: 600px) {
+  .hub-header .site-label {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .15em;
+  }
+}
+
 h1 span {
   color: var(--gold);
   font-weight: 700;
+}
+
+/* Hub page: strong gold glow with horizontal lens flare effect */
+.hub-header h1 span {
+  text-shadow:
+    0 0 20px rgba(201, 168, 76, 0.6),
+    -8px 0 15px rgba(201, 168, 76, 0.4),
+    8px 0 15px rgba(201, 168, 76, 0.4),
+    0 2px 8px rgba(201, 168, 76, 0.5);
 }
 
 
@@ -621,6 +639,37 @@ html[data-theme="nodice"] .shelf-header::after {
   background: linear-gradient(110deg, rgba(235,46,46,.06) 0%, transparent 60%);
 }
 
+/* No Dice theme: header text colors */
+html[data-theme="nodice"] .site-label {
+  color: rgba(156, 123, 46, 1);
+}
+
+html[data-theme="nodice"] header h1 {
+  color: rgba(255, 255, 255, 1);
+}
+
+html[data-theme="nodice"] h1 span {
+  color: rgba(156, 123, 46, 1);
+}
+
+html[data-theme="nodice"] .tagline {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Profile button: gold in No Dice theme */
+html[data-theme="nodice"] .profile-btn {
+  background: var(--card-bg);
+  border-color: rgba(156, 123, 46, 1);
+  color: rgba(156, 123, 46, 1);
+}
+
+html[data-theme="nodice"] .profile-btn:hover,
+html[data-theme="nodice"] .profile-btn--signed-in {
+  border-color: rgba(156, 123, 46, 1);
+  color: rgba(156, 123, 46, 1);
+  box-shadow: 0 4px 14px rgba(156, 123, 46, 0.3);
+}
+
 /* Shelf content area: faint red tint */
 html[data-theme="nodice"] .shelf-content {
   background: rgba(235, 46, 46, .03);
@@ -730,7 +779,7 @@ header h1 {
   cursor: pointer;
   box-shadow: 0 3px 10px var(--shadow);
   opacity: 0.85;
-  transition: opacity .2s, border-color .2s, color .2s, box-shadow .2s;
+  transition: opacity .2s, border-color .2s, color .2s, box-shadow .2s, background .2s;
   touch-action: manipulation;
   white-space: nowrap;
 }
