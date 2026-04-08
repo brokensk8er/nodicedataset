@@ -62,6 +62,10 @@
   --pass-rim:     #1e8449;
   --fail-red:     #c0392b;
   --fail-rim:     #922b21;
+
+  /* No Dice accent — used by nodice theme */
+  --nd-red:       rgba(235, 46, 46, 1);
+  --nd-green:     rgba(0, 166, 81, 1);
 }
 
 
@@ -414,6 +418,11 @@ h1 span { color: var(--gold); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes nd-border-sweep {
+  from { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); opacity: 1; }
+  to   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
+}
+
 
 /* ================================================
    14. DARK THEME  (index3.html)
@@ -491,6 +500,127 @@ html[data-theme="dark"] .section-rule {
 html[data-theme="dark"] .lock-bar {
   background: rgba(201,168,76,.10);
   border: 1px solid var(--border);
+}
+
+
+/* ================================================
+   14b. NODICE THEME  (data-theme="nodice")
+   Pop-art: black backgrounds, red primary accent,
+   white card surfaces, coin-gold highlights.
+   ================================================ */
+
+html[data-theme="nodice"] {
+  --ink:         rgba(255, 255, 255, 1);
+  --ink-hover:   rgba(0, 0, 0, 1);
+  --parchment:   rgba(0, 0, 0, 1);
+  --card-bg:     rgba(255, 255, 255, 1);
+  --border:      rgba(235, 46, 46, 1);
+  --muted:       rgba(180, 180, 180, 1);
+  --gold:        rgba(156, 123, 46, 1);
+  --gold-dim:    rgba(120, 95, 35, 1);
+  --gold-bg:     rgba(156, 123, 46, .12);
+  --shadow:      rgba(0, 0, 0, .70);
+  --shadow-gold: rgba(235, 46, 46, .35);
+  --success:     rgba(0, 166, 81, 1);
+  --warning:     rgba(235, 46, 46, .80);
+  --pass-grn:    rgba(0, 166, 81, 1);
+  --pass-rim:    rgba(0, 130, 63, 1);
+  --fail-red:    rgba(235, 46, 46, 1);
+  --fail-rim:    rgba(190, 30, 30, 1);
+}
+
+/* Page background: black with red/green coin-color radial accents */
+html[data-theme="nodice"] body {
+  background-color: var(--parchment);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(235,46,46,.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(0,166,81,.07) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Pop-art primary buttons: gold bg, black text */
+html[data-theme="nodice"] .btn-primary,
+html[data-theme="nodice"] .roll-btn,
+html[data-theme="nodice"] .pull-btn {
+  background: var(--gold);
+  color: rgba(0, 0, 0, 1);
+}
+html[data-theme="nodice"] .btn-primary:hover:not(:disabled),
+html[data-theme="nodice"] .roll-btn:hover:not(:disabled),
+html[data-theme="nodice"] .pull-btn:hover {
+  background: rgba(180, 142, 52, 1);
+  color: rgba(0, 0, 0, 1);
+}
+
+/* Gold-bg buttons that need explicit dark text (same as dark theme) */
+html[data-theme="nodice"] .btn-coin-flip           { color: rgba(0, 0, 0, 1); }
+html[data-theme="nodice"] .cg-quick-cat-btn.active { color: rgba(0, 0, 0, 1); }
+html[data-theme="nodice"] .full-link-btn           { color: rgba(0, 0, 0, 1); }
+html[data-theme="nodice"] .full-link-btn:hover     { color: rgba(0, 0, 0, 1); }
+
+/* Full-link button: gold gradient on black */
+html[data-theme="nodice"] .full-link-btn {
+  background: linear-gradient(135deg, var(--gold) 0%, rgba(196,160,74,1) 50%, var(--gold) 100%);
+  box-shadow: 0 3px 10px rgba(156,123,46,.35), inset 0 1px 0 rgba(255,255,255,.25);
+}
+html[data-theme="nodice"] .full-link-btn:hover {
+  background: linear-gradient(135deg, rgba(196,160,74,1) 0%, var(--gold) 50%, rgba(196,160,74,1) 100%);
+}
+
+/* Shelf at rest: red border (via --border token override above) */
+/* Shelf open: green glow + sweep animation trigger */
+html[data-theme="nodice"] .shelf.open {
+  box-shadow: 0 6px 30px rgba(0,166,81,.25), 0 2px 12px rgba(235,46,46,.20);
+  border-color: rgba(0, 166, 81, 1);
+}
+html[data-theme="nodice"] .shelf.open .shelf-chevron { color: var(--pass-grn); }
+
+/* Trigger the sweep animation on open, with slight delay */
+html[data-theme="nodice"] .shelf.open::before {
+  opacity: 1;
+  animation: nd-border-sweep .55s .12s cubic-bezier(.4, 0, .2, 1) both;
+}
+
+/* Header divider: red-to-green gradient */
+html[data-theme="nodice"] .header-divider {
+  background: linear-gradient(90deg, var(--gold-dim), rgba(235,46,46,.8), rgba(0,166,81,.8), var(--gold-dim));
+  opacity: .85;
+}
+
+/* Vote buttons: red hover glow */
+html[data-theme="nodice"] .vote-btn:hover:not(:disabled) {
+  border-color: rgba(235, 46, 46, 1);
+  background: rgba(235, 46, 46, .10);
+  box-shadow: 0 2px 10px rgba(235, 46, 46, .20);
+}
+
+/* Section divider: red-to-green sweep */
+html[data-theme="nodice"] .section-rule {
+  background: linear-gradient(90deg, transparent, rgba(235,46,46,.4) 20%, rgba(0,166,81,.4) 80%, transparent);
+}
+
+/* Lock bar: red-tinted */
+html[data-theme="nodice"] .lock-bar {
+  background: rgba(235, 46, 46, .08);
+  border: 1px solid rgba(235, 46, 46, .30);
+}
+
+/* Profile button gold border in nodice */
+html[data-theme="nodice"] .profile-btn { background: var(--card-bg); }
+html[data-theme="nodice"] .profile-btn:hover,
+html[data-theme="nodice"] .profile-btn--signed-in {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Shelf header hover overlay: red tint instead of gold */
+html[data-theme="nodice"] .shelf-header::after {
+  background: linear-gradient(110deg, rgba(235,46,46,.06) 0%, transparent 60%);
+}
+
+/* Shelf content area: faint red tint */
+html[data-theme="nodice"] .shelf-content {
+  background: rgba(235, 46, 46, .03);
 }
 
 /* ================================================
@@ -772,6 +902,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
 
   /* ── SHELF ── */
   .shelf {
+    position: relative;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -780,6 +911,31 @@ html[data-theme="dark"] .profile-btn--signed-in {
     transition: box-shadow .25s ease, border-color .25s ease;
     animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
   }
+
+  /* Nodice animated border ring — conic-gradient sweep, clipped by clip-path wipe */
+  .shelf::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;
+    border: 2px solid transparent;
+    background:
+      conic-gradient(from 45deg,
+        rgba(235, 46, 46, 1)   0deg,
+        rgba(0, 166, 81, 1)  180deg,
+        rgba(235, 46, 46, 1) 360deg)
+      border-box;
+    -webkit-mask:
+      linear-gradient(#fff 0 0) padding-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+
   .shelf.open {
     box-shadow: 0 6px 28px var(--shadow-gold);
     border-color: rgba(201,168,76,.35);

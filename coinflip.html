@@ -11,7 +11,7 @@
   <!-- Shared styles (colours, fonts, nav link, animations) -->
   <link rel="stylesheet" href="styles.css" />
   <!-- Prevent theme flash: apply saved theme before first paint -->
-  <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+  <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 
   <style>
     /* ── Page layout ── */
@@ -726,15 +726,18 @@
 
     // ── Theme toggle ──────────────────────────────
     function toggleTheme() {
-      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = cur === 'dark' ? 'light' : cur === 'light' ? 'nodice' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       try { localStorage.setItem('vaultTheme', next); } catch(e) {}
-      document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+      const icons = { dark: '☀️', light: '🛑', nodice: '🌙' };
+      document.getElementById('themeBtn').textContent = icons[next] || '☀️';
     }
     (function(){
       const t = document.documentElement.getAttribute('data-theme') || 'dark';
       const btn = document.getElementById('themeBtn');
-      if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+      const icons = { dark: '☀️', light: '🛑', nodice: '🌙' };
+      if (btn) btn.textContent = icons[t] || '☀️';
     })();
   </script>
 <script type="module">

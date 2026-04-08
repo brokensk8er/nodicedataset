@@ -28,7 +28,7 @@ Users land on the page (`index.html`) — a scrollable accordion of every tool, 
 
 **Data:** Every Google Sheets–backed tool falls back silently to hardcoded data if the sheet is unreachable. Nobody sees a broken screen mid-session.
 
-**Theme:** All pages share a dark/light mode toggle (☀️ / 🌙, top-left). The choice persists across pages via `localStorage` key `vaultTheme`. Planning on additional themes based on potential alternate show styles -- current visual focus is on instituting a pop-art white/black/green/red color.
+**Theme:** All pages share a three-state theme toggle (🌙 / ☀️ / 🛑, top-left) cycling dark → light → No Dice → dark. The choice persists across pages via `localStorage` key `vaultTheme`. The No Dice theme uses colors from the physical coin collection: red (235, 46, 46) and green (0, 166, 81) for a pop-art aesthetic with animated shelf borders that sweep from red to green when opened.
 
 **Auth:** A fixed `⚔ Login` / `⚔ Name` cutout tab appears top-right on every page, linking to `profile.html`. Powered by Firebase Auth (Google sign-in + email/password). Profile auth has admin permission checks to for special "showrunner" tools.
 
@@ -60,7 +60,7 @@ Users land on the page (`index.html`) — a scrollable accordion of every tool, 
 ## Tool Details
 
 ### The Vault (`index.html`)
-Accordion of collapsible shelves — one per tool. Each shelf expands inline so players never need to navigate away. A theme toggle (☀️ / 🌙 -- one additional mode to come utilizing 🛑) sits in the top-left corner and persists the choice across all pages.
+Accordion of collapsible shelves — one per tool. Each shelf expands inline so players never need to navigate away. A three-state theme toggle (🌙 / ☀️ / 🛑) sits in the top-left corner, cycling dark mode → light mode → No Dice mode, and persists the choice across all pages via localStorage.
 
 ### Adventurer Profile (`profile.html` + `profile-auth.js`)
 Persistent per-player profile backed by **Firebase Auth + Firestore**. Accessible from any page via the `⚔ Login` / `⚔ Name` cutout tab at the top-right.
@@ -213,6 +213,18 @@ Free Spark plan is sufficient: 100 simultaneous connections, 1 GB storage.
 ```
 
 Dark mode (`html[data-theme="dark"]`) overrides these tokens. All component styles use variables, so dark mode works automatically.
+
+**No Dice Theme** (`html[data-theme="nodice"]`) uses colors from the physical No Dice coins for a pop-art aesthetic:
+```css
+/* No Dice theme palette */
+--parchment:   rgba(0, 0, 0, 1);         /* pure black background */
+--card-bg:     rgba(255, 255, 255, 1);   /* white card surfaces */
+--border:      rgba(235, 46, 46, 1);     /* coin red — shelf borders at rest */
+--gold:        rgba(156, 123, 46, 1);    /* coin gold — interactive highlights */
+--pass-grn:    rgba(0, 166, 81, 1);      /* coin green — open shelf accent, sweep endpoint */
+```
+
+Signature feature: **Animated shelf borders** — cards display a red border at rest; when opened, the border animates in a 45° diagonal sweep from red to green, creating a dynamic visual "reveal." The animation uses a conic-gradient with `clip-path` wipe and has a subtle delay (120ms) after the shelf opens.
 
 **Key rules:**
 - `overflow: hidden` intentionally absent from `html/body` — preserves Android pull-to-refresh

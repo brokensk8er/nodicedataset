@@ -11,7 +11,7 @@
 <!-- Shared styles (colours, fonts, buttons, badges, animations) -->
 <link rel="stylesheet" href="styles.css">
 <!-- Prevent flash: apply saved theme before first paint -->
-<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 </head>
 <body>
 
@@ -383,16 +383,18 @@
 // ── THEME TOGGLE — must be in plain <script>, not type="module" ──
 window.toggleTheme = function() {
   var cur = document.documentElement.getAttribute('data-theme') || 'dark';
-  var next = cur === 'dark' ? 'light' : 'dark';
+  var next = cur === 'dark' ? 'light' : cur === 'light' ? 'nodice' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
-  document.getElementById('theme-toggle-icon').textContent = next === 'dark' ? '🌙' : '☀️';
+  var icons = { dark: '🌙', light: '☀️', nodice: '🛑' };
+  document.getElementById('theme-toggle-icon').textContent = icons[next] || '🌙';
   try { localStorage.setItem('vaultTheme', next); } catch(e) {}
 };
 // Sync icon on load to match whatever data-theme the head script set
 (function() {
   var t = document.documentElement.getAttribute('data-theme') || 'dark';
   var icon = document.getElementById('theme-toggle-icon');
-  if (icon) icon.textContent = t === 'dark' ? '🌙' : '☀️';
+  var icons = { dark: '🌙', light: '☀️', nodice: '🛑' };
+  if (icon) icon.textContent = icons[t] || '🌙';
 })();
 </script>
 
