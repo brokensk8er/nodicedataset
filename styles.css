@@ -623,6 +623,16 @@ html[data-theme="nodice"] .shelf-content {
   background: rgba(235, 46, 46, .03);
 }
 
+/* Source badge: gold background instead of red dots */
+html[data-theme="nodice"] .source-badge {
+  background: rgba(156, 123, 46, .15);
+  border-color: rgba(156, 123, 46, .35);
+  color: var(--gold);
+}
+html[data-theme="nodice"] .source-badge .dot {
+  background: var(--gold);
+}
+
 /* ================================================
    15. TOOL-PAGE HEADER TYPOGRAPHY
    Shared by chargen, coinflip (via h1 override),
