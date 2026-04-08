@@ -513,7 +513,7 @@ html[data-theme="nodice"] {
   --ink:         rgba(255, 255, 255, 1);
   --ink-hover:   rgba(0, 0, 0, 1);
   --parchment:   rgba(0, 0, 0, 1);
-  --card-bg:     rgba(255, 255, 255, 1);
+  --card-bg:     rgba(0, 0, 0, 1);
   --border:      rgba(235, 46, 46, 1);
   --muted:       rgba(180, 180, 180, 1);
   --gold:        rgba(156, 123, 46, 1);
