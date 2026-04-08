@@ -956,7 +956,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   /* .header-divider width, gradient, and height come from styles.css */
 
   /* ── Main ── */
-  main { display: flex; flex-direction: column; gap: 10px; padding: 1.8rem 0 1rem; }
+  main { display: flex; flex-direction: column; gap: 10px; padding: .9rem 0 1rem; }
 
   /* ── SHELF ── */
   .shelf {
