@@ -89,7 +89,7 @@ Each field has an inline **⚄ Roll** button and a **✓ Pin** button. A **🎲 
 
 **Showrunner Panel (Admin):**
 
-A collapsible accordion drawer at the bottom of the profile page, **only visible when the signed-in user's Firestore doc has `isAdmin: true`**. The Firebase Realtime Database listener starts lazily on first open.
+A collapsible accordion shelf at the bottom of the profile page, **only visible when the signed-in user's Firestore doc has `isAdmin: true`**. The Firebase Realtime Database listener starts lazily on first open.
 
 Provides the full poll admin workflow:
 - Create a question with 2–5 lettered options (A–E); add/remove options dynamically.
@@ -142,6 +142,33 @@ Adding a trait category = adding a new Sheet tab. No code changes needed. Same 3
 
 ### QR Code (`qrcode.html`)
 Displays the QR code image (`qr.png`) for show night. Tap to enlarge via lightbox overlay.
+
+---
+
+## Shelf Registry
+
+The Vault (`index.html`) and Adventurer Profile (`profile.html`) use a collapsible shelf accordion pattern. Each shelf is identified by an internal ID and a user-facing display name. Use this registry when working on code or referring to a specific tool/section.
+
+### The Vault (`index.html` — 6 shelves)
+
+| Shelf ID | Display Name | Purpose |
+|----------|--------------|---------|
+| `shelf-coin` | coinflip | Coin flip / pass-fail tool |
+| `shelf-chargen` | chargen | Character generator |
+| `shelf-loot` | loot | Loot table roller |
+| `shelf-poll` | poll | Audience poll admin |
+| `shelf-trait` | traitgen | Trait generator |
+| `shelf-qr` | qrcode | QR code display |
+
+### Adventurer Profile (`profile.html` — 5 shelves)
+
+| Shelf ID | Display Name | Purpose |
+|----------|--------------|---------|
+| `profile-shelf-account` | account | Account/username display (empty, reserved for future content) |
+| `profile-shelf-badges` | badges | Session count + badge display |
+| `profile-shelf-tickets` | tickets | Player ticket verification |
+| `profile-shelf-charsheet` | charsheet | Editable character fields (Name, Race, Class, Backstory, Quirk, Secret) |
+| `admin-poll-card` | adminpoll | Admin-only poll management (hidden unless `isAdmin: true`) |
 
 ---
 
@@ -244,7 +271,7 @@ All shared styles live in `styles.css`. Each tool page has a small inline `<styl
 | Buttons (`.btn-primary`, `.roll-btn`, `.pull-btn`) | Page-specific animations (coin flip, wobble) |
 | Shared components (`.source-badge`, `.mulligan-bar`, `.card-footer`, `.lock-notice`) | Unique button variants (coinflip's gold `.btn-roll`) |
 | `.page-frame` layout container | Per-page `max-height` overrides |
-| Animations (`cardIn`, `spin`, `slideUp`) | `profile.html`: auth forms, character sheet controls, admin drawer, poll admin styles |
+| Animations (`cardIn`, `spin`, `slideUp`) | `profile.html`: auth forms, character sheet controls, admin shelf, poll admin styles |
 | Theme toggle button (`.theme-toggle-btn`) | |
 | Profile button (`.profile-btn`, `.profile-btn--signed-in`) | |
 

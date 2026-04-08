@@ -388,12 +388,29 @@
         <button class="btn-signout" id="btn-signout">Sign out</button>
       </div>
 
-      <!-- ── SHELF: Attendance & Badges ── -->
-      <div class="shelf" id="profile-shelf-attendance">
-        <div class="shelf-header" onclick="toggleProfileShelf('attendance')">
+      <!-- ── SHELF: Account ── -->
+      <div class="shelf" id="profile-shelf-account">
+        <div class="shelf-header" onclick="toggleProfileShelf('account')">
+          <div class="shelf-icon">👤</div>
+          <div class="shelf-text">
+            <div class="shelf-name">Account</div>
+          </div>
+          <div class="shelf-chevron">▼</div>
+        </div>
+        <div class="shelf-body">
+          <div class="shelf-body-inner">
+            <div class="shelf-content profile-shelf-content">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SHELF: Badges ── -->
+      <div class="shelf" id="profile-shelf-badges">
+        <div class="shelf-header" onclick="toggleProfileShelf('badges')">
           <div class="shelf-icon">🏅</div>
           <div class="shelf-text">
-            <div class="shelf-name">Attendance &amp; Badges</div>
+            <div class="shelf-name">Badges</div>
           </div>
           <div class="shelf-chevron">▼</div>
         </div>
@@ -412,12 +429,12 @@
         </div>
       </div>
 
-      <!-- ── SHELF: Ticket Verification ── -->
-      <div class="shelf" id="profile-shelf-ticket">
-        <div class="shelf-header" onclick="toggleProfileShelf('ticket')">
+      <!-- ── SHELF: Tickets ── -->
+      <div class="shelf" id="profile-shelf-tickets">
+        <div class="shelf-header" onclick="toggleProfileShelf('tickets')">
           <div class="shelf-icon">🎟️</div>
           <div class="shelf-text">
-            <div class="shelf-name">Ticket Verification</div>
+            <div class="shelf-name">Tickets</div>
           </div>
           <div class="shelf-chevron">▼</div>
         </div>
@@ -528,9 +545,9 @@
         </div>
       </div>
 
-      <!-- ── SHELF: Admin Showrunner Panel — only shown when isAdmin: true ── -->
+      <!-- ── SHELF: Admin Poll ── -->
       <div class="shelf hidden" id="admin-poll-card">
-        <div class="shelf-header" id="admin-poll-toggle" onclick="toggleProfileShelf('admin')">
+        <div class="shelf-header" id="admin-poll-toggle" onclick="toggleProfileShelf('adminpoll')">
           <div class="shelf-icon">⚔</div>
           <div class="shelf-text">
             <div class="shelf-name">
@@ -587,15 +604,15 @@
   var activeProfileShelf = null;
   window.toggleProfileShelf = function(id) {
     var shelf = document.getElementById('profile-shelf-' + id);
-    // Admin shelf uses a different ID root (admin-poll-card)
-    if (!shelf) shelf = id === 'admin' ? document.getElementById('admin-poll-card') : null;
+    // Admin poll shelf uses a different ID root (admin-poll-card)
+    if (!shelf) shelf = id === 'adminpoll' ? document.getElementById('admin-poll-card') : null;
     if (!shelf) return;
     var isOpening = !shelf.classList.contains('open');
     // Close previously open shelf
     if (activeProfileShelf) {
       var prevId = 'profile-shelf-' + activeProfileShelf;
       var prev   = document.getElementById(prevId) ||
-                   (activeProfileShelf === 'admin' ? document.getElementById('admin-poll-card') : null);
+                   (activeProfileShelf === 'adminpoll' ? document.getElementById('admin-poll-card') : null);
       if (prev) prev.classList.remove('open');
     }
     if (!isOpening) {
