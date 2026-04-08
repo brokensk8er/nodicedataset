@@ -164,11 +164,11 @@ The Vault (`index.html`) and Adventurer Profile (`profile.html`) use a collapsib
 
 | Shelf ID | Display Name | Purpose |
 |----------|--------------|---------|
-| `profile-shelf-account` | account | Account/username display (empty, reserved for future content) |
+| `profile-shelf-account` | account | Account/username display with sign out |
+| `admin-poll-card` | adminpoll | Admin-only poll management (hidden unless `isAdmin: true`) |
 | `profile-shelf-badges` | badges | Session count + badge display |
 | `profile-shelf-tickets` | tickets | Player ticket verification |
 | `profile-shelf-charsheet` | charsheet | Editable character fields (Name, Race, Class, Backstory, Quirk, Secret) |
-| `admin-poll-card` | adminpoll | Admin-only poll management (hidden unless `isAdmin: true`) |
 
 ---
 
