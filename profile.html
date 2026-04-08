@@ -1502,11 +1502,11 @@ function initAdminPanel(isAdmin) {
   if (!isAdmin) { card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
 
-  // Open/close is driven by toggleProfileShelf('admin') via onclick on .shelf-header.
+  // Open/close is driven by toggleProfileShelf('adminpoll') via onclick on .shelf-header.
   // Register a hook so toggleProfileShelf can lazy-start the Firebase listener
   // the first time the admin shelf is opened.
   window._onProfileShelfOpen = function(id) {
-    if (id === 'admin' && !_pollListenerSetUp) {
+    if (id === 'adminpoll' && !_pollListenerSetUp) {
       _pollListenerSetUp = true;
       pStartListener();
     }
