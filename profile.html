@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+<script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 <style>
   /* ── Profile page local styles ── */
   .profile-page { max-width: 540px; margin: 0 auto; padding: 24px 16px 80px; }
@@ -560,14 +560,17 @@
 (function () {
   const btn  = document.getElementById('theme-toggle');
   const html = document.documentElement;
+  const icons = { dark: '☀️', light: '🛑', nodice: '🌙' };
   function apply(t) {
     html.setAttribute('data-theme', t);
     localStorage.setItem('vaultTheme', t);
-    if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    if (btn) btn.textContent = icons[t] || '☀️';
   }
   apply(localStorage.getItem('vaultTheme') || 'dark');
   if (btn) btn.addEventListener('click', () => {
-    apply(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    const cur = html.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : cur === 'light' ? 'nodice' : 'dark';
+    apply(next);
   });
 })();
 </script>
