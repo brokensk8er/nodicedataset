@@ -2963,11 +2963,12 @@ html[data-theme="dark"] .profile-btn--signed-in {
 
   .page-wrap {
     width: 100%;
-    max-width: 480px;
+    max-width: 540px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 0 14px 32px;
+    padding: 24px 16px 32px;
   }
 
   /* ── Header ── */
@@ -2975,6 +2976,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
     text-align: center;
     padding: 1.6rem 0 .8rem;
     position: relative;
+    background: transparent;
   }
   /* .site-label comes from styles.css */
   h1 {
@@ -3600,7 +3602,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .soon-desc { font-size: .65rem; font-weight: 300; color: var(--muted); line-height: 1.35; }
   .soon-badge { display: inline-block; font-family: 'Cinzel', serif; font-size: .48rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); border-radius: 20px; padding: 2px 7px; margin-top: 3px; align-self: flex-start; }
 
-  footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+  footer { text-align: center; padding-bottom: 1rem; font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; background: transparent; }
 
   /* ── QR Code shelf ── */
   .qr-wrap { display: flex; flex-direction: column; align-items: center; padding: 16px 16px 14px; gap: 10px; }
