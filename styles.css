@@ -83,6 +83,30 @@
    DO NOT use bare selectors like "body { }" in page sections - it breaks other pages!
    ════════════════════════════════════════════════════════════════════════════════ */
 
+/* ════════════════════════════════════════════════════════════════════════════════
+   🛑 HISTORIC BUG FIX (April 2026): Shelf Width Alignment Issue
+
+   WHAT HAPPENED: During CSS consolidation, bare "body { }" and "html, body { }"
+   selectors in page-specific sections were NOT renamed to page-scoped versions
+   (.chargen-page body, etc.). This caused the INDEX PAGE body styles to apply
+   globally, breaking shelf alignment on all other pages.
+
+   SYMPTOM: Shelves had variable widths and misaligned horizontally on index.html
+
+   LESSON: Compound selectors like "html, body { }" are easy to miss during
+   refactoring. Always use grep to verify:
+     grep "^  body\s*{" styles.css     # Should return NOTHING
+     grep "html, body" styles.css      # Should return NOTHING (only page-scoped)
+
+   FUTURE PREVENTION: All body/html selectors MUST have page class prefix.
+
+   IF YOU SEE THESE AGAIN: Search styles.css for:
+     ✓ ^  body {          (bare body)
+     ✓ html, body {       (compound, not page-scoped)
+   And rename to: .PAGE-page body { ... }
+
+   ════════════════════════════════════════════════════════════════════════════════ */
+
 /* Page-specific body and layout selectors */
 .chargen-page html,
 .chargen-page body { height: 100%; }
@@ -150,9 +174,10 @@
   /* DO NOT use bare body/html/header/main selectors - use .chargen-page <selector> */
 
   /* ── Page layout ── */
-  html, body { height: 100%; }
+  .chargen-page html,
+.chargen-page body { height: 100%; }
 
-  body {
+.chargen-page body {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -605,9 +630,10 @@
   /* DO NOT use bare body/html/header/main selectors - use .loot-page <selector> */
 
   /* ── Page layout ── */
-  html, body { height: 100%; }
+  .loot-page html,
+.loot-page body { height: 100%; }
 
-  body {
+.loot-page body {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -798,9 +824,10 @@
   /* DO NOT use bare body/html/header/main selectors - use .poll-page <selector> */
 
   /* ── Page layout ── */
-  html, body { height: 100%; }
+  .poll-page html,
+.poll-page body { height: 100%; }
 
-  body {
+.poll-page body {
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
@@ -1318,9 +1345,10 @@
    ───────────────────────────────────────── */
 
   /* ── Page layout ── */
-  html, body { height: 100%; }
+  .qrcode-page html,
+  .qrcode-page body { height: 100%; }
 
-  body {
+  .qrcode-page body {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -1406,9 +1434,10 @@
   /* DO NOT use bare body/html/header/main selectors - use .traitgen-page <selector> */
 
   /* ── Page layout ── */
-  html, body { height: 100%; }
+  .traitgen-page html,
+.traitgen-page body { height: 100%; }
 
-  body {
+.traitgen-page body {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -2925,7 +2954,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .poll-admin-section { padding: 12px 12px 14px; }
 
   /* ── Page layout ── */
-  body {
+  .index-page body {
     min-height: 100dvh;
     display: flex;
     flex-direction: column;

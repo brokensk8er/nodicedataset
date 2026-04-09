@@ -408,6 +408,41 @@ header { padding: 10px 16px 6px; }
 
 See the **CRITICAL** notation at the top of the PAGE-SPECIFIC STYLES section in `styles.css` for full details.
 
+### 🛑 Known Issues & Prevention (Historic)
+
+**Shelf Alignment Issue (April 2026 - FIXED)**
+
+During CSS consolidation, bare `body { }` and `html, body { }` selectors were accidentally left unscoped in page-specific sections. This caused the INDEX PAGE body styles to apply globally, breaking shelf alignment on all pages (shelves had variable widths and misaligned horizontally).
+
+**What to watch for:**
+```css
+/* ✗ WRONG - These apply GLOBALLY, breaking other pages */
+body { display: flex; }
+html, body { height: 100%; }
+
+/* ✓ CORRECT - These apply only to their page */
+.chargen-page body { display: flex; }
+.chargen-page html,
+.chargen-page body { height: 100%; }
+```
+
+**Quick check for this issue:**
+```bash
+# Should return NOTHING:
+grep "^  body\s*{" styles.css
+grep "^  html\s*{" styles.css
+
+# All results should include page-specific class:
+grep "html, body" styles.css
+```
+
+If you find bare selectors:
+1. Identify which page section they're in
+2. Rename: `body {` → `.PAGE-page body {`
+3. Test all pages to confirm alignment is fixed
+
+The detailed explanation and prevention checklist are in the `🛑 HISTORIC BUG FIX` comment in `styles.css` around line 86.
+
 ---
 
 ## GitHub Pages Deployment
