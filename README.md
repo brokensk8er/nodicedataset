@@ -47,8 +47,7 @@ Users land on the page (`index.html`) — a scrollable accordion of every tool, 
 ├── poll.html           — Audience poll — see FIREBASE_SETUP.md
 ├── traitgen.html       — Trait generator (standalone)
 ├── qrcode.html         — QR code display for show night
-├── styles.css          — Shared CSS: tokens, typography, buttons, dark mode
-├── design-system.css   — Visual reference (not linked — docs only)
+├── styles.css          — All CSS consolidated: shared + page-specific styles, all three themes
 ├── character-data.csv  — Starter data for Google Sheets import
 ├── FIREBASE_SETUP.md   — Firebase setup guide for poll.html and profile.html
 ├── icons/              — AI-generated loot item artwork (55 images, JPEG ≤450 KB)
@@ -262,18 +261,124 @@ Signature feature: **Animated shelf borders** — cards display a red border at 
 
 ## CSS Architecture
 
-All shared styles live in `styles.css`. Each tool page has a small inline `<style>` block for page-specific layout only. `profile.html` carries a larger inline block due to its multi-section layout and the admin poll styles being scoped to that page.
+**ALL CSS is consolidated in `styles.css` — no more inline styles in HTML files.**
 
-| In `styles.css` | In page `<style>` |
-|-----------------|-------------------|
-| CSS variables + dark mode overrides | Body/page layout (height, flex direction) |
-| Typography (`.site-label`, `header h1`, `.subtitle`, `.nav-link`) | Card structure (`.character-card`, `.loot-card`, etc.) |
-| Buttons (`.btn-primary`, `.roll-btn`, `.pull-btn`) | Page-specific animations (coin flip, wobble) |
-| Shared components (`.source-badge`, `.mulligan-bar`, `.card-footer`, `.lock-notice`) | Unique button variants (coinflip's gold `.btn-roll`) |
-| `.page-frame` layout container | Per-page `max-height` overrides |
-| Animations (`cardIn`, `spin`, `slideUp`) | `profile.html`: auth forms, character sheet controls, admin shelf, poll admin styles |
-| Theme toggle button (`.theme-toggle-btn`) | |
-| Profile button (`.profile-btn`, `.profile-btn--signed-in`) | |
+The stylesheet is organized into three sections:
+
+1. **Shared Styles** (Sections 1–13)
+   - CSS Variables (`:root`) — all color tokens
+   - Typography, buttons, components, animations
+   - Used by every page
+
+2. **Page-Specific Styles** (Sections 14–21)
+   - Index/Hub, Chargen, Coinflip, Loot, Poll, QR Code, Traitgen, Profile
+   - Layout, cards, unique components
+   - Page-specific animations (prefixed: `chargen-spin`, `coinflip-wobble`, etc.)
+
+3. **Theme System**
+   - Light (default `:root` values)
+   - Dark (`html[data-theme="dark"]`)
+   - No Dice (`html[data-theme="nodice"]`)
+
+| Component | Location |
+|-----------|----------|
+| CSS Variables, color tokens, shadows | `styles.css` Section 1 |
+| Typography (`.site-label`, `h1 span`, `.subtitle`, `.nav-link`) | `styles.css` Section 4–5 |
+| Buttons (`.btn-primary`, `.roll-btn`, `.pull-btn`, `.btn-roll`) | `styles.css` Sections 9, Page-specific |
+| Shared components (`.source-badge`, `.mulligan-bar`, `.card-footer`) | `styles.css` Sections 7, 10, 12 |
+| Page layout (flex, height, max-width) | `styles.css` Page-specific section |
+| Animations (`cardIn`, `chargen-spin`, `coinflip-wobble`, `coinflip-slideUp`) | `styles.css` Section 13 + Page-specific |
+| Theme overrides (dark/nodice) | `styles.css` Sections at end |
+
+## CSS Guidelines & Best Practices
+
+### Color & Variables
+- **Always use CSS variables from `:root`** — never hardcode hex values
+- `--gold` and `--gold-dim` are primary accent colors
+- `--ink` and `--parchment` form the light theme; dark theme overrides both
+- Variables like `--pass-grn`, `--fail-red` are for semantic status colors
+
+Example:
+```css
+/* ✓ Correct */
+.my-btn { background: var(--gold); color: var(--ink); }
+
+/* ✗ Wrong */
+.my-btn { background: #c9a84c; color: #1a1a2e; }
+```
+
+### CSS Organization
+
+**When adding CSS:**
+1. If it's **shared** across pages → add to a SHARED section (Sections 1–13)
+2. If it's **page-specific** → add to that page's section (Sections 14–21)
+3. If it's a **new tool/page** → create a new PAGE-SPECIFIC section
+
+**Page-specific section template:**
+```css
+/* ─────────────────────────────────────────
+   YOUR PAGE NAME
+   Brief description of what this page does
+   and its key features.
+   ───────────────────────────────────────── */
+
+/* Your page styles here */
+```
+
+### Animation Naming Convention
+
+Animations are **page-prefixed** to avoid unintended cross-page effects:
+- `chargen-spin` (reroll die)
+- `coinflip-coinFlip` (coin flip)
+- `coinflip-wobble` (result wobble)
+- `coinflip-slideUp` (card entrance)
+- `traitgen-spin` (trait reroll)
+
+Shared animations (`cardIn`, base `slideUp`) don't have prefixes.
+
+### Button Styling
+
+**Shared button classes:**
+- `.btn-primary` — ink background, parchment text (chargen, loot, traitgen roll buttons)
+- `.roll-btn` — alias for `.btn-primary`
+- `.pull-btn` — alias for `.btn-primary`
+- `.btn-roll` — coinflip gold gradient button (page-specific)
+- `.btn-draw-trait` — traitgen gold gradient button (page-specific)
+
+All buttons use `transition` for smooth hover effects. Disabled state uses `opacity: .35`.
+
+### Theme Overrides
+
+Each page's theme overrides are in a dedicated subsection at the end of `styles.css`:
+
+```css
+html[data-theme="dark"] .my-component { background: var(--card-bg); }
+html[data-theme="nodice"] .my-component { background: #000; }
+```
+
+**Important:** Theme selectors have specificity `(0,1,1)`, which beats `:root` `(0,1,0)`. Light theme falls back to `:root` defaults.
+
+### Dev-Only Styles
+
+Mark development-only CSS with clear comments:
+```css
+/* DEV ONLY: Reset button for testing (commented out in production) */
+.reset-btn { position: absolute; top: 50%; right: 12px; }
+```
+
+Dev styles are kept in the stylesheet for convenience during development but should not affect production.
+
+### Responsive Design
+
+- Uses `clamp()` for fluid scaling — no explicit breakpoints needed
+- `max-width: 420px–520px` for tool cards
+- `16px` side padding on mobile
+- No `overflow: hidden` on `html/body` (preserves Android pull-to-refresh)
+
+Example:
+```css
+.card { max-width: clamp(320px, 90vw, 480px); }
+```
 
 ---
 
@@ -308,21 +413,41 @@ Two implementations exist — same rules, different lock durations:
 
 ## Building Future Tools
 
-*Copy, rename, update CONFIG, ship.*
+*Copy, rename, update CONFIG, add CSS section, ship.*
 
 1. Copy `chargen.html` (multi-field) or `loot.html` (single-item) as your base
 2. Update `CONFIG.TABS` / `CONFIG.TAB`, `FIELDS`, and `FALLBACK`
 3. Update `<title>`, `<h1>`, `.subtitle`
 4. Add a shelf entry in `index.html`
-5. Optionally override the gold tokens for a distinct per-tool colour:
+5. **Add your page's CSS to `styles.css`:**
+   - Create a new PAGE-SPECIFIC section in `styles.css` with your page name
+   - Copy your page's inline styles into this section
+   - Prefix any animations with your page name (e.g., `mypage-spin`)
+   - Use CSS variables for all colors — no hardcoded hex values
+6. Optionally override the gold tokens for a distinct per-tool colour (in `styles.css` root or page-specific section):
 
 ```css
 /* Example: teal for a scenario generator */
-:root {
+.my-page-root {
   --gold:     #2d7a5e;
   --gold-dim: #1e5a44;
   --gold-bg:  #f0fff8;
 }
+```
+
+**CSS Section Template:**
+```css
+/* ─────────────────────────────────────────
+   MY NEW TOOL
+   Brief description of the tool
+   ───────────────────────────────────────── */
+
+/* Page layout */
+.my-tool-card { /* styles */ }
+
+/* Theme overrides at end of styles.css */
+html[data-theme="dark"] .my-tool-card { /* dark styles */ }
+html[data-theme="nodice"] .my-tool-card { /* nodice styles */ }
 ```
 
 ---
@@ -335,7 +460,31 @@ TBD
 
 ## Resuming Work With Claude
 
-> *I'm building an improv RPG tool suite on GitHub Pages called "No Dice." The Vault (`index.html`) is an accordion hub — each tool has an inline shelf and a standalone page. Tools: Character Generator (`chargen.html`), Fate's Flip (`coinflip.html`), Loot Table (`loot.html`), Poll (`poll.html`, Firebase Realtime Database), Trait Generator (`traitgen.html`), QR Code (`qrcode.html`), Adventurer Profile (`profile.html`, Firebase Auth + Firestore). Shared stylesheet: `styles.css` (tokens, typography, buttons, dark mode, animations, profile button). Shared auth module: `profile-auth.js` (Firebase Auth + Firestore, profile button on every page, badge system). Cinzel/Lato, parchment palette. chargen, loot, traitgen pull from Google Sheets (already wired). traitgen auto-discovers Sheet tabs, excludes via `EXCLUDE_TABS`, shows full loot card for the Loot tab. poll.html uses Firebase Realtime Database (already wired); showrunner toggles admin mode via 3-second long-press on the 🧙 NPC Gen card (persists in sessionStorage key `nodice_vault_admin`). chargen and traitgen share 3-mulligan / 1-hour lockout / localStorage. profile.html has: auth (Google + email/password), attendance + badges, ticket verification, character sheet with per-field Roll/Pin buttons + Fully Randomize + 3-mulligan pool + 24h save lock (Firestore). Admin Showrunner Panel on profile.html (isAdmin: true in Firestore) — full poll admin UI connected to same Realtime Database. `← Vault` back button top-right on profile.html only. Dark/light toggle on every page via `localStorage` key `vaultTheme`. I'd like to [describe what you need].*
+> *I'm building an improv RPG tool suite on GitHub Pages called "No Dice." The Vault (`index.html`) is an accordion hub — each tool has an inline shelf and a standalone page.*
+>
+> **Tools:** Character Generator (`chargen.html`), Fate's Flip (`coinflip.html`), Loot Table (`loot.html`), Poll (`poll.html`, Firebase Realtime Database), Trait Generator (`traitgen.html`), QR Code (`qrcode.html`), Adventurer Profile (`profile.html`, Firebase Auth + Firestore).
+>
+> **Styling:**
+> - Consolidated stylesheet: `styles.css` (ALL styles centralized)
+> - Organized into: Shared Styles (Sections 1–13) + Page-Specific Styles (Sections 14–21) + Theme System
+> - Three themes: Light, Dark (`html[data-theme="dark"]`), No Dice (`html[data-theme="nodice"]`)
+> - All colors use CSS variables from `:root` — never hardcode hex values
+> - Page-specific animations are prefixed: `chargen-spin`, `coinflip-wobble`, `coinflip-slideUp`, `traitgen-spin`
+> - Shared typography: Cinzel (headings) + Lato (body); parchment palette
+> - Dark/light toggle on every page via `localStorage` key `vaultTheme`
+> - When adding CSS: use page-specific section in `styles.css` (no inline styles)
+>
+> **Shared Features:**
+> - Auth module: `profile-auth.js` (Firebase Auth + Firestore, profile button on every page, badge system)
+> - Data: chargen, loot, traitgen pull from Google Sheets (already wired)
+> - traitgen auto-discovers Sheet tabs, excludes via `EXCLUDE_TABS`, shows full loot card for the Loot tab
+> - poll.html uses Firebase Realtime Database; showrunner toggles admin mode via 3-second long-press on the 🧙 NPC Gen card (persists in sessionStorage key `nodice_vault_admin`)
+> - chargen and traitgen share 3-mulligan / 1-hour lockout / localStorage
+> - profile.html: auth (Google + email/password), attendance + badges, character sheet with Roll/Pin buttons, 3-mulligan pool, 24h save lock (Firestore)
+> - Admin Showrunner Panel on profile.html (isAdmin: true in Firestore) — full poll admin UI
+> - `← Vault` back button top-right on profile.html only
+>
+> *I'd like to [describe what you need].*
 
 ---
 

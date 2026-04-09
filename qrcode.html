@@ -10,86 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <!-- Shared styles (colours, fonts, buttons, badges, animations) -->
 <link rel="stylesheet" href="styles.css">
+  <!-- Page-specific styles in styles.css -->
+
 <!-- Prevent theme flash: apply saved theme before first paint -->
 <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
-<style>
-  /* ── Page layout ── */
-  html, body { height: 100%; }
-
-  body {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-  }
-
-  /* ── Header ── */
-  header {
-    text-align: center;
-    padding: 10px 16px 6px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  /* ── Main ── */
-  main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    overflow: hidden;
-  }
-
-  /* ── QR card ── */
-  .qr-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 24px 24px 20px;
-    box-shadow: 0 6px 32px var(--shadow);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    max-width: 320px;
-  }
-
-  .qr-title {
-    font-family: 'Cinzel', serif;
-    font-size: .7rem;
-    font-weight: 600;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    text-align: center;
-  }
-
-  .qr-img {
-    width: 100%;
-    max-height: 60vh;
-    object-fit: contain;
-    border-radius: 10px;
-    cursor: pointer;
-    display: block;
-  }
-
-  .qr-hint {
-    font-size: .72rem;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  /* ── Footer ── */
-  footer {
-    text-align: center;
-    padding: 10px 16px 14px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-</style>
 </head>
 <body>
 
