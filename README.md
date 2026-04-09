@@ -380,6 +380,34 @@ Example:
 .card { max-width: clamp(320px, 90vw, 480px); }
 ```
 
+### ⚠️ CRITICAL: Page-Specific Body Selectors (Consolidated CSS Pattern)
+
+**IMPORTANT**: All CSS is in a single `styles.css` file. This creates a potential pitfall: each tool page originally had its own `<style>` block with conflicting `body`, `html`, `header`, and `main` selectors. 
+
+**The Solution**: Page-specific classes prevent these selectors from conflicting globally:
+
+- Each HTML file has `<body class="<page>-page">` (e.g., `<body class="chargen-page">`)
+- All page-specific body/html/element selectors are scoped to their class: `.chargen-page body { ... }`
+- Only the relevant page's styles apply; other pages are unaffected
+
+**When Adding CSS to a Tool Page:**
+```css
+/* ✓ CORRECT */
+.chargen-page body { display: flex; height: 100dvh; }
+.chargen-page header { padding: 10px 16px 6px; }
+
+/* ✗ WRONG - will break other pages */
+body { display: flex; }
+header { padding: 10px 16px 6px; }
+```
+
+**When Adding a New Tool:**
+1. Create HTML file with `<body class="mytool-page">`
+2. Add CSS section in `styles.css` with page-specific selectors: `.mytool-page body { ... }`
+3. Add page-class definition to the "PAGE-SPECIFIC BODY SELECTORS" section (around line 100 of styles.css)
+
+See the **CRITICAL** notation at the top of the PAGE-SPECIFIC STYLES section in `styles.css` for full details.
+
 ---
 
 ## GitHub Pages Deployment

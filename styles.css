@@ -64,12 +64,90 @@
    PAGE-SPECIFIC STYLES
    ================================================ */
 
+/* ════════════════════════════════════════════════════════════════════════════════
+   ⚠️  CRITICAL: PAGE-SPECIFIC BODY/HTML SELECTORS
+   
+   PROBLEM: Each tool page has conflicting body/html styles. When consolidated into
+   a single stylesheet, only the LAST definition applies globally - breaking layouts.
+   
+   SOLUTION: Use page-specific classes (.chargen-page, .coinflip-page, etc.) to
+   scope body styles to their respective pages. These classes are added to <body> 
+   tags in each HTML file.
+   
+   CONVENTION: For any future styles targeting body/html/header/main/etc on a 
+   specific page, use: .<page-name>-page <selector> { ... }
+   
+   EXAMPLE: .chargen-page body { display: flex; } applies only to chargen.html
+            .coinflip-page body { display: flex; } applies only to coinflip.html
+   
+   DO NOT use bare selectors like "body { }" in page sections - it breaks other pages!
+   ════════════════════════════════════════════════════════════════════════════════ */
+
+/* Page-specific body and layout selectors */
+.chargen-page html,
+.chargen-page body { height: 100%; }
+.chargen-page body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.coinflip-page body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loot-page html,
+.loot-page body { height: 100%; }
+.loot-page body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.poll-page html,
+.poll-page body { height: 100%; }
+.poll-page body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.qrcode-page html,
+.qrcode-page body { height: 100%; }
+.qrcode-page body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.traitgen-page html,
+.traitgen-page body { height: 100%; }
+.traitgen-page body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.profile-page html,
+.profile-page body { height: 100%; }
+.profile-page body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
 /* ─────────────────────────────────────────
    CHARGEN PAGE
    Character Generator: Roll a character with
    name, race, class, backstory, quirk, secret.
    Features: Field reroll, mulligan system, lockout.
    ───────────────────────────────────────── */
+
+  /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .chargen-page */
+  /* DO NOT use bare body/html/header/main selectors - use .chargen-page <selector> */
 
   /* ── Page layout ── */
   html, body { height: 100%; }
@@ -78,7 +156,7 @@
     display: flex;
     flex-direction: column;
     height: 100dvh;
-  }h
+  }
 
   /* ── Desktop wrapper — .page-frame base + media query come from styles.css ── */
   @media (min-width: 600px) {
@@ -263,6 +341,9 @@
    Fate's Flip: Flip a coin for pass/fail results.
    Features: Spinning animation, result reveal, wobble.
    ───────────────────────────────────────── */
+
+  /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .coinflip-page */
+  /* DO NOT use bare body/html/header/main selectors - use .coinflip-page <selector> */
 
     /* ── Page layout ── */
     body {
@@ -520,6 +601,9 @@
    Features: Shuffle-bag algorithm, image slots.
    ───────────────────────────────────────── */
 
+  /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .loot-page */
+  /* DO NOT use bare body/html/header/main selectors - use .loot-page <selector> */
+
   /* ── Page layout ── */
   html, body { height: 100%; }
 
@@ -709,6 +793,9 @@
    Admin panel for creating/managing polls.
    Features: Real-time results, vote tracking, admin controls.
    ───────────────────────────────────────── */
+
+  /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .poll-page */
+  /* DO NOT use bare body/html/header/main selectors - use .poll-page <selector> */
 
   /* ── Page layout ── */
   html, body { height: 100%; }
@@ -1315,6 +1402,9 @@
    Features: Mulligan system, trait display, loot preview.
    ───────────────────────────────────────── */
 
+  /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .traitgen-page */
+  /* DO NOT use bare body/html/header/main selectors - use .traitgen-page <selector> */
+
   /* ── Page layout ── */
   html, body { height: 100%; }
 
@@ -1591,6 +1681,9 @@
    User authentication and profile display.
    Features: Sign-in form, profile data, section cards.
    ───────────────────────────────────────── */
+
+  /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .profile-page */
+  /* DO NOT use bare body/html/header/main selectors - use .profile-page <selector> */
 
   /* ── Profile page local styles ── */
   .profile-page { max-width: 540px; margin: 0 auto; padding: 24px 16px 80px; }
@@ -1882,7 +1975,7 @@
     width: 6px; height: 6px; border-radius: 50%; background: #27ae60;
     animation: livePulse 1.4s ease-in-out infinite;
   }
-  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+   50%{opacity:.4;transform:scale(.75)} }
   .poll-result-wrap { display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; }
   .poll-result-row {}
   .poll-result-label-row {
@@ -2354,8 +2447,7 @@ h1 span {
   to   { transform: rotate(360deg); }
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(14px); }
+
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -3385,9 +3477,9 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .total-votes { font-size: .65rem; color: var(--muted); letter-spacing: .04em; text-align: center; }
   .poll-waiting { text-align: center; padding: 10px 0; font-size: .82rem; color: var(--muted); line-height: 1.5; }
   .poll-waiting-pulse { animation: waitPulse 2s ease-in-out infinite; display: inline-block; font-size: 1.2rem; margin-bottom: 4px; }
-  @keyframes waitPulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+   50% { opacity: .4; } }
   .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pass-grn); display: inline-block; animation: livePulse 1.4s ease-in-out infinite; margin-right: 4px; }
-  @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+   50% { opacity: .25; } }
 
   .poll-footer {
     padding: 0 12px 12px;
