@@ -3064,13 +3064,17 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .shelf-body {
     display: grid;
     grid-template-rows: 0fr;
+    grid-template-columns: 1fr;
+    width: 100%;
     transition: grid-template-rows .35s cubic-bezier(.22,1,.36,1);
   }
   .shelf.open .shelf-body { grid-template-rows: 1fr; }
-  .shelf-body-inner { overflow: hidden; }
+  .shelf-body-inner { overflow: hidden; width: 100%; min-width: 0; }
   .shelf-content {
     border-top: 1px solid var(--border);
     background: rgba(201,168,76,.05);
+    width: 100%;
+    min-width: 0;
   }
 
   /* ── SHELF DRAG-REORDER ── */
