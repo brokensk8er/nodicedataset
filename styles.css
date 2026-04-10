@@ -2975,6 +2975,8 @@ html[data-theme="dark"] .profile-btn--signed-in {
   /* ── SHELF ── */
   .shelf {
     position: relative;
+    width: 100%;
+    min-width: 0;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 16px;
