@@ -85,80 +85,82 @@
    ════════════════════════════════════════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════════════════════════════════════════
-   🛑 HISTORIC BUG FIX (April 2026): Shelf Width Alignment Issue
+   🛑 THREE BUGS FIXED (April 2026) — READ BEFORE EDITING BODY/MAIN SELECTORS
 
-   WHAT HAPPENED: During CSS consolidation, bare "body { }" and "html, body { }"
-   selectors were incorrectly renamed to ".chargen-page body { }" etc. This selector
-   syntax means "body INSIDE .chargen-page" which never matches (body has no parent).
-   The correct scoped selector is "body.chargen-page" (body WITH the class).
+   ── BUG 1: Wrong body selector syntax ──────────────────────────────────────────
+   BROKEN:  .index-page body { }   → "body INSIDE .index-page" — never matches
+   CORRECT: body.index-page { }    → "body element WITH class index-page" ✓
+   Same rule for ALL page classes. The space makes all the difference.
 
-   SYMPTOM: Shelves had variable widths and misaligned horizontally on index.html
-   because body.index-page never received its flex layout.
+   SYMPTOM: Body styles silently ignored → no flex layout → shelf widths driven
+   by content → variable-width misaligned shelves on index.html.
 
-   LESSON: ".page body { }" ≠ "body.page { }" — the space changes everything.
-   Always grep to verify after changes:
-     grep "\.index-page body" styles.css    # Should return NOTHING
-     grep "body\.index-page" styles.css     # This is the correct pattern
+   SCAN FOR THIS:  grep -n "\.\(chargen\|loot\|poll\|qrcode\|traitgen\|profile\|index\|coinflip\)-page body" styles.css
+   Expected result: ONLY matches inside comments, never as live selectors.
 
-   FUTURE PREVENTION: All body-targeting selectors MUST use body.PAGE-page syntax.
+   ── BUG 2: Bare main{} selectors bleeding across pages ─────────────────────────
+   Each page section had an unscoped "main { }" rule. The last one wins (cascade),
+   but EARLIER ones set align-items/justify-content that later rules don't reset.
+   Coinflip's "main { align-items:center; justify-content:center; }" was vertically
+   centering index.html's shelf list.
 
-   IF YOU SEE THESE AGAIN: Search styles.css for:
-     ✓ \..*-page body {      (descendant form — broken)
-   And change to: body.PAGE-page { ... }
+   FIX: index.html's main selector is now ".page-wrap > main { align-items:stretch;
+   justify-content:flex-start; }" — explicit resets plus a scoped selector.
+
+   SCAN FOR THIS:  grep -n "^  main\s*{" styles.css
+   Any match should be reviewed — prefer scoped selectors like .page-wrap > main.
+
+   ── BUG 3: Flex on body with align-items:center shrinks children ───────────────
+   index.html body had "display:flex; align-items:center" (cross-axis centering).
+   In a flex-column container, this lets children shrink to content width instead
+   of stretching. Looked fine on wide screens, broke on narrow ones.
+
+   FIX: Removed flex from body.index-page entirely. Used block-centering instead:
+   .page-wrap { max-width:480px; margin:0 auto; } — same pattern profile.html uses.
 
    ════════════════════════════════════════════════════════════════════════════════ */
 
-/* Page-specific body and layout selectors */
-.chargen-page html,
-.chargen-page body { height: 100%; }
-.chargen-page body {
+/* Page-specific body layout — CORRECT form: body.PAGE-page { }
+   The html{height:100%} lines from the old pattern are dropped: 100dvh units
+   make them unnecessary, and they couldn't be page-scoped anyway. */
+body.chargen-page {
   display: flex;
   flex-direction: column;
   height: 100dvh;
 }
 
-.coinflip-page body {
+body.coinflip-page {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.loot-page html,
-.loot-page body { height: 100%; }
-.loot-page body {
+body.loot-page {
   display: flex;
   flex-direction: column;
   height: 100dvh;
 }
 
-.poll-page html,
-.poll-page body { height: 100%; }
-.poll-page body {
+body.poll-page {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
 }
 
-.qrcode-page html,
-.qrcode-page body { height: 100%; }
-.qrcode-page body {
+body.qrcode-page {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
 }
 
-.traitgen-page html,
-.traitgen-page body { height: 100%; }
-.traitgen-page body {
+body.traitgen-page {
   display: flex;
   flex-direction: column;
   height: 100dvh;
 }
 
-.profile-page html,
-.profile-page body { height: 100%; }
-.profile-page body {
+body.profile-page {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -174,15 +176,7 @@
   /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .chargen-page */
   /* DO NOT use bare body/html/header/main selectors - use .chargen-page <selector> */
 
-  /* ── Page layout ── */
-  .chargen-page html,
-.chargen-page body { height: 100%; }
-
-.chargen-page body {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-  }
+  /* ── Page layout (body.chargen-page defined in global page-body block above) ── */
 
   /* ── Desktop wrapper — .page-frame base + media query come from styles.css ── */
   @media (min-width: 600px) {
@@ -630,15 +624,7 @@
   /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .loot-page */
   /* DO NOT use bare body/html/header/main selectors - use .loot-page <selector> */
 
-  /* ── Page layout ── */
-  .loot-page html,
-.loot-page body { height: 100%; }
-
-.loot-page body {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-  }
+  /* ── Page layout (body.loot-page defined in global page-body block above) ── */
 
   /* ── Header ── */
   /* .site-label, header h1, .subtitle come from styles.css */
@@ -824,15 +810,7 @@
   /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .poll-page */
   /* DO NOT use bare body/html/header/main selectors - use .poll-page <selector> */
 
-  /* ── Page layout ── */
-  .poll-page html,
-.poll-page body { height: 100%; }
-
-.poll-page body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-  }
+  /* ── Page layout (body.poll-page defined in global page-body block above) ── */
 
   /* ── Header ── */
   /* .site-label, header h1, .subtitle come from styles.css */
@@ -1345,15 +1323,7 @@
    Features: QR code generation, lightbox overlay.
    ───────────────────────────────────────── */
 
-  /* ── Page layout ── */
-  .qrcode-page html,
-  .qrcode-page body { height: 100%; }
-
-  .qrcode-page body {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-  }
+  /* ── Page layout (body.qrcode-page defined in global page-body block above) ── */
 
   /* ── Header ── */
   header {
@@ -1434,15 +1404,7 @@
   /* ⚠️  PAGE-SPECIFIC: All styles in this section are scoped to .traitgen-page */
   /* DO NOT use bare body/html/header/main selectors - use .traitgen-page <selector> */
 
-  /* ── Page layout ── */
-  .traitgen-page html,
-.traitgen-page body { height: 100%; }
-
-.traitgen-page body {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-  }
+  /* ── Page layout (body.traitgen-page defined in global page-body block above) ── */
 
   /* ── Desktop wrapper — .page-frame base + media query come from styles.css ── */
   @media (min-width: 600px) {
@@ -1786,6 +1748,11 @@
     font-size: .78rem; cursor: pointer; white-space: nowrap;
     transition: border-color .2s, color .2s; }
   .btn-signout:hover { border-color: var(--gold-dim); color: var(--text); }
+  .btn-reset-mulligans { padding: 7px 14px; border-radius: 6px; border: 1px solid #c0392b;
+    background: none; color: #c0392b; font-family: 'Lato', sans-serif;
+    font-size: .78rem; cursor: pointer; white-space: nowrap;
+    opacity: 0.65; transition: border-color .2s, color .2s, opacity .2s; }
+  .btn-reset-mulligans:hover { opacity: 1; }
 
   /* section cards */
   .profile-card { background: var(--card-bg); border: 1px solid var(--border);
@@ -3613,15 +3580,5 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .qr-img { width: 100%; max-width: 280px; max-height: 58vh; object-fit: contain; border-radius: 12px; cursor: pointer; display: block; }
   .qr-hint { font-size: .72rem; color: var(--muted); text-align: center; line-height: 1.5; margin: 0; }
 
-  /* ── DEV RESET — remove this block when no longer needed ── */
-  .dev-reset-btn {
-    position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
-    background: none; border: 1px solid #c0392b; border-radius: 5px;
-    padding: 3px 8px; font-family: 'Lato', sans-serif; font-size: .58rem;
-    font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    color: #c0392b; cursor: pointer; opacity: 0.65; transition: opacity .2s;
-  }
-  .dev-reset-btn:hover { opacity: 1; }
-  /* ── END DEV RESET ── */
 
   /* @keyframes slideUp comes from styles.css */

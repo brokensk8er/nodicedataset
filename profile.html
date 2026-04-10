@@ -68,6 +68,7 @@
           <div class="shelf-body-inner">
             <div class="shelf-content profile-shelf-content">
               <button class="btn-signout" id="btn-signout">Sign out</button>
+              <button class="btn-reset-mulligans" id="btn-reset-mulligans" style="display:none">Reset Mulligans</button>
             </div>
           </div>
         </div>
@@ -1188,6 +1189,24 @@ function initAdminPanel(isAdmin) {
     }
   };
 }
+
+// ── Vault Mulligan Reset (account shelf) ──────────────────────────
+(function() {
+  const VAULT_CG_KEY = 'nodice_vault_chargen_session';
+  const btn = document.getElementById('btn-reset-mulligans');
+  if (!btn) return;
+  try {
+    const raw = localStorage.getItem(VAULT_CG_KEY);
+    if (raw) {
+      const state = JSON.parse(raw);
+      if (state.mulligans === 0) btn.style.display = '';
+    }
+  } catch(e) {}
+  btn.addEventListener('click', function() {
+    localStorage.removeItem(VAULT_CG_KEY);
+    btn.style.display = 'none';
+  });
+})();
 </script>
 </body>
 </html>

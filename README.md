@@ -408,40 +408,64 @@ header { padding: 10px 16px 6px; }
 
 See the **CRITICAL** notation at the top of the PAGE-SPECIFIC STYLES section in `styles.css` for full details.
 
-### 🛑 Known Issues & Prevention (Historic)
+### 🛑 Known CSS Bugs (April 2026 — Fixed, don't reintroduce)
 
-**Shelf Alignment Issue (April 2026 - FIXED)**
+Three bugs caused index.html shelves to be variable-width and misaligned. All three are fixed and documented with scan commands in `styles.css`. Summary:
 
-During CSS consolidation, bare `body { }` and `html, body { }` selectors were accidentally left unscoped in page-specific sections. This caused the INDEX PAGE body styles to apply globally, breaking shelf alignment on all pages (shelves had variable widths and misaligned horizontally).
+---
 
-**What to watch for:**
+**Bug 1 — Wrong body selector syntax**
+
 ```css
-/* ✗ WRONG - These apply GLOBALLY, breaking other pages */
-body { display: flex; }
-html, body { height: 100%; }
-
-/* ✓ CORRECT - These apply only to their page */
+/* ✗ BROKEN — ".page body" means body INSIDE .chargen-page. Body has no parent. */
 .chargen-page body { display: flex; }
-.chargen-page html,
-.chargen-page body { height: 100%; }
+
+/* ✓ CORRECT — "body.page" means the body element WITH class chargen-page */
+body.chargen-page { display: flex; }
 ```
 
-**Quick check for this issue:**
+The space makes all the difference. The broken form silently does nothing — no error, just dead CSS.
+
+Scan for it:
 ```bash
-# Should return NOTHING:
-grep "^  body\s*{" styles.css
-grep "^  html\s*{" styles.css
-
-# All results should include page-specific class:
-grep "html, body" styles.css
+# Should return NOTHING (comments don't count):
+grep -n "\.\(chargen\|loot\|poll\|qrcode\|traitgen\|profile\|index\|coinflip\)-page body" styles.css
 ```
 
-If you find bare selectors:
-1. Identify which page section they're in
-2. Rename: `body {` → `.PAGE-page body {`
-3. Test all pages to confirm alignment is fixed
+---
 
-The detailed explanation and prevention checklist are in the `🛑 HISTORIC BUG FIX` comment in `styles.css` around line 86.
+**Bug 2 — Bare `main {}` rules bleed across pages**
+
+Each page section had an unscoped `main { }` selector. CSS cascade means earlier rules set properties that later rules don't reset. Coinflip's `main { align-items:center; justify-content:center; }` was vertically centering index.html's shelf list.
+
+```css
+/* ✗ BLEEDS — applies to every page's <main> */
+main { align-items: center; justify-content: center; }
+
+/* ✓ SCOPED — only targets the shelf list on index.html */
+.page-wrap > main { align-items: stretch; justify-content: flex-start; }
+```
+
+Scan for it:
+```bash
+# Review any matches — prefer scoped selectors:
+grep -n "^  main\s*{" styles.css
+```
+
+---
+
+**Bug 3 — `align-items:center` on a flex-column body shrinks children**
+
+`display:flex; flex-direction:column; align-items:center` on body means children size to their *content width* rather than stretching to fill. Shelves became variable-width based on their text content.
+
+Fix: removed flex from `body.index-page` entirely. Used block centering instead — the same pattern profile.html uses successfully:
+```css
+.page-wrap { max-width: 480px; margin: 0 auto; }
+```
+
+---
+
+Full scan commands and detailed explanations are in the `🛑 THREE BUGS FIXED` comment block in `styles.css` near the top of the PAGE-SPECIFIC STYLES section.
 
 ---
 
