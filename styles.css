@@ -74,12 +74,13 @@
    scope body styles to their respective pages. These classes are added to <body> 
    tags in each HTML file.
    
-   CONVENTION: For any future styles targeting body/html/header/main/etc on a 
-   specific page, use: .<page-name>-page <selector> { ... }
-   
-   EXAMPLE: .chargen-page body { display: flex; } applies only to chargen.html
-            .coinflip-page body { display: flex; } applies only to coinflip.html
-   
+   CONVENTION: For any future styles targeting the body element on a specific page:
+   Use: body.<page-name>-page { ... }  ← body element WITH the class (correct)
+   NOT: .<page-name>-page body { ... } ← body INSIDE an element (wrong — body has no parent)
+
+   EXAMPLE: body.chargen-page { display: flex; } applies only to chargen.html
+            body.coinflip-page { display: flex; } applies only to coinflip.html
+
    DO NOT use bare selectors like "body { }" in page sections - it breaks other pages!
    ════════════════════════════════════════════════════════════════════════════════ */
 
@@ -87,23 +88,23 @@
    🛑 HISTORIC BUG FIX (April 2026): Shelf Width Alignment Issue
 
    WHAT HAPPENED: During CSS consolidation, bare "body { }" and "html, body { }"
-   selectors in page-specific sections were NOT renamed to page-scoped versions
-   (.chargen-page body, etc.). This caused the INDEX PAGE body styles to apply
-   globally, breaking shelf alignment on all other pages.
+   selectors were incorrectly renamed to ".chargen-page body { }" etc. This selector
+   syntax means "body INSIDE .chargen-page" which never matches (body has no parent).
+   The correct scoped selector is "body.chargen-page" (body WITH the class).
 
    SYMPTOM: Shelves had variable widths and misaligned horizontally on index.html
+   because body.index-page never received its flex layout.
 
-   LESSON: Compound selectors like "html, body { }" are easy to miss during
-   refactoring. Always use grep to verify:
-     grep "^  body\s*{" styles.css     # Should return NOTHING
-     grep "html, body" styles.css      # Should return NOTHING (only page-scoped)
+   LESSON: ".page body { }" ≠ "body.page { }" — the space changes everything.
+   Always grep to verify after changes:
+     grep "\.index-page body" styles.css    # Should return NOTHING
+     grep "body\.index-page" styles.css     # This is the correct pattern
 
-   FUTURE PREVENTION: All body/html selectors MUST have page class prefix.
+   FUTURE PREVENTION: All body-targeting selectors MUST use body.PAGE-page syntax.
 
    IF YOU SEE THESE AGAIN: Search styles.css for:
-     ✓ ^  body {          (bare body)
-     ✓ html, body {       (compound, not page-scoped)
-   And rename to: .PAGE-page body { ... }
+     ✓ \..*-page body {      (descendant form — broken)
+   And change to: body.PAGE-page { ... }
 
    ════════════════════════════════════════════════════════════════════════════════ */
 
@@ -2954,7 +2955,8 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .poll-admin-section { padding: 12px 12px 14px; }
 
   /* ── Page layout ── */
-  .index-page body {
+  /* NOTE: selector is body.index-page (body WITH the class), NOT .index-page body (body INSIDE an element with that class) */
+  body.index-page {
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -2963,12 +2965,12 @@ html[data-theme="dark"] .profile-btn--signed-in {
 
   .page-wrap {
     width: 100%;
-    max-width: 540px;
+    max-width: 480px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 24px 16px 32px;
+    padding: 0 14px 32px;
   }
 
   /* ── Header ── */
