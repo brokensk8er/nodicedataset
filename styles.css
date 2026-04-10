@@ -2927,12 +2927,16 @@ html[data-theme="dark"] .profile-btn--signed-in {
      No flex on body — .page-wrap centers itself as a block element. */
   body.index-page {
     min-height: 100dvh;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   .page-wrap {
     max-width: 480px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 14px 32px;
+    overflow-x: clip;
   }
 
   /* ── Header ── */
@@ -2970,6 +2974,8 @@ html[data-theme="dark"] .profile-btn--signed-in {
     justify-content: flex-start;
     gap: 10px;
     padding: .9rem 0 1rem;
+    width: 100%;
+    min-width: 0;
   }
 
   /* ── SHELF ── */
