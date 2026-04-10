@@ -2954,22 +2954,17 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .poll-btn-add-option:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
   .poll-admin-section { padding: 12px 12px 14px; }
 
-  /* ── Page layout ── */
-  /* NOTE: selector is body.index-page (body WITH the class), NOT .index-page body (body INSIDE an element with that class) */
+  /* ── Page layout ──
+     Mirrors profile.html's approach: block centering via max-width + margin auto.
+     body.index-page is body WITH the class (not .index-page body = body inside .index-page).
+     No flex on body — .page-wrap centers itself as a block element. */
   body.index-page {
     min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
   .page-wrap {
-    width: 100%;
     max-width: 480px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
     padding: 0 14px 32px;
   }
 
@@ -2981,7 +2976,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
     background: transparent;
   }
   /* .site-label comes from styles.css */
-  h1 {
+  .hub-header h1 {
     font-family: 'Cinzel', serif;
     font-size: clamp(2rem, 7vw, 2.8rem);
     font-weight: 700;
@@ -3000,8 +2995,15 @@ html[data-theme="dark"] .profile-btn--signed-in {
   }
   /* .header-divider width, gradient, and height come from styles.css */
 
-  /* ── Main ── */
-  main { display: flex; flex-direction: column; gap: 10px; padding: .9rem 0 1rem; }
+  /* ── Main ── reset align/justify from other page sections that bleed in via bare main{} */
+  .page-wrap > main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: .9rem 0 1rem;
+  }
 
   /* ── SHELF ── */
   .shelf {
