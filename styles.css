@@ -2453,6 +2453,18 @@ h1 span {
   to   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); opacity: 1; }
 }
 
+/* Houdini typed property — lets the browser interpolate --nd-angle as a true <angle>
+   so conic-gradient(from var(--nd-angle), ...) can be CSS-animated. */
+@property --nd-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes nd-border-rotate {
+  to { --nd-angle: 360deg; }
+}
+
 
 /* ================================================
    14. DARK THEME  (index3.html)
@@ -2605,10 +2617,25 @@ html[data-theme="nodice"] .shelf.open {
 }
 html[data-theme="nodice"] .shelf.open .shelf-chevron { color: var(--pass-grn); }
 
-/* Trigger the sweep animation on open, with slight delay */
+/* Nodice rotating sparkle border:
+   Override the base clip-path and swap in a rotating conic-gradient.
+   White hot-spot sweeps red→white→green continuously while the shelf is open. */
+html[data-theme="nodice"] .shelf::before {
+  clip-path: none;
+  background:
+    conic-gradient(from var(--nd-angle),
+      rgba(235, 46, 46, 0.7)    0deg,
+      rgba(235, 46, 46, 1)     70deg,
+      rgba(255, 255, 255, 0.95) 90deg,
+      rgba(0, 166, 81, 1)     110deg,
+      rgba(0, 166, 81, 0.7)   190deg,
+      rgba(235, 46, 46, 0.7)  360deg)
+    border-box;
+}
+
 html[data-theme="nodice"] .shelf.open::before {
   opacity: 1;
-  animation: nd-border-sweep .55s .12s cubic-bezier(.4, 0, .2, 1) both;
+  animation: nd-border-rotate 3s linear infinite;
 }
 
 /* Header divider: red-to-green gradient */
