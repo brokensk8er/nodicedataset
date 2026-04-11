@@ -4,7 +4,7 @@
 // The <head> FOUC-prevention script must remain inline in each HTML file.
 
 (function () {
-  var ICONS = { dark: '☀️', light: '🛑', nodice: '🌙' };
+  var ICONS = { dark: '🌙', light: '☀️', nodice: '🛑' };
 
   function getTheme() {
     return document.documentElement.getAttribute('data-theme') || 'dark';
