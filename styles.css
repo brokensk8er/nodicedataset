@@ -2924,19 +2924,29 @@ html[data-theme="dark"] .profile-btn--signed-in {
   /* ── Page layout ──
      Mirrors profile.html's approach: block centering via max-width + margin auto.
      body.index-page is body WITH the class (not .index-page body = body inside .index-page).
-     No flex on body — .page-wrap centers itself as a block element. */
+     No flex on body — .page-wrap centers itself as a block element.
+
+     WIDTH-LOCK STRATEGY (prevents shelves from resizing when content is generated):
+     Shelf widths must be static on mobile. Any element that overflows its container
+     can push the body into a horizontal scroll state, which changes what "100%"
+     resolves to for every child — causing all shelves to shift width simultaneously.
+     The fix is a three-layer clamp: body → .page-wrap → main each opt out of
+     horizontal overflow so nothing inside can escape and reflow the layout.
+  */
   body.index-page {
     min-height: 100dvh;
-    overflow-x: hidden;
-    width: 100%;
+    overflow-x: hidden; /* Layer 1: prevents body scroll zone from forming */
+    width: 100%;        /* explicit width so children resolve % against the viewport */
   }
 
   .page-wrap {
     max-width: 480px;
-    width: 100%;
+    width: 100%;        /* explicit width; max-width alone does not prevent content escape */
     margin: 0 auto;
     padding: 0 14px 32px;
-    overflow-x: clip;
+    overflow-x: clip;   /* Layer 2: clips overflow without creating a scroll container.
+                           Use 'clip' not 'hidden' — 'hidden' breaks position:fixed children
+                           (e.g. theme-toggle-btn, profile-btn). 'clip' does not. */
   }
 
   /* ── Header ── */
@@ -2966,7 +2976,11 @@ html[data-theme="dark"] .profile-btn--signed-in {
   }
   /* .header-divider width, gradient, and height come from styles.css */
 
-  /* ── Main ── reset align/justify from other page sections that bleed in via bare main{} */
+  /* ── Main ──
+     Resets align/justify from other page sections that bleed in via bare main{} selectors.
+     width: 100% + min-width: 0 = Layer 3 of the width-lock strategy.
+     Flex children default to min-width: auto, which lets content push the column wider.
+     min-width: 0 disables that, so no shelf can ever widen the column it lives in. */
   .page-wrap > main {
     display: flex;
     flex-direction: column;
@@ -2974,15 +2988,18 @@ html[data-theme="dark"] .profile-btn--signed-in {
     justify-content: flex-start;
     gap: 10px;
     padding: .9rem 0 1rem;
-    width: 100%;
-    min-width: 0;
+    width: 100%;    /* Layer 3a: locks column to container */
+    min-width: 0;   /* Layer 3b: disables flex-child auto minimum */
   }
 
-  /* ── SHELF ── */
+  /* ── SHELF ──
+     width: 100% + min-width: 0 mirrors the pattern on .page-wrap > main.
+     Each shelf is a flex child of main; without these, a shelf can grow wider
+     than its siblings when JS injects content into it, shifting all shelf edges. */
   .shelf {
     position: relative;
-    width: 100%;
-    min-width: 0;
+    width: 100%;    /* lock to column width */
+    min-width: 0;   /* prevent flex-child auto minimum from overriding the lock */
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -3066,11 +3083,15 @@ html[data-theme="dark"] .profile-btn--signed-in {
   }
   .shelf.open .shelf-chevron { transform: rotate(180deg); color: var(--gold); }
 
-  /* Shelf slide-down body */
+  /* Shelf slide-down body — CSS grid accordion (grid-template-rows 0fr → 1fr).
+     grid-template-columns: 1fr is critical: without it, grid defaults to
+     "auto" columns which size to content rather than to the container.
+     width: 100% on .shelf-body and its children carries the width-lock
+     through the full DOM depth to wherever JS renders content. */
   .shelf-body {
     display: grid;
     grid-template-rows: 0fr;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* fills container; DO NOT remove — reverts to content-sized auto */
     width: 100%;
     transition: grid-template-rows .35s cubic-bezier(.22,1,.36,1);
   }
@@ -3079,7 +3100,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
   .shelf-content {
     border-top: 1px solid var(--border);
     background: rgba(201,168,76,.05);
-    width: 100%;
+    width: 100%;    /* direct parent of all JS-injected shelf content */
     min-width: 0;
   }
 
