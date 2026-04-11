@@ -52,7 +52,7 @@
     </div>
 
     <!-- ── PROFILE PANEL ── -->
-    <div class="profile-panel hidden" id="profile-panel">
+    <div class="profile-panel hidden" id="profile-panel" data-shelf-reorder="nodice_profile_shelf_order" data-shelf-wait-visible>
 
       <!-- ── SHELF: Account ── -->
       <div class="shelf" id="profile-shelf-account">
@@ -239,27 +239,10 @@
   </div><!-- /profile-page -->
 </div><!-- /page-wrap -->
 
-<button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">🌙</button>
+<button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme"></button>
 <button class="btn-back-vault" onclick="window.location.href='index.html'">&#8592; Vault</button>
 
-<script>
-(function () {
-  const btn  = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-  const icons = { dark: '☀️', light: '🛑', nodice: '🌙' };
-  function apply(t) {
-    html.setAttribute('data-theme', t);
-    localStorage.setItem('vaultTheme', t);
-    if (btn) btn.textContent = icons[t] || '☀️';
-  }
-  apply(localStorage.getItem('vaultTheme') || 'dark');
-  if (btn) btn.addEventListener('click', () => {
-    const cur = html.getAttribute('data-theme') || 'dark';
-    const next = cur === 'dark' ? 'light' : cur === 'light' ? 'nodice' : 'dark';
-    apply(next);
-  });
-})();
-</script>
+<script src="theme-toggle.js"></script>
 
 <!-- ============================================================
      PROFILE SHELF NAVIGATION
@@ -298,163 +281,7 @@
 })();
 </script>
 
-<!-- ============================================================
-     PROFILE SHELF REORDER — long-press (400 ms) to drag/reorder
-     Same Pointer Events pattern as the index.html shelf reorder.
-     Container: #profile-panel (auth-gated). A MutationObserver
-     waits for the panel to become visible before wiring listeners.
-     localStorage key: 'nodice_profile_shelf_order'
-     ============================================================ -->
-<script>
-(function() {
-  var HOLD_MS     = 400;
-  var MOVE_CANCEL_H = 35;  // px horizontal — cancel on clear sideways-swipe intent
-  var MOVE_CANCEL_V = 55;  // px vertical   — more permissive; natural thumb drift is vertical
-  var LSKEY       = 'nodice_profile_shelf_order';
-
-  function getContainer() { return document.getElementById('profile-panel'); }
-
-  // ── Restore saved shelf order on page load ─────────────────────
-  function restoreShelfOrder() {
-    var saved;
-    try { saved = JSON.parse(localStorage.getItem(LSKEY)); } catch(e) {}
-    if (!Array.isArray(saved) || !saved.length) return;
-    var c = getContainer(); if (!c) return;
-    // Snapshot non-shelf children before moving shelves so they
-    // aren't displaced to the top of the container.
-    var nonShelves = Array.from(c.children).filter(function(ch) {
-      return !ch.classList.contains('shelf');
-    });
-    saved.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el && el.parentNode === c) c.appendChild(el);
-    });
-    nonShelves.forEach(function(el) { c.appendChild(el); });
-  }
-
-  // ── Persist current DOM order ──────────────────────────────────
-  function saveShelfOrder() {
-    var c = getContainer(); if (!c) return;
-    var ids = Array.from(c.querySelectorAll(':scope > .shelf')).map(function(s) { return s.id; });
-    localStorage.setItem(LSKEY, JSON.stringify(ids));
-  }
-
-  // ── Wire long-press listeners on every profile shelf header ────
-  function initReorder() {
-    var c = getContainer(); if (!c) return;
-    c.querySelectorAll('.shelf-header').forEach(function(header) {
-      header.addEventListener('pointerdown', function(e) {
-        if (e.button !== 0 && e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
-        var shelf = header.closest('.shelf'); if (!shelf) return;
-        var sx = e.clientX, sy = e.clientY;
-        var holdStart = Date.now(); // grace period reference
-        var timer = null;
-
-        function cleanup() {
-          clearTimeout(timer);
-          document.removeEventListener('pointermove',   onEarlyMove);
-          document.removeEventListener('pointerup',     cleanup);
-          document.removeEventListener('pointercancel', cleanup);
-        }
-        function onEarlyMove(ev) {
-          // 50ms grace: skip the synthetic pointermove browsers fire right
-          // after pointerdown (browser artifact, not real finger movement)
-          if (Date.now() - holdStart < 50) return;
-          var dx = ev.clientX - sx, dy = ev.clientY - sy;
-          if (Math.abs(dx) > MOVE_CANCEL_H || Math.abs(dy) > MOVE_CANCEL_V) cleanup();
-        }
-        document.addEventListener('pointermove',   onEarlyMove);
-        document.addEventListener('pointerup',     cleanup);
-        document.addEventListener('pointercancel', cleanup);
-        timer = setTimeout(function() {
-          cleanup();
-          startDrag(c, shelf, header, e.pointerId, sx, sy);
-        }, HOLD_MS);
-      });
-    });
-  }
-
-  // ── Handle drag after long-press activates ─────────────────────
-  function startDrag(c, shelf, header, pointerId, sx, sy) {
-    if (navigator.vibrate) navigator.vibrate(30);
-    var rect        = shelf.getBoundingClientRect();
-    var grabOffsetY = sy - rect.top;
-
-    // Placeholder preserves the gap while the shelf floats
-    var ph = document.createElement('div');
-    ph.className = 'shelf drag-placeholder';
-    ph.style.height = rect.height + 'px';
-    c.insertBefore(ph, shelf);
-
-    // Lift shelf out of flow
-    shelf.style.position = 'fixed';
-    shelf.style.top      = rect.top  + 'px';
-    shelf.style.left     = rect.left + 'px';
-    shelf.style.width    = rect.width + 'px';
-    shelf.style.zIndex   = '1000';
-    shelf.style.margin   = '0';
-    shelf.classList.add('dragging');
-    header.classList.add('reorder-active');
-    header.setPointerCapture(pointerId);
-
-    function onMove(e) {
-      e.preventDefault();
-      shelf.style.top = (e.clientY - grabOffsetY) + 'px';
-      var midY     = e.clientY;
-      var siblings = Array.from(c.querySelectorAll(':scope > .shelf:not(.dragging)'));
-      var insertRef = null;
-      for (var i = 0; i < siblings.length; i++) {
-        var r = siblings[i].getBoundingClientRect();
-        if (midY < r.top + r.height / 2) { insertRef = siblings[i]; break; }
-      }
-      if (insertRef) {
-        if (ph.nextSibling !== insertRef) c.insertBefore(ph, insertRef);
-      } else {
-        if (c.lastChild !== ph) c.appendChild(ph);
-      }
-    }
-
-    function onUp() {
-      shelf.style.position = '';
-      shelf.style.top      = '';
-      shelf.style.left     = '';
-      shelf.style.width    = '';
-      shelf.style.zIndex   = '';
-      shelf.style.margin   = '';
-      shelf.classList.remove('dragging');
-      header.classList.remove('reorder-active');
-      c.insertBefore(shelf, ph);
-      ph.parentNode.removeChild(ph);
-      saveShelfOrder();
-      header.removeEventListener('pointermove',   onMove);
-      header.removeEventListener('pointerup',     onUp);
-      header.removeEventListener('pointercancel', onUp);
-      // Suppress the click that fires immediately after pointerup
-      header.addEventListener('click', function eatClick(ev) {
-        ev.stopImmediatePropagation();
-        header.removeEventListener('click', eatClick, true);
-      }, { capture: true, once: true });
-    }
-
-    header.addEventListener('pointermove',   onMove);
-    header.addEventListener('pointerup',     onUp);
-    header.addEventListener('pointercancel', onUp);
-  }
-
-  // ── Init — wait for profile-panel to become visible after auth ──
-  document.addEventListener('DOMContentLoaded', function() {
-    restoreShelfOrder(); // safe to run even while panel is hidden
-    var panel = document.getElementById('profile-panel');
-    if (!panel) return;
-    if (!panel.classList.contains('hidden')) { initReorder(); return; }
-    // MutationObserver fires when profile-auth.js removes the 'hidden' class
-    var obs = new MutationObserver(function() {
-      if (!panel.classList.contains('hidden')) { obs.disconnect(); initReorder(); }
-    });
-    obs.observe(panel, { attributes: true, attributeFilter: ['class'] });
-  });
-})();
-</script>
+<script src="shelf-reorder.js"></script>
 
 <script>
 // ── Character sheet randomize system ─────────────────────────
@@ -931,247 +758,23 @@ document.getElementById('btn-char-save').addEventListener('click', async () => {
 });
 
 // ══════════════════════════════════════════════════════════════
-//  ADMIN SHOWRUNNER PANEL
-//  Replicates the poll admin from index.html.
+//  ADMIN SHOWRUNNER PANEL (shared module: poll-admin.js)
 //  Only mounted when data.isAdmin === true in Firestore.
 // ══════════════════════════════════════════════════════════════
 
-function pEsc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-const P_LETTERS       = ['A','B','C','D','E'];
-const P_MIN_OPTS      = 2;
-const P_MAX_OPTS      = 5;
-const P_PLACEHOLDERS  = ['The first option…','The second option…','A third choice…','Or maybe this…','One more possibility…'];
+import { createPollAdmin } from './poll-admin.js';
 
-// Reuse the already-initialized 'ndt-profile' Firebase app for Realtime Database
-const _pollApp   = getApps().find(a => a.name === 'ndt-profile');
-const _rtdb      = _pollApp ? getDatabase(_pollApp) : null;
-const _pollRef   = _rtdb ? rtdbRef(_rtdb, 'nodice/poll')  : null;
-const _votesRef  = _rtdb ? rtdbRef(_rtdb, 'nodice/votes') : null;
+const _pollApp  = getApps().find(a => a.name === 'ndt-profile');
+const _rtdb     = _pollApp ? getDatabase(_pollApp) : null;
+const _pollRef  = _rtdb ? rtdbRef(_rtdb, 'nodice/poll')  : null;
+const _votesRef = _rtdb ? rtdbRef(_rtdb, 'nodice/votes') : null;
+
+const _admin = createPollAdmin({
+  set: rtdbSet, ref: rtdbRef, db: _rtdb,
+  pollRef: _pollRef, votesRef: _votesRef, onValue,
+});
 
 let _pollListenerSetUp = false;
-let _pollCurrentSnap   = null;
-let _pollUnsubVotes    = null;
-let _pollOptCount      = P_MIN_OPTS;
-
-function pBadge() {
-  const live = !!_rtdb;
-  return `<div class="source-badge ${live?'live':'fallback'}"><span class="dot"></span>${live?'Connected':'Firebase not configured'}</div>`;
-}
-
-function pRenderAdminForm(preserveValues) {
-  const optRowsHtml = P_LETTERS.slice(0, _pollOptCount).map((letter, i) => {
-    const isReq = i < P_MIN_OPTS;
-    const removeBtn = isReq
-      ? `<div class="poll-btn-remove-placeholder"></div>`
-      : `<button class="poll-btn-remove-option" data-index="${i}" title="Remove">✕</button>`;
-    const val = preserveValues && preserveValues[i] ? pEsc(preserveValues[i]) : '';
-    return `<div class="poll-option-row" id="padmin-row-${i}">
-      <span class="poll-option-letter-tag">${letter}</span>
-      <input class="poll-form-input" id="padmin-opt-${i}" type="text"
-        placeholder="${P_PLACEHOLDERS[i]}" maxlength="80" autocomplete="off" value="${val}">
-      ${removeBtn}</div>`;
-  }).join('');
-  const addBtnHtml = _pollOptCount < P_MAX_OPTS
-    ? `<button class="poll-btn-add-option" id="padmin-add-btn">
-         <span style="font-size:1.1rem;line-height:1;opacity:.55;">＋</span>
-         Add another option (${_pollOptCount}/${P_MAX_OPTS})</button>`
-    : '';
-  document.getElementById('poll-inner').innerHTML = `
-    <div class="poll-admin-section">
-      <div class="poll-admin-badge">⚔ Showrunner</div>
-      <div class="poll-form-group">
-        <label class="poll-form-label" for="padmin-q">Question</label>
-        <input class="poll-form-input" id="padmin-q" type="text"
-          placeholder="What does the crowd choose?" maxlength="120" autocomplete="off"
-          value="${preserveValues && preserveValues.question ? pEsc(preserveValues.question) : ''}">
-      </div>
-      <div class="poll-options-section-label">
-        <span class="poll-form-label" style="margin-bottom:0;">Options</span>
-        <span class="poll-options-count-hint">Min 2 · Max 5</span>
-      </div>
-      <div id="padmin-opts">${optRowsHtml}</div>
-      ${addBtnHtml}
-      <button class="poll-btn-launch" id="padmin-launch-btn">⚔ Launch Poll</button>
-      ${pBadge()}
-    </div>`;
-  document.getElementById('poll-footer').innerHTML = '';
-  document.getElementById('padmin-launch-btn').onclick = pAdminLaunch;
-  document.getElementById('padmin-q').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('padmin-opt-0')?.focus();
-  });
-  for (let i = 0; i < _pollOptCount; i++) {
-    document.getElementById(`padmin-opt-${i}`).addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        const next = document.getElementById(`padmin-opt-${i+1}`);
-        if (next) next.focus(); else pAdminLaunch();
-      }
-    });
-  }
-  document.getElementById('padmin-add-btn')?.addEventListener('click', () => {
-    const vals = pGatherValues();
-    _pollOptCount++;
-    pRenderAdminForm(vals);
-    setTimeout(() => document.getElementById(`padmin-opt-${_pollOptCount-1}`)?.focus(), 50);
-  });
-  document.querySelectorAll('.poll-btn-remove-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.index);
-      const vals = pGatherValues();
-      vals.splice(idx, 1);
-      _pollOptCount--;
-      pRenderAdminForm(vals);
-    });
-  });
-}
-
-function pGatherValues() {
-  const vals = [];
-  vals.question = document.getElementById('padmin-q')?.value ?? '';
-  for (let i = 0; i < _pollOptCount; i++) {
-    vals.push(document.getElementById(`padmin-opt-${i}`)?.value ?? '');
-  }
-  return vals;
-}
-
-async function pAdminLaunch() {
-  if (!_pollRef) return;
-  const q = document.getElementById('padmin-q')?.value.trim();
-  const options = [];
-  for (let i = 0; i < _pollOptCount; i++) {
-    options.push((document.getElementById(`padmin-opt-${i}`)?.value ?? '').trim());
-  }
-  let hasError = false;
-  if (!q) {
-    const el = document.getElementById('padmin-q');
-    el.style.borderColor = '#c0392b'; el.focus();
-    setTimeout(() => { el.style.borderColor = ''; }, 1200);
-    hasError = true;
-  }
-  options.forEach((val, i) => {
-    if (!val) {
-      const el = document.getElementById(`padmin-opt-${i}`);
-      if (el) { el.style.borderColor = '#c0392b'; if (!hasError) el.focus(); setTimeout(() => { el.style.borderColor = ''; }, 1200); }
-      hasError = true;
-    }
-  });
-  if (hasError) return;
-  const btn = document.getElementById('padmin-launch-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Launching…'; }
-  await rtdbSet(_pollRef, { question: q, options, active: true, revealed: false, ts: Date.now() });
-  await rtdbSet(_votesRef, {});
-  _pollOptCount = P_MIN_OPTS;
-}
-
-function pRenderAdminPreReveal(poll, votes) {
-  const opts = poll.options || [];
-  const counts = opts.map((_,i) => Object.values(votes).filter(v => v === String(i)).length);
-  const total = counts.reduce((a,b) => a+b, 0);
-  const pcts  = counts.map(c => total ? Math.round(c/total*100) : 0);
-  const maxC  = Math.max(...counts);
-  const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
-    <div class="poll-result-label-row">
-      <span class="poll-result-opt-name">${P_LETTERS[i]} — ${pEsc(o)}</span>
-      <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
-    </div>
-    <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
-  </div>`).join('');
-  document.getElementById('poll-inner').innerHTML = `
-    <div class="poll-admin-section">
-      <div class="poll-admin-badge">⚔ Showrunner</div>
-      <div class="poll-admin-results-header">
-        <div>
-          <div class="poll-question-label">Active Poll</div>
-        </div>
-        <div class="poll-live-indicator"><span class="poll-live-dot"></span>Votes incoming</div>
-      </div>
-      <p class="poll-question-text">${pEsc(poll.question)}</p>
-      <div class="poll-result-wrap">${barsHtml}</div>
-      <p class="total-votes">${total} vote${total!==1?'s':''} cast — audience sees nothing yet</p>
-      <button class="poll-btn-reveal" id="padmin-reveal-btn">🎲 Reveal Results to Audience</button>
-      <button class="poll-btn-danger" id="padmin-close-btn">Close Poll &amp; Clear</button>
-      ${pBadge()}
-    </div>`;
-  document.getElementById('poll-footer').innerHTML = '';
-  document.getElementById('padmin-reveal-btn').onclick = pAdminReveal;
-  document.getElementById('padmin-close-btn').onclick  = pAdminClear;
-}
-
-function pRenderAdminPostReveal(poll, votes) {
-  const opts   = poll.options || [];
-  const counts = opts.map((_,i) => Object.values(votes).filter(v => v === String(i)).length);
-  const total  = counts.reduce((a,b) => a+b, 0);
-  const pcts   = counts.map(c => total ? Math.round(c/total*100) : 0);
-  const maxC   = Math.max(...counts);
-  const barsHtml = opts.map((o,i) => `<div class="poll-result-row">
-    <div class="poll-result-label-row">
-      <span class="poll-result-opt-name">${P_LETTERS[i]} — ${pEsc(o)}</span>
-      <span><span class="poll-result-pct">${pcts[i]}%</span><span class="poll-result-count">${counts[i]}</span></span>
-    </div>
-    <div class="bar-track"><div class="bar-fill${counts[i]===maxC&&total>0?' winner':''}" style="width:${pcts[i]}%"></div></div>
-  </div>`).join('');
-  document.getElementById('poll-inner').innerHTML = `
-    <div class="poll-admin-section">
-      <div class="poll-admin-badge">⚔ Showrunner</div>
-      <div class="poll-admin-results-header">
-        <div>
-          <div class="poll-question-label">Results Revealed</div>
-        </div>
-        <div class="poll-live-indicator" style="color:var(--gold);">
-          <span class="poll-live-dot" style="background:var(--gold);animation:none;"></span>Visible to audience
-        </div>
-      </div>
-      <p class="poll-question-text">${pEsc(poll.question)}</p>
-      <div class="poll-result-wrap">${barsHtml}</div>
-      <p class="total-votes">${total} vote${total!==1?'s':''} cast</p>
-      <button class="poll-btn-new" id="padmin-new-btn">New Poll</button>
-      <button class="poll-btn-danger" id="padmin-close2-btn">Close Poll &amp; Clear</button>
-      ${pBadge()}
-    </div>`;
-  document.getElementById('poll-footer').innerHTML = '';
-  document.getElementById('padmin-new-btn').onclick    = pAdminClear;
-  document.getElementById('padmin-close2-btn').onclick = pAdminClear;
-}
-
-async function pAdminReveal() {
-  if (!_rtdb) return;
-  const btn = document.getElementById('padmin-reveal-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Revealing…'; }
-  await rtdbSet(rtdbRef(_rtdb, 'nodice/poll/revealed'), true);
-}
-
-async function pAdminClear() {
-  if (!_pollRef || !_votesRef) return;
-  await rtdbSet(_pollRef, { active: false });
-  await rtdbSet(_votesRef, {});
-  _pollOptCount = P_MIN_OPTS;
-}
-
-function pStartListener() {
-  if (!_pollRef) {
-    document.getElementById('poll-inner').innerHTML =
-      '<div class="poll-waiting">Firebase not configured.</div>';
-    return;
-  }
-  document.getElementById('poll-inner').innerHTML =
-    '<div class="poll-waiting"><span style="font-size:1.2rem">⚔</span><br>Connecting…</div>';
-
-  onValue(_pollRef, snap => {
-    const poll = snap.val(); _pollCurrentSnap = poll;
-    if (!poll || !poll.active) {
-      if (_pollUnsubVotes) { _pollUnsubVotes(); _pollUnsubVotes = null; }
-      pRenderAdminForm();
-    } else {
-      if (_pollUnsubVotes) _pollUnsubVotes();
-      _pollUnsubVotes = onValue(_votesRef, votesSnap => {
-        const votes = votesSnap.val() || {};
-        if (poll.revealed) pRenderAdminPostReveal(poll, votes);
-        else               pRenderAdminPreReveal(poll, votes);
-      });
-    }
-  });
-}
 
 function initAdminPanel(isAdmin) {
   const card = document.getElementById('admin-poll-card');
@@ -1179,13 +782,10 @@ function initAdminPanel(isAdmin) {
   if (!isAdmin) { card.classList.add('hidden'); return; }
   card.classList.remove('hidden');
 
-  // Open/close is driven by toggleProfileShelf('adminpoll') via onclick on .shelf-header.
-  // Register a hook so toggleProfileShelf can lazy-start the Firebase listener
-  // the first time the admin shelf is opened.
   window._onProfileShelfOpen = function(id) {
     if (id === 'adminpoll' && !_pollListenerSetUp) {
       _pollListenerSetUp = true;
-      pStartListener();
+      _admin.startListener();
     }
   };
 }

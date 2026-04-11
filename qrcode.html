@@ -44,23 +44,7 @@
   <img src="qr.png" alt="No Dice QR Code" style="max-width:95vmin;max-height:95vmin;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.6);">
 </div>
 
-<script>
-// ── Theme toggle ──────────────────────────────
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-  const next = cur === 'dark' ? 'light' : cur === 'light' ? 'nodice' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  try { localStorage.setItem('vaultTheme', next); } catch(e) {}
-  const icons = { dark: '☀️', light: '🛑', nodice: '🌙' };
-  document.getElementById('themeBtn').textContent = icons[next] || '☀️';
-}
-(function(){
-  const t = document.documentElement.getAttribute('data-theme') || 'dark';
-  const btn = document.getElementById('themeBtn');
-  const icons = { dark: '☀️', light: '🛑', nodice: '🌙' };
-  if (btn) btn.textContent = icons[t] || '☀️';
-})();
-</script>
+<script src="theme-toggle.js"></script>
 <script type="module">
 import { mountProfileButton } from './profile-auth.js';
 mountProfileButton();

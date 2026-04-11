@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "nodice": {
+      "poll": {
+        ".read": true,
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['question', 'options', 'active']) || newData.child('active').val() === false",
+        "question": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+        },
+        "options": {
+          ".validate": "newData.hasChildren(['0', '1'])",
+          "$idx": {
+            ".validate": "$idx.matches(/^[0-4]$/) && newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+          }
+        },
+        "active":   { ".validate": "newData.isBoolean()" },
+        "revealed": { ".validate": "newData.isBoolean()" },
+        "ts":       { ".validate": "newData.isNumber()" }
+      },
+      "votes": {
+        ".read": true,
+        ".write": "auth != null",
+        "$voterId": {
+          ".write": true,
+          ".validate": "newData.isString() && newData.val().matches(/^[0-4]$/) && !data.exists()"
+        }
+      }
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
