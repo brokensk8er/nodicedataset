@@ -2976,12 +2976,18 @@ html[data-theme="dark"] .profile-btn--signed-in {
                            (e.g. theme-toggle-btn, profile-btn). 'clip' does not. */
   }
 
-  /* ── Header ── */
+  /* ── Header ──
+     border-bottom: none overrides the inherited solid border from bare header {}
+     rules in other page sections (e.g. chargen, qrcode). Those rules apply
+     globally and add a 1px solid border that bleeds across the full content
+     area. The hub uses a .section-rule div below the header instead, which
+     provides the same visual separator with a gradient fade. */
   header {
     text-align: center;
     padding: 1.6rem 0 .8rem;
     position: relative;
     background: transparent;
+    border-bottom: none;
   }
   /* .site-label comes from styles.css */
   .hub-header h1 {
