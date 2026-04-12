@@ -2984,7 +2984,7 @@ html[data-theme="dark"] .profile-btn--signed-in {
      provides the same visual separator with a gradient fade. */
   header {
     text-align: center;
-    padding: 1.6rem 0 .8rem;
+    padding: 1.6rem 0 .3rem;
     position: relative;
     background: transparent;
     border-bottom: none;
