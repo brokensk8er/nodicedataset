@@ -14,54 +14,59 @@
 <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 
 <style>
-  /* ── Page layout ── */
+  /* ── Page layout — matches index.html .page-wrap (shelf-ready) ── */
   html, body { height: 100%; }
   body {
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
+    align-items: center;
   }
 
   /* ── Header ── */
   /* .site-label, header h1, .subtitle come from styles.css */
   header {
+    width: 100%;
+    max-width: 480px;
     text-align: center;
-    padding: 12px 16px 8px;
-    border-bottom: 1px solid var(--border);
+    padding: 14px 14px 8px;
     flex-shrink: 0;
   }
 
   /* ── Main ── */
   main {
     flex: 1;
+    width: 100%;
+    max-width: 480px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 16px;
+    padding: 10px 14px 18px;
+    gap: 10px;
   }
 
   /* ── Screen system — only one visible at a time ── */
-  .screen { display: none; width: 100%; max-width: 480px; }
+  .screen { display: none; width: 100%; }
   .screen.active {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
-  /* ── Card (matches other tools) ── */
+  /* ── Card — matches index.html .shelf styling for future shelf integration ── */
   .card {
     width: 100%;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 18px;
-    box-shadow: 0 6px 32px var(--shadow);
+    border-radius: 16px;
+    box-shadow: 0 2px 14px var(--shadow);
     overflow: hidden;
-    animation: cardIn .45s cubic-bezier(.22,1,.36,1) both;
+    animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
   }
+  /* Combat card's interior uses the same faint gold tint as .shelf-content */
+  .combat-card-body { background: rgba(201,168,76,.05); }
 
-  /* .card-footer base comes from styles.css — combat uses extra side padding */
-  .card-footer { padding: 10px 22px 14px; }
+  /* .card-footer base comes from styles.css */
+  .card-footer { padding: 10px 14px 12px; }
 
   /* ────────────────────────────────────────────────
      HUB SCREEN
@@ -112,43 +117,77 @@
   }
 
   /* ────────────────────────────────────────────────
-     INITIATIVE + COMBAT — shared combatant reveal
+     COMBATANT REVEAL — compact top strip
   ──────────────────────────────────────────────── */
   .combatant-reveal {
     text-align: center;
-    padding: 22px 22px 8px;
+    padding: 14px 14px 6px;
+    position: relative;
   }
   .enemy-emoji {
-    font-size: 3.6rem;
-    display: block;
+    font-size: 2.8rem;
+    display: inline-block;
     line-height: 1;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     animation: slideUp .4s ease both;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .enemy-emoji.hit { animation: hitJitter .35s ease; }
+  .enemy-emoji.fallen {
+    animation: hitJitter .45s ease, deathFade .6s ease .45s forwards;
+  }
+  @keyframes hitJitter {
+    0%,100% { transform: translateX(0) rotate(0); }
+    15%     { transform: translateX(-6px) rotate(-4deg); }
+    30%     { transform: translateX(5px) rotate(3deg); }
+    45%     { transform: translateX(-4px) rotate(-2deg); }
+    60%     { transform: translateX(3px) rotate(2deg); }
+    80%     { transform: translateX(-1px) rotate(0); }
+  }
+  @keyframes deathFade {
+    0%   { opacity: 1; filter: none; }
+    100% { opacity: 0.55; filter: grayscale(0.6); }
   }
   .enemy-name {
     font-family: 'Cinzel', serif;
-    font-size: 1.25rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--ink);
     letter-spacing: 0.03em;
+    line-height: 1.2;
   }
+  .enemy-name.fallen { color: var(--muted); text-decoration: line-through; text-decoration-color: rgba(201,168,76,0.4); }
+  .kill-counter-inline {
+    position: absolute;
+    top: 8px; right: 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+  }
+  .kill-counter-inline strong { color: var(--gold); margin-left: 4px; }
+
   .turn-label {
     font-family: 'Cinzel', serif;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--gold);
-    margin: 6px 0 2px;
     text-align: center;
-    min-height: 1rem;
+    min-height: 0.9rem;
+    margin-top: 2px;
   }
   .subtext {
     font-family: 'Lato', sans-serif;
     font-style: italic;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     color: var(--muted);
     text-align: center;
-    margin-top: 4px;
   }
 
   /* ── HP display (coin pips) ── */
@@ -185,27 +224,27 @@
 
   /* ────────────────────────────────────────────────
      COIN STAGE + CUSTOM ANIMATION
-     Phase map (1.3s total):
-       0–30%   outbound (translateY up, shrinks)
-       30–45%  held small at apex
-       45–100% return + grow; inner face flips several times
+     Default: player roll — coin flies UP from below, returns.
+     .from-enemy: coin flies DOWN from above, returns.
+     Total: 1.3s in both directions. Inner face flips during return.
   ──────────────────────────────────────────────── */
   .coin-stage {
-    height: 140px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 4px 0 0;
+    margin: 0;
     position: relative;
     overflow: visible;
   }
   .combat-coin {
-    width: 110px;
-    height: 110px;
+    width: 90px;
+    height: 90px;
     position: relative;
     transform-origin: center;
   }
   .combat-coin.animating { animation: coinTravel 1.3s cubic-bezier(.4,.05,.6,.95) forwards; }
+  .combat-coin.animating.from-enemy { animation: coinTravelInverted 1.3s cubic-bezier(.4,.05,.6,.95) forwards; }
   .combat-coin.animating .face {
     animation: coinFlip 0.11s linear 5;
     animation-delay: 0.72s;
@@ -247,8 +286,14 @@
 
   @keyframes coinTravel {
     0%   { transform: translateY(0) scale(1); opacity: 1; }
-    30%  { transform: translateY(-130px) scale(0.18); opacity: 0.85; }
-    45%  { transform: translateY(-130px) scale(0.18); opacity: 0.85; }
+    30%  { transform: translateY(-110px) scale(0.18); opacity: 0.85; }
+    45%  { transform: translateY(-110px) scale(0.18); opacity: 0.85; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes coinTravelInverted {
+    0%   { transform: translateY(0) scale(1); opacity: 1; }
+    30%  { transform: translateY(110px) scale(0.18); opacity: 0.85; }
+    45%  { transform: translateY(110px) scale(0.18); opacity: 0.85; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
   @keyframes coinFlip {
@@ -260,59 +305,99 @@
   /* ── Result banner (Go Time / No Time) ── */
   .result-banner {
     font-family: 'Cinzel', serif;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    min-height: 1.6rem;
+    min-height: 1.3rem;
     text-align: center;
     opacity: 0;
     transform: translateY(6px);
     transition: opacity 0.35s, transform 0.35s;
-    padding: 4px 0 8px;
   }
   .result-banner.visible { opacity: 1; transform: translateY(0); }
   .result-banner.pass { color: var(--pass-grn); }
   .result-banner.fail { color: var(--fail-red); }
 
   /* ────────────────────────────────────────────────
-     COMBAT LOG
+     COMBAT LOG — prominent scrollable feed
+     New entries appear at the bottom and push older
+     ones up. Newest entry gets a subtle slide-in.
   ──────────────────────────────────────────────── */
   .combat-log {
-    padding: 10px 18px 12px;
+    padding: 10px 14px;
     border-top: 1px solid var(--border);
-    background: rgba(26,26,46,0.015);
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 140px;
+    max-height: 180px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
+  .combat-log::-webkit-scrollbar { width: 4px; }
+  .combat-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
   .combat-log-title {
     font-family: 'Cinzel', serif;
-    font-size: 0.58rem;
-    letter-spacing: 0.14em;
+    font-size: 0.56rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--gold-dim);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    padding-bottom: 4px;
+    z-index: 1;
+  }
+  .combat-log-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
   }
   .combat-log-entry {
     font-family: 'Lato', sans-serif;
     font-size: 0.78rem;
-    font-weight: 300;
+    font-weight: 400;
     color: var(--muted);
-    line-height: 1.45;
-    padding: 2px 0;
+    line-height: 1.4;
+    padding: 3px 0;
+    animation: logEntryIn .3s ease both;
   }
   .combat-log-entry .actor {
     font-weight: 700;
     color: var(--ink);
   }
-  .combat-log-entry.killing-blow {
-    font-weight: 400;
+  .combat-log-entry.system {
+    font-style: italic;
+    color: var(--gold-dim);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+  }
+  .combat-log-entry.hit  .outcome { color: var(--pass-grn); font-weight: 700; }
+  .combat-log-entry.miss .outcome { color: var(--fail-red); font-weight: 700; }
+  .combat-log-entry.death {
+    font-weight: 700;
     color: var(--ink);
     border-left: 3px solid var(--gold);
     padding: 5px 8px;
-    background: rgba(192,57,43,0.05);
+    background: rgba(201,168,76,0.08);
     border-radius: 0 4px 4px 0;
-    margin: 4px 0;
+    margin: 2px 0;
+  }
+  .combat-log-entry.killing-blow {
+    border-left-color: var(--fail-red);
+    background: rgba(192,57,43,0.06);
   }
   .combat-log-entry.killing-blow .actor { color: var(--fail-red); }
+  @keyframes logEntryIn {
+    0%   { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
 
   /* ────────────────────────────────────────────────
      DEATH SCREENS
@@ -464,79 +549,40 @@
   </section>
 
   <!-- ============================================
-       INITIATIVE SCREEN — roll to determine turn order
-       ============================================ -->
-  <section id="initScreen" class="screen">
-    <div class="card">
-      <div class="combatant-reveal">
-        <span class="enemy-emoji" id="initEmoji">🧌</span>
-        <div class="enemy-name" id="initName">Goblin</div>
-        <div class="subtext">approaches for battle&hellip;</div>
-      </div>
-      <div class="coin-stage">
-        <div class="combat-coin" id="initCoin">
-          <div class="face face-mystery" id="initCoinFace"></div>
-        </div>
-      </div>
-      <div class="turn-label" id="initLabel">Rolling for initiative</div>
-      <div class="result-banner" id="initResult"></div>
-      <div class="card-footer">
-        <button id="btnInitRoll" class="btn-primary">Roll for Initiative</button>
-        <div id="initSourceBadge"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       ACTIVE COMBAT SCREEN
+       COMBAT SCREEN — unified initiative + active combat
+       Initiative is the first roll of combat. After that,
+       regular turn-based rolling. Enemy death is inline
+       (emoji morphs to gravestone, next enemy fades in).
        ============================================ -->
   <section id="combatScreen" class="screen">
     <div class="card">
-      <div class="combatant-reveal">
-        <span class="enemy-emoji" id="combatEmoji">🧌</span>
-        <div class="enemy-name" id="combatName">Goblin</div>
-      </div>
-      <div class="hp-display" id="enemyHP">
-        <span class="hp-label">HP</span>
-      </div>
-      <div class="coin-stage">
-        <div class="combat-coin" id="combatCoin">
-          <div class="face face-mystery" id="combatCoinFace"></div>
+      <div class="combat-card-body">
+        <div class="combatant-reveal">
+          <div class="kill-counter-inline">Felled<strong id="combatKillCount">0</strong></div>
+          <span class="enemy-emoji" id="combatEmoji">🧌</span>
+          <div class="enemy-name" id="combatName">Goblin</div>
         </div>
-      </div>
-      <div class="turn-label" id="combatTurnLabel">Your turn</div>
-      <div class="result-banner" id="combatResult"></div>
-      <div class="hp-display" id="playerHP">
-        <span class="hp-label">You</span>
-      </div>
-      <div class="combat-log">
-        <div class="combat-log-title">Combat Log</div>
-        <div id="combatLogEntries"></div>
-      </div>
-      <div class="card-footer">
-        <button id="btnCombatRoll" class="btn-primary">Roll</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       ENEMY DEATH SCREEN
-       ============================================ -->
-  <section id="enemyDeathScreen" class="screen">
-    <div class="card">
-      <div class="death-card">
-        <span class="death-icon">🪦</span>
-        <div class="death-title enemy" id="enemyDeathName">Goblin has fallen</div>
-        <div class="death-subtitle">
-          Enemies felled this session: <strong id="edKillCount">1</strong>
+        <div class="hp-display" id="enemyHP">
+          <span class="hp-label">HP</span>
+        </div>
+        <div class="coin-stage">
+          <div class="combat-coin" id="combatCoin">
+            <div class="face face-mystery" id="combatCoinFace"></div>
+          </div>
+        </div>
+        <div class="turn-label" id="combatTurnLabel">Rolling for initiative</div>
+        <div class="result-banner" id="combatResult"></div>
+        <div class="hp-display" id="playerHP">
+          <span class="hp-label">You</span>
         </div>
       </div>
       <div class="combat-log">
         <div class="combat-log-title">Combat Log</div>
-        <div id="enemyDeathLog"></div>
+        <div class="combat-log-entries" id="combatLogEntries"></div>
       </div>
       <div class="card-footer">
-        <button id="btnContinue" class="btn-primary">Continue</button>
+        <button id="btnCombatRoll" class="btn-primary">Roll for Initiative</button>
+        <div id="combatSourceBadge"></div>
       </div>
     </div>
   </section>
@@ -559,7 +605,7 @@
       </div>
       <div class="combat-log">
         <div class="combat-log-title">Combat Log</div>
-        <div id="playerDeathLog"></div>
+        <div class="combat-log-entries" id="playerDeathLog"></div>
       </div>
       <div class="card-footer">
         <button id="btnRiseAgain" class="btn-rise-again">Rise, Again!</button>
@@ -644,11 +690,11 @@ function createFreshState() {
   return {
     player: { maxCoins: 1, currentCoins: 1, isAlive: true },
     enemy:  { name: '', coins: 1, artwork: '', maxCoins: 1, currentCoins: 1, isAlive: true },
+    phase: 'initiative',          // 'initiative' | 'active'
     currentTurn: 'player',
     initiativeWinner: null,
     combatLog: [],
     enemiesKilled: 0,
-    initiativeRolls: { player: null, enemy: null },
     isRolling: false,
   };
 }
@@ -762,23 +808,26 @@ function setFace(el, outcome) {
 
 /**
  * Runs the custom coin roll animation:
- *   1. travels upward + shrinks
+ *   1. travels (up for player / down for enemy) + shrinks
  *   2. holds small at apex
  *   3. returns + grows, with inner flip during return
  *   4. reveals final face near the end
+ *
+ * @param actor - 'player' (default, coin flies up) or 'enemy' (flies down)
  */
-function animateCoinRoll(coinEl, faceEl, outcome) {
+function animateCoinRoll(coinEl, faceEl, outcome, actor = 'player') {
   return new Promise((resolve) => {
     setFace(faceEl, 'mystery');
-    coinEl.classList.remove('animating');
+    coinEl.classList.remove('animating', 'from-enemy');
     void coinEl.offsetWidth; // force reflow so re-add triggers fresh run
     coinEl.classList.add('animating');
+    if (actor === 'enemy') coinEl.classList.add('from-enemy');
 
     // swap to result face just before the last flip completes (~85%)
     setTimeout(() => setFace(faceEl, outcome), 1100);
     // resolve when full travel animation completes
     setTimeout(() => {
-      coinEl.classList.remove('animating');
+      coinEl.classList.remove('animating', 'from-enemy');
       resolve();
     }, 1300);
   });
@@ -810,29 +859,89 @@ function renderHP(containerId, current, max) {
 }
 
 // ============================================================
-//  COMBAT LOG (last 5 actions)
+//  COMBAT LOG — rich entry system
+//  Entries flow up from the bottom. Last 12 kept in memory
+//  (log is scrollable so we can show more than before).
+//
+//  Entry shape: { kind, html, isKillingBlow? }
+//    kind: 'system' | 'action' | 'hit' | 'miss' | 'death' | 'killing-blow'
 // ============================================================
-function logAction(actor, outcome, damage, isKillingBlow = false) {
-  const displayName = actor === 'player' ? 'You' : combatState.enemy.name;
-  const actionText = outcome === 'pass'
-    ? (damage > 0 ? `rolled Go Time — hit for ${damage}!` : 'rolled Go Time!')
-    : 'rolled No Time — miss.';
-  combatState.combatLog.push({ actor, displayName, actionText, isKillingBlow });
-  if (combatState.combatLog.length > 5) combatState.combatLog.shift();
+const LOG_MAX = 12;
+
+function log(kind, html, isKillingBlow = false) {
+  combatState.combatLog.push({ kind, html, isKillingBlow });
+  if (combatState.combatLog.length > LOG_MAX) combatState.combatLog.shift();
   renderCombatLog('combatLogEntries');
+}
+
+// Semantic helpers — call these throughout combat for consistent phrasing.
+const playerName = () => 'You';
+const enemyName  = () => combatState.enemy.name || 'the foe';
+
+function logSystem(text) {
+  log('system', text);
+}
+function logBattleBegin() {
+  log('system', `Battle begins &mdash; <span class="actor">${enemyName()}</span> approaches!`);
+}
+function logInitiativeCall() {
+  log('system', 'Roll for initiative!');
+}
+function logInitiativeRoll(actor, outcome) {
+  const name = actor === 'player' ? playerName() : enemyName();
+  const faceText = outcome === 'pass' ? 'Go Time' : 'No Time';
+  log('action', `<span class="actor">${name}</span> rolled <span class="outcome">${faceText}</span> for initiative.`);
+}
+function logInitiativeWinner(winner) {
+  const name = winner === 'player' ? playerName() : enemyName();
+  const verb = winner === 'player' ? 'strike' : 'strikes';
+  log('system', `<span class="actor">${name}</span> ${verb} first!`);
+}
+function logAttack(actor) {
+  const name = actor === 'player' ? playerName() : enemyName();
+  const verb = actor === 'player' ? 'attacks' : 'swings';
+  log('action', `<span class="actor">${name}</span> ${verb}!`);
+}
+function logRoll(actor, outcome, damage) {
+  const name = actor === 'player' ? playerName() : enemyName();
+  if (outcome === 'pass') {
+    log('hit', `<span class="actor">${name}</span> rolled <span class="outcome">Go Time</span> &mdash; hit for ${damage}!`);
+  } else {
+    log('miss', `<span class="actor">${name}</span> rolled <span class="outcome">No Time</span> &mdash; miss.`);
+  }
+}
+function logChain(actor) {
+  const name = actor === 'player' ? playerName() : enemyName();
+  log('system', `<span class="actor">${name}</span> rolls again!`);
+}
+function logTurnPass(toActor) {
+  const name = toActor === 'player' ? playerName() : enemyName();
+  log('system', `Turn passes to <span class="actor">${name}</span>.`);
+}
+function logDeath(actor, isKillingBlow = false) {
+  const name = actor === 'player' ? playerName() : enemyName();
+  const kind = isKillingBlow ? 'killing-blow' : 'death';
+  const text = actor === 'player'
+    ? `<span class="actor">${name}</span> have fallen.`
+    : `<span class="actor">${name}</span> falls!`;
+  log(kind, text, isKillingBlow);
 }
 
 function renderCombatLog(targetId) {
   const el = document.getElementById(targetId);
   if (!el) return;
   if (!combatState.combatLog.length) {
-    el.innerHTML = '<div class="combat-log-entry" style="opacity:0.5">— No actions yet —</div>';
+    el.innerHTML = '<div class="combat-log-entry system">&mdash; Combat awaits &mdash;</div>';
     return;
   }
   el.innerHTML = combatState.combatLog.map(entry => {
-    const cls = entry.isKillingBlow ? 'combat-log-entry killing-blow' : 'combat-log-entry';
-    return `<div class="${cls}"><span class="actor">${entry.displayName}</span> ${entry.actionText}</div>`;
+    let cls = 'combat-log-entry ' + entry.kind;
+    if (entry.isKillingBlow) cls += ' killing-blow';
+    return `<div class="${cls}">${entry.html}</div>`;
   }).join('');
+  // auto-scroll the log container to show the newest entry at the bottom
+  const container = el.closest('.combat-log');
+  if (container) container.scrollTop = container.scrollHeight;
 }
 
 // ============================================================
@@ -846,8 +955,14 @@ function initHub() {
   showScreen('hubScreen');
 }
 
+function updateKillCounter() {
+  document.getElementById('combatKillCount').textContent = combatState.enemiesKilled;
+  document.getElementById('hubKillCount').textContent    = combatState.enemiesKilled;
+}
+
 // ============================================================
-//  BEGIN COMBAT — fetches roster (first time only), picks enemy
+//  BEGIN COMBAT — fetches roster (first time only), picks enemy,
+//  goes directly into the unified combat screen in the 'initiative' phase.
 // ============================================================
 async function handleBegin() {
   const btn = document.getElementById('btnBegin');
@@ -869,88 +984,26 @@ async function handleBegin() {
     isAlive:      true,
   };
 
-  // Prep initiative screen
-  document.getElementById('initEmoji').textContent = enemy.artwork;
-  document.getElementById('initName').textContent  = enemy.name;
-  document.getElementById('initLabel').textContent = 'Rolling for initiative';
-  hideResultBanner(document.getElementById('initResult'));
-  setFace(document.getElementById('initCoinFace'), 'mystery');
-  document.getElementById('initSourceBadge').innerHTML = sourceBadgeHTML();
-
-  const initBtn = document.getElementById('btnInitRoll');
-  initBtn.disabled = false;
-  initBtn.textContent = 'Roll for Initiative';
-
-  showScreen('initScreen');
+  enterCombat(/* freshEncounter */ true);
 
   btn.disabled = false;
   btn.innerHTML = 'Begin Combat';
 }
 
 // ============================================================
-//  INITIATIVE — each combatant rolls once; re-roll on tie
+//  ENTER COMBAT — sets up the unified screen for a new encounter.
+//  Always begins in 'initiative' phase. Player rolls once for
+//  initiative; a 50/50 RNG decides the winner (no enemy roll shown,
+//  no tie-reroll loop — keeps the UI snappy).
 // ============================================================
-async function handleInitRoll() {
-  const btn    = document.getElementById('btnInitRoll');
-  const coin   = document.getElementById('initCoin');
-  const face   = document.getElementById('initCoinFace');
-  const label  = document.getElementById('initLabel');
-  const banner = document.getElementById('initResult');
+function enterCombat(freshEncounter) {
+  const emoji  = document.getElementById('combatEmoji');
+  const nameEl = document.getElementById('combatName');
 
-  btn.disabled = true;
-  hideResultBanner(banner);
-
-  // Player roll
-  label.textContent = 'Your roll';
-  const playerRoll = rollD2();
-  await animateCoinRoll(coin, face, playerRoll);
-  showResultBanner(banner, playerRoll);
-  combatState.initiativeRolls.player = playerRoll;
-
-  await sleep(700);
-
-  // Enemy roll
-  label.textContent = `${combatState.enemy.name}'s roll`;
-  hideResultBanner(banner);
-  const enemyRoll = rollD2();
-  await animateCoinRoll(coin, face, enemyRoll);
-  showResultBanner(banner, enemyRoll);
-  combatState.initiativeRolls.enemy = enemyRoll;
-
-  await sleep(900);
-
-  // Compare
-  if (playerRoll === enemyRoll) {
-    // Tie — require a tap to re-roll (more dramatic than auto)
-    label.textContent = 'Tie — roll again!';
-    hideResultBanner(banner);
-    btn.disabled = false;
-    btn.textContent = 'Re-roll Initiative';
-    return;
-  }
-
-  const winner = playerRoll === 'pass' ? 'player' : 'enemy';
-  combatState.initiativeWinner = winner;
-  combatState.currentTurn = winner;
-
-  label.textContent = winner === 'player'
-    ? 'You strike first!'
-    : `${combatState.enemy.name} strikes first!`;
-  banner.className = 'result-banner visible pass';
-  banner.textContent = winner === 'player'
-    ? 'Initiative: You'
-    : `Initiative: ${combatState.enemy.name}`;
-
-  await sleep(1300);
-  enterCombat();
-}
-
-// ============================================================
-//  ACTIVE COMBAT
-// ============================================================
-function enterCombat() {
-  document.getElementById('combatEmoji').textContent = combatState.enemy.artwork;
-  document.getElementById('combatName').textContent  = combatState.enemy.name;
+  emoji.classList.remove('fallen', 'hit');
+  nameEl.classList.remove('fallen');
+  emoji.textContent  = combatState.enemy.artwork;
+  nameEl.textContent = combatState.enemy.name;
 
   renderHP('enemyHP',  combatState.enemy.currentCoins,  combatState.enemy.maxCoins);
   renderHP('playerHP', combatState.player.currentCoins, combatState.player.maxCoins);
@@ -958,15 +1011,95 @@ function enterCombat() {
   setFace(document.getElementById('combatCoinFace'), 'mystery');
   hideResultBanner(document.getElementById('combatResult'));
 
-  combatState.combatLog = [];
-  renderCombatLog('combatLogEntries');
+  document.getElementById('combatTurnLabel').textContent = 'Roll for initiative';
+  document.getElementById('combatSourceBadge').innerHTML = sourceBadgeHTML();
+
+  updateKillCounter();
+
+  // Reset log only for a brand-new encounter (fresh Begin Combat).
+  // After an inline enemy death the log persists for continuity.
+  if (freshEncounter) {
+    combatState.combatLog = [];
+    renderCombatLog('combatLogEntries');
+  }
+
+  logBattleBegin();
+  logInitiativeCall();
+
+  const btn = document.getElementById('btnCombatRoll');
+  btn.disabled = false;
+  btn.textContent = 'Roll for Initiative';
+
+  combatState.phase = 'initiative';
+  combatState.isRolling = false;
 
   showScreen('combatScreen');
+}
+
+// ============================================================
+//  ROLL DISPATCH — phase-aware. Single button does everything.
+// ============================================================
+async function handleCombatRoll() {
+  if (combatState.isRolling) return;
+  if (combatState.phase === 'initiative') {
+    await rollInitiative();
+  } else if (combatState.currentTurn === 'player') {
+    await doTurn('player');
+  }
+}
+
+// ============================================================
+//  INITIATIVE — one visible player roll; winner is a 50/50 RNG.
+//  The player's roll outcome is displayed/logged for drama, but
+//  the initiative winner is independent (per spec: save cycles).
+// ============================================================
+async function rollInitiative() {
+  combatState.isRolling = true;
+
+  const btn    = document.getElementById('btnCombatRoll');
+  const coin   = document.getElementById('combatCoin');
+  const face   = document.getElementById('combatCoinFace');
+  const banner = document.getElementById('combatResult');
+  const label  = document.getElementById('combatTurnLabel');
+
+  btn.disabled = true;
+  hideResultBanner(banner);
+  label.textContent = 'Your initiative roll';
+
+  const playerRoll = rollD2();
+  await animateCoinRoll(coin, face, playerRoll, 'player');
+  showResultBanner(banner, playerRoll);
+  logInitiativeRoll('player', playerRoll);
+
+  await sleep(900);
+
+  // 50/50 RNG for winner — independent of the displayed roll
+  const winner = Math.random() < 0.5 ? 'player' : 'enemy';
+  combatState.initiativeWinner = winner;
+  combatState.currentTurn = winner;
+  combatState.phase = 'active';
+
+  if (winner === 'player') {
+    label.textContent = 'You strike first!';
+    banner.className = 'result-banner visible pass';
+    banner.textContent = 'Initiative: You';
+  } else {
+    label.textContent = `${combatState.enemy.name} strikes first!`;
+    banner.className = 'result-banner visible fail';
+    banner.textContent = `Initiative: ${combatState.enemy.name}`;
+  }
+  logInitiativeWinner(winner);
+
+  await sleep(1400);
+  hideResultBanner(banner);
+  combatState.isRolling = false;
+
   updateCombatTurnUI();
 
-  // If enemy won initiative, auto-start their turn
-  if (combatState.currentTurn === 'enemy') {
-    setTimeout(() => doTurn('enemy'), 800);
+  // If the enemy won initiative, auto-start their first turn
+  if (winner === 'enemy') {
+    await sleep(400);
+    doTurn('enemy');
   }
 }
 
@@ -979,24 +1112,17 @@ function updateCombatTurnUI() {
     btn.disabled = false;
   } else {
     label.textContent = `${combatState.enemy.name}'s turn`;
-    btn.textContent = `${combatState.enemy.name} rolls&hellip;`;
+    btn.innerHTML = `${combatState.enemy.name} rolls&hellip;`;
     btn.disabled = true;
   }
 }
 
-async function handleCombatRoll() {
-  if (combatState.isRolling) return;
-  if (combatState.currentTurn === 'player') {
-    await doTurn('player');
-  }
-}
-
-/**
- * Executes one roll for the active combatant.
- * On pass: deal 1 damage, chain if still alive. Player chains on tap;
- * enemy auto-chains.
- * On fail: turn passes to opponent.
- */
+// ============================================================
+//  ACTIVE TURN — player or enemy rolls one d2.
+//  Pass: deal 1 damage, chain (player taps again, enemy auto).
+//  Fail: turn passes.
+//  Enemy coin animation is inverted (comes from above).
+// ============================================================
 async function doTurn(actor) {
   if (combatState.isRolling) return;
   combatState.isRolling = true;
@@ -1009,13 +1135,13 @@ async function doTurn(actor) {
 
   btn.disabled = true;
   hideResultBanner(banner);
-
-  if (actor === 'enemy') {
-    label.textContent = `${combatState.enemy.name} rolls&hellip;`;
-  }
+  label.textContent = actor === 'player'
+    ? 'You attack!'
+    : `${combatState.enemy.name} swings!`;
+  logAttack(actor);
 
   const outcome = rollD2();
-  await animateCoinRoll(coin, face, outcome);
+  await animateCoinRoll(coin, face, outcome, actor);
   showResultBanner(banner, outcome);
 
   let damage = 0;
@@ -1026,6 +1152,9 @@ async function doTurn(actor) {
     if (actor === 'player') {
       combatState.enemy.currentCoins = Math.max(0, combatState.enemy.currentCoins - damage);
       renderHP('enemyHP', combatState.enemy.currentCoins, combatState.enemy.maxCoins);
+      // visual hit shake on enemy emoji
+      const emoji = document.getElementById('combatEmoji');
+      emoji.classList.remove('hit'); void emoji.offsetWidth; emoji.classList.add('hit');
       if (combatState.enemy.currentCoins <= 0) {
         combatState.enemy.isAlive = false;
         killed = true;
@@ -1040,17 +1169,18 @@ async function doTurn(actor) {
     }
   }
 
-  logAction(actor, outcome, damage, killed);
+  logRoll(actor, outcome, damage);
 
   await sleep(900);
 
-  // Resolve turn
+  // Resolve
   if (killed) {
     combatState.isRolling = false;
     if (actor === 'player') {
-      combatState.enemiesKilled++;
-      showEnemyDeathScreen();
+      logDeath('enemy', /* isKillingBlow */ true);
+      await runEnemyDeath();
     } else {
+      logDeath('player', /* isKillingBlow */ true);
       showPlayerDeathScreen();
     }
     return;
@@ -1060,6 +1190,7 @@ async function doTurn(actor) {
 
   if (outcome === 'pass') {
     // Chain — same actor rolls again
+    logChain(actor);
     combatState.isRolling = false;
     if (actor === 'player') {
       label.textContent = 'Roll again!';
@@ -1071,10 +1202,12 @@ async function doTurn(actor) {
     }
   } else {
     // Turn passes
-    combatState.currentTurn = actor === 'player' ? 'enemy' : 'player';
+    const nextActor = actor === 'player' ? 'enemy' : 'player';
+    combatState.currentTurn = nextActor;
     combatState.isRolling = false;
+    logTurnPass(nextActor);
     updateCombatTurnUI();
-    if (combatState.currentTurn === 'enemy') {
+    if (nextActor === 'enemy') {
       await sleep(600);
       doTurn('enemy');
     }
@@ -1082,40 +1215,79 @@ async function doTurn(actor) {
 }
 
 // ============================================================
-//  DEATH SCREENS
+//  INLINE ENEMY DEATH
+//  No screen change — emoji shakes + fades to gravestone, beat
+//  of stillness, then next enemy materialises and we drop back
+//  into the initiative phase on the same screen.
 // ============================================================
-function renderLogInto(targetId) {
-  const el = document.getElementById(targetId);
-  if (!el) return;
-  if (!combatState.combatLog.length) {
-    el.innerHTML = '<div class="combat-log-entry" style="opacity:0.5">— No actions —</div>';
-    return;
-  }
-  el.innerHTML = combatState.combatLog.map(entry => {
-    const cls = entry.isKillingBlow ? 'combat-log-entry killing-blow' : 'combat-log-entry';
-    return `<div class="${cls}"><span class="actor">${entry.displayName}</span> ${entry.actionText}</div>`;
-  }).join('');
+async function runEnemyDeath() {
+  const emoji  = document.getElementById('combatEmoji');
+  const nameEl = document.getElementById('combatName');
+  const label  = document.getElementById('combatTurnLabel');
+  const banner = document.getElementById('combatResult');
+  const btn    = document.getElementById('btnCombatRoll');
+
+  btn.disabled = true;
+  btn.textContent = 'Victory&hellip;';
+  label.textContent = `${combatState.enemy.name} is slain`;
+  hideResultBanner(banner);
+
+  // 1. Jitter + fade + name strikethrough
+  emoji.classList.add('fallen');
+  nameEl.classList.add('fallen');
+
+  await sleep(900);
+
+  // 2. Swap to gravestone (still in fallen state — keeps the desaturation)
+  emoji.textContent = '🪦';
+
+  await sleep(1100);
+
+  // 3. Increment tally, pick next enemy, reset player HP, back to initiative
+  combatState.enemiesKilled++;
+
+  const nextEnemy = selectRandomEnemy();
+  combatState.enemy = {
+    name:         nextEnemy.name,
+    coins:        nextEnemy.coins,
+    artwork:      nextEnemy.artwork,
+    maxCoins:     nextEnemy.coins,
+    currentCoins: nextEnemy.coins,
+    isAlive:      true,
+  };
+  combatState.player.currentCoins = combatState.player.maxCoins;
+  combatState.phase = 'initiative';
+  combatState.currentTurn = 'player';
+  combatState.initiativeWinner = null;
+
+  // 4. Swap in the new enemy (log keeps scrolling, no reset)
+  emoji.classList.remove('fallen');
+  nameEl.classList.remove('fallen');
+  enterCombat(/* freshEncounter */ false);
 }
 
-function showEnemyDeathScreen() {
-  document.getElementById('enemyDeathName').textContent = `${combatState.enemy.name} has fallen`;
-  document.getElementById('edKillCount').textContent    = combatState.enemiesKilled;
-  renderLogInto('enemyDeathLog');
-  // Sync hub tally for next return to hub
-  document.getElementById('hubKillCount').textContent = combatState.enemiesKilled;
-  showScreen('enemyDeathScreen');
-}
-
+// ============================================================
+//  PLAYER DEATH (full screen — per spec: killing blow, 3s delay,
+//  holy glow "Rise Again")
+// ============================================================
 function showPlayerDeathScreen() {
   document.getElementById('pdKillCount').textContent = combatState.enemiesKilled;
 
   const killing = combatState.combatLog.find(e => e.isKillingBlow);
   const kbText = killing
-    ? `${killing.displayName} ${killing.actionText}`
+    ? killing.html.replace(/<[^>]+>/g, '') // strip inline tags for plain-text summary
     : `${combatState.enemy.name} dealt the final blow.`;
   document.getElementById('killingBlowText').textContent = kbText;
 
-  renderLogInto('playerDeathLog');
+  // Render the same log (reuses entry classes)
+  const logEl = document.getElementById('playerDeathLog');
+  if (logEl) {
+    logEl.innerHTML = combatState.combatLog.map(entry => {
+      let cls = 'combat-log-entry ' + entry.kind;
+      if (entry.isKillingBlow) cls += ' killing-blow';
+      return `<div class="${cls}">${entry.html}</div>`;
+    }).join('');
+  }
 
   // HOOK: [v1.5] Play down-tempo MIDI music
   // Options: tone.js, HTML5 <audio loop>, or Web Audio API
@@ -1123,54 +1295,14 @@ function showPlayerDeathScreen() {
 
   showScreen('playerDeathScreen');
 
-  // 3s delay before the holy glow button appears
+  // 3s delay before holy glow button appears
   const riseBtn = document.getElementById('btnRiseAgain');
   riseBtn.classList.remove('visible');
   setTimeout(() => riseBtn.classList.add('visible'), 3000);
 }
 
-// ============================================================
-//  CONTINUATION (next enemy) + RISE AGAIN (back to hub)
-// ============================================================
-async function handleContinue() {
-  const btn = document.getElementById('btnContinue');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-inline"></span> Summoning next foe&hellip;';
-
-  // roster already cached; just pick a new enemy and reset round state
-  const enemy = selectRandomEnemy();
-  const killTally = combatState.enemiesKilled;
-  combatState = createFreshState();
-  combatState.enemiesKilled = killTally;
-  combatState.enemy = {
-    name:         enemy.name,
-    coins:        enemy.coins,
-    artwork:      enemy.artwork,
-    maxCoins:     enemy.coins,
-    currentCoins: enemy.coins,
-    isAlive:      true,
-  };
-
-  // Prep initiative screen
-  document.getElementById('initEmoji').textContent = enemy.artwork;
-  document.getElementById('initName').textContent  = enemy.name;
-  document.getElementById('initLabel').textContent = 'Rolling for initiative';
-  hideResultBanner(document.getElementById('initResult'));
-  setFace(document.getElementById('initCoinFace'), 'mystery');
-  document.getElementById('initSourceBadge').innerHTML = sourceBadgeHTML();
-
-  const initBtn = document.getElementById('btnInitRoll');
-  initBtn.disabled = false;
-  initBtn.textContent = 'Roll for Initiative';
-
-  showScreen('initScreen');
-
-  btn.disabled = false;
-  btn.innerHTML = 'Continue';
-}
-
 function handleRiseAgain() {
-  // Preserve kill tally this session, return to hub.
+  // Preserve session kill tally, return to hub.
   // On a full page reload, everything resets (no localStorage).
   initHub();
 }
@@ -1179,9 +1311,7 @@ function handleRiseAgain() {
 //  EVENT BINDINGS
 // ============================================================
 document.getElementById('btnBegin')     .addEventListener('click', handleBegin);
-document.getElementById('btnInitRoll')  .addEventListener('click', handleInitRoll);
 document.getElementById('btnCombatRoll').addEventListener('click', handleCombatRoll);
-document.getElementById('btnContinue')  .addEventListener('click', handleContinue);
 document.getElementById('btnRiseAgain') .addEventListener('click', handleRiseAgain);
 
 // ============================================================
