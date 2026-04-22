@@ -267,10 +267,10 @@
   }
 
   /* ────────────────────────────────────────────────
-     COIN STAGE + CUSTOM ANIMATION
-     Default: player roll — coin flies UP from below, returns.
-     .from-enemy: coin flies DOWN from above, returns.
-     Total: 1.3s in both directions. Inner face flips during return.
+     COIN STAGE + ANIMATION
+     Coin rests on the rolling actor's HP pip between turns.
+     JS transitions (getBoundingClientRect) drive all travel;
+     the .animating class only triggers the inner face-flip.
   ──────────────────────────────────────────────── */
   .coin-stage {
     height: 120px;
@@ -287,10 +287,8 @@
     position: relative;
     transform-origin: center;
   }
-  .combat-coin.animating { animation: coinTravel 1.3s cubic-bezier(.4,.05,.6,.95) forwards; }
-  .combat-coin.animating.from-enemy { animation: coinTravelInverted 1.3s cubic-bezier(.4,.05,.6,.95) forwards; }
   .combat-coin.animating .face {
-    animation: coinFlip 0.11s linear 12;
+    animation: coinFlip 0.11s linear 4;
     animation-fill-mode: forwards;
   }
 
@@ -327,18 +325,6 @@
   }
   .face-mystery svg { width: 100%; height: 100%; position: relative; z-index: 2; }
 
-  @keyframes coinTravel {
-    0%   { transform: translateY(0) scale(1); opacity: 1; }
-    30%  { transform: translateY(-110px) scale(0.18); opacity: 0.85; }
-    45%  { transform: translateY(-110px) scale(0.18); opacity: 0.85; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-  }
-  @keyframes coinTravelInverted {
-    0%   { transform: translateY(0) scale(1); opacity: 1; }
-    30%  { transform: translateY(110px) scale(0.18); opacity: 0.85; }
-    45%  { transform: translateY(110px) scale(0.18); opacity: 0.85; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-  }
   @keyframes coinFlip {
     0%   { transform: scaleX(1); }
     50%  { transform: scaleX(0); }
@@ -833,30 +819,74 @@ function setFace(el, outcome) {
   }
 }
 
-/**
- * Runs the custom coin roll animation:
- *   1. travels (up for player / down for enemy) + shrinks
- *   2. holds small at apex
- *   3. returns + grows, with inner flip during return
- *   4. reveals final face near the end
- *
- * @param actor - 'player' (default, coin flies up) or 'enemy' (flies down)
- */
-function animateCoinRoll(coinEl, faceEl, outcome, actor = 'player') {
-  return new Promise((resolve) => {
-    setFace(faceEl, 'mystery');
-    coinEl.classList.remove('animating', 'from-enemy');
-    void coinEl.offsetWidth; // force reflow so re-add triggers fresh run
-    coinEl.classList.add('animating');
-    if (actor === 'enemy') coinEl.classList.add('from-enemy');
+// Returns {dx, dy, scale} needed to place the coin's centre over the first
+// alive HP pip for the given actor.  Falls back to {0,0,1} (stage centre)
+// if no pip exists yet (e.g. called before renderHP).
+function getPipOffset(actor) {
+  const coinEl = document.getElementById('combatCoin');
+  const hpId   = actor === 'player' ? 'playerHP' : 'enemyHP';
+  const pip    = document.querySelector(`#${hpId} .hp-coin:not(.lost)`)
+              || document.querySelector(`#${hpId} .hp-coin`);
+  if (!pip) return { dx: 0, dy: 0, scale: 1 };
+  const cr = coinEl.getBoundingClientRect();
+  const pr = pip.getBoundingClientRect();
+  return {
+    dx:    (pr.left + pr.width  / 2) - (cr.left + cr.width  / 2),
+    dy:    (pr.top  + pr.height / 2) - (cr.top  + cr.height / 2),
+    scale: pr.width / cr.width,
+  };
+}
 
-    // swap to result face just before the last flip completes (~85%)
-    setTimeout(() => setFace(faceEl, outcome), 1100);
-    // resolve when full travel animation completes
+// Instantly parks the coin over the actor's HP pip (no animation).
+// Call after renderHP so the pip elements exist in the DOM.
+function snapCoinToPip(actor) {
+  const coinEl = document.getElementById('combatCoin');
+  const { dx, dy, scale } = getPipOffset(actor);
+  coinEl.style.transition = 'none';
+  coinEl.style.transform  = `translate(${dx}px,${dy}px) scale(${scale})`;
+}
+
+// Coin lifts from the actor's HP pip → travels to the centre stage →
+// holds showing the result face → returns to the pip.  Total ≈ 1.28 s.
+function animateCoinRoll(coinEl, faceEl, outcome, actor = 'player') {
+  const TRAVEL_IN  = 420;   // ms  pip → centre (coin grows, spins)
+  const HOLD       = 520;   // ms  held at centre showing result face
+  const TRAVEL_OUT = 340;   // ms  centre → pip (coin shrinks back)
+
+  return new Promise((resolve) => {
+    // Snap to pip start position (instant, no transition)
+    const { dx, dy, scale } = getPipOffset(actor);
+    coinEl.style.transition = 'none';
+    coinEl.style.transform  = `translate(${dx}px,${dy}px) scale(${scale})`;
+
+    setFace(faceEl, 'mystery');
+    coinEl.classList.remove('animating');
+    void coinEl.offsetWidth; // flush reflow so CSS animation re-triggers
+
+    // .animating kicks off the 4-flip face-flip CSS animation
+    coinEl.classList.add('animating');
+
+    // Phase 1 — fly to centre stage (two rAF ticks let the snap settle first)
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      coinEl.style.transition = `transform ${TRAVEL_IN}ms cubic-bezier(0.22,1,0.36,1)`;
+      coinEl.style.transform  = 'translate(0,0) scale(1)';
+    }));
+
+    // Reveal result face at ~75 % of travel (coin is edge-on mid-flip)
+    setTimeout(() => setFace(faceEl, outcome), (TRAVEL_IN * 0.75) | 0);
+
+    // Phase 2 → Phase 3 — after hold, return to pip
     setTimeout(() => {
-      coinEl.classList.remove('animating', 'from-enemy');
-      resolve();
-    }, 1300);
+      const { dx: rx, dy: ry, scale: rs } = getPipOffset(actor);
+      coinEl.style.transition = `transform ${TRAVEL_OUT}ms cubic-bezier(0.64,0,0.78,0)`;
+      coinEl.style.transform  = `translate(${rx}px,${ry}px) scale(${rs})`;
+
+      setTimeout(() => {
+        coinEl.classList.remove('animating');
+        coinEl.style.transition = '';
+        resolve();
+      }, TRAVEL_OUT);
+    }, TRAVEL_IN + HOLD);
   });
 }
 
@@ -1060,6 +1090,8 @@ function enterCombat(freshEncounter) {
   combatState.isRolling = false;
 
   showScreen('combatScreen');
+  // Park the coin on the player's pip once the screen is laid out
+  requestAnimationFrame(() => snapCoinToPip('player'));
 }
 
 // ============================================================
@@ -1141,6 +1173,8 @@ function updateCombatTurnUI() {
     btn.innerHTML = `${combatState.enemy.name} rolls&hellip;`;
     btn.disabled = true;
   }
+  // Move the resting coin to the incoming actor's pip
+  snapCoinToPip(combatState.currentTurn);
 }
 
 // ============================================================
