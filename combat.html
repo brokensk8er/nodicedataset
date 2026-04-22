@@ -53,8 +53,16 @@
     flex-shrink: 0;
     text-align: center;
     padding: 10px 14px 6px;
-    border-bottom: 1px solid var(--border);
     background: var(--card-bg);
+    position: relative;
+  }
+  /* Full-bleed divider — pseudo-element ignores padding, runs edge to edge */
+  .frame-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--border);
   }
   /* .site-label, h1 span, .subtitle come from styles.css */
   .frame-header h1 { font-size: 1rem; }
@@ -62,10 +70,17 @@
   /* Footer — inside the frame, pinned to bottom */
   .frame-footer {
     flex-shrink: 0;
-    border-top: 1px solid var(--border);
     text-align: center;
     padding: 6px 0 8px;
     background: var(--card-bg);
+    position: relative;
+  }
+  .frame-footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--border);
   }
 
   /* Screens — each fills all remaining frame space */
@@ -97,7 +112,7 @@
   ──────────────────────────────────────────────── */
   #hubScreen {
     justify-content: center;
-    padding: 24px 14px;
+    padding: 24px 0;
     background: rgba(201,168,76,.03);
   }
   .hub-actions {
