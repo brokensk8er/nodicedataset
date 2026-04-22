@@ -14,63 +14,92 @@
 <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
 
 <style>
-  /* ── Page layout — matches index.html .page-wrap (shelf-ready) ── */
-  html, body { height: 100%; }
+  /* ─────────────────────────────────────────────────
+     FIXED FRAME LAYOUT
+     One outer frame. Never resizes. All screens live
+     inside it as flex children filling the full height.
+     The combat log in each screen takes flex:1 so it
+     absorbs leftover space rather than pushing the frame.
+  ───────────────────────────────────────────────── */
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
   body {
     display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
     align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 12px 14px;
   }
 
-  /* ── Header ── */
-  /* .site-label, header h1, .subtitle come from styles.css */
-  header {
-    width: 100%;
-    max-width: 480px;
-    text-align: center;
-    padding: 14px 14px 8px;
-    flex-shrink: 0;
-  }
-
-  /* ── Main ── */
-  main {
-    flex: 1;
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    padding: 10px 14px 18px;
-    gap: 10px;
-  }
-
-  /* ── Screen system — only one visible at a time ── */
-  .screen { display: none; width: 100%; }
-  .screen.active {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* ── Card — matches index.html .shelf styling for future shelf integration ── */
-  .card {
-    width: 100%;
+  /* The frame — fixed dimensions, never redraws */
+  .combat-frame {
+    width: min(480px, 100%);
+    height: min(700px, calc(100dvh - 24px));
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 16px;
     box-shadow: 0 2px 14px var(--shadow);
     overflow: hidden;
-    animation: slideUp .4s cubic-bezier(.22,1,.36,1) both;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex-shrink: 0;
   }
-  /* Combat card's interior uses the same faint gold tint as .shelf-content */
-  .combat-card-body { background: rgba(201,168,76,.05); }
 
-  /* .card-footer base comes from styles.css */
-  .card-footer { padding: 10px 14px 12px; }
+  /* Header — inside the frame, never varies */
+  .frame-header {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 10px 14px 6px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+  }
+  /* .site-label, h1 span, .subtitle come from styles.css */
+  .frame-header h1 { font-size: 1rem; }
+
+  /* Footer — inside the frame, pinned to bottom */
+  .frame-footer {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 6px 0 8px;
+    background: var(--card-bg);
+  }
+
+  /* Screens — each fills all remaining frame space */
+  .screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .screen.active { display: flex; }
+
+  /* combat-card-body: the gold-tinted upper section */
+  .combat-card-body {
+    background: rgba(201,168,76,.05);
+    flex-shrink: 0;
+  }
+
+  /* .card-footer — pinned at bottom of each screen */
+  .card-footer {
+    flex-shrink: 0;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--card-bg);
+  }
 
   /* ────────────────────────────────────────────────
-     HUB SCREEN
+     HUB SCREEN — centered in frame
   ──────────────────────────────────────────────── */
+  #hubScreen {
+    justify-content: center;
+    padding: 24px 14px;
+    background: rgba(201,168,76,.03);
+  }
   .hub-actions {
     display: flex;
     flex-direction: column;
@@ -320,11 +349,15 @@
   .result-banner.fail { color: var(--fail-red); }
 
   /* ────────────────────────────────────────────────
-     COMBAT LOG — prominent scrollable feed
-     New entries appear at the bottom and push older
-     ones up. Newest entry gets a subtle slide-in.
+     COMBAT LOG — fills all remaining frame space
+     flex:1 + min-height:0 is the key: the log grows
+     to fill whatever height is left after fixed-height
+     siblings, and scrolls internally rather than
+     pushing the frame taller.
   ──────────────────────────────────────────────── */
   .combat-log {
+    flex: 1;
+    min-height: 0;
     padding: 10px 14px;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
@@ -332,8 +365,6 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    min-height: 140px;
-    max-height: 180px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
@@ -523,67 +554,62 @@
 <button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
 
 <!-- ============================================
-     HEADER
+     COMBAT FRAME — one fixed container.
+     All screens live inside here. It never resizes.
      ============================================ -->
-<header>
-  <p class="site-label">No Dice &mdash; Improv RPG</p>
-  <h1><span>Combat</span></h1>
-  <p class="subtitle">Rise. Fight. Fall.</p>
-</header>
+<div class="combat-frame">
 
-<main>
+  <!-- ── Frame header — always visible ── -->
+  <header class="frame-header">
+    <p class="site-label">No Dice &mdash; Improv RPG</p>
+    <h1><span>Combat</span></h1>
+    <p class="subtitle">Rise. Fight. Fall.</p>
+  </header>
 
   <!-- ============================================
        HUB SCREEN — entry point
        ============================================ -->
   <section id="hubScreen" class="screen active">
-    <div class="card">
-      <div class="hub-actions">
-        <button id="btnBegin" class="btn-primary btn-large">Begin Combat</button>
-        <button class="btn-primary btn-large vs-player-btn" disabled>VS. Player</button>
-      </div>
-      <div class="kill-tally">
-        Enemies Felled<strong id="hubKillCount">0</strong>
-      </div>
+    <div class="hub-actions">
+      <button id="btnBegin" class="btn-primary btn-large">Begin Combat</button>
+      <button class="btn-primary btn-large vs-player-btn" disabled>VS. Player</button>
+    </div>
+    <div class="kill-tally">
+      Enemies Felled<strong id="hubKillCount">0</strong>
     </div>
   </section>
 
   <!-- ============================================
        COMBAT SCREEN — unified initiative + active combat
-       Initiative is the first roll of combat. After that,
-       regular turn-based rolling. Enemy death is inline
-       (emoji morphs to gravestone, next enemy fades in).
        ============================================ -->
   <section id="combatScreen" class="screen">
-    <div class="card">
-      <div class="combat-card-body">
-        <div class="combatant-reveal">
-          <div class="kill-counter-inline">Felled<strong id="combatKillCount">0</strong></div>
-          <span class="enemy-emoji" id="combatEmoji">🧌</span>
-          <div class="enemy-name" id="combatName">Goblin</div>
-        </div>
-        <div class="hp-display" id="enemyHP">
-          <span class="hp-label">HP</span>
-        </div>
-        <div class="coin-stage">
-          <div class="combat-coin" id="combatCoin">
-            <div class="face face-mystery" id="combatCoinFace"></div>
-          </div>
-        </div>
-        <div class="turn-label" id="combatTurnLabel">Rolling for initiative</div>
-        <div class="result-banner" id="combatResult"></div>
-        <div class="hp-display" id="playerHP">
-          <span class="hp-label">You</span>
+    <div class="combat-card-body">
+      <div class="combatant-reveal">
+        <div class="kill-counter-inline">Felled<strong id="combatKillCount">0</strong></div>
+        <span class="enemy-emoji" id="combatEmoji">🧌</span>
+        <div class="enemy-name" id="combatName">Goblin</div>
+      </div>
+      <div class="hp-display" id="enemyHP">
+        <span class="hp-label">HP</span>
+      </div>
+      <div class="coin-stage">
+        <div class="combat-coin" id="combatCoin">
+          <div class="face face-mystery" id="combatCoinFace"></div>
         </div>
       </div>
-      <div class="combat-log">
-        <div class="combat-log-title">Combat Log</div>
-        <div class="combat-log-entries" id="combatLogEntries"></div>
+      <div class="turn-label" id="combatTurnLabel">Rolling for initiative</div>
+      <div class="result-banner" id="combatResult"></div>
+      <div class="hp-display" id="playerHP">
+        <span class="hp-label">You</span>
       </div>
-      <div class="card-footer">
-        <button id="btnCombatRoll" class="btn-primary">Roll for Initiative</button>
-        <div id="combatSourceBadge"></div>
-      </div>
+    </div>
+    <div class="combat-log">
+      <div class="combat-log-title">Combat Log</div>
+      <div class="combat-log-entries" id="combatLogEntries"></div>
+    </div>
+    <div class="card-footer">
+      <button id="btnCombatRoll" class="btn-primary">Roll for Initiative</button>
+      <div id="combatSourceBadge"></div>
     </div>
   </section>
 
@@ -591,36 +617,32 @@
        PLAYER DEATH SCREEN
        ============================================ -->
   <section id="playerDeathScreen" class="screen">
-    <div class="card">
-      <div class="death-card">
-        <span class="death-icon">☠️</span>
-        <div class="death-title player">You Have Fallen</div>
-        <div class="death-subtitle">
-          Enemies felled this session: <strong id="pdKillCount">0</strong>
-        </div>
-        <div class="killing-blow-box">
-          <div class="label">Killing Blow</div>
-          <div class="text" id="killingBlowText">&mdash;</div>
-        </div>
+    <div class="death-card">
+      <span class="death-icon">☠️</span>
+      <div class="death-title player">You Have Fallen</div>
+      <div class="death-subtitle">
+        Enemies felled this session: <strong id="pdKillCount">0</strong>
       </div>
-      <div class="combat-log">
-        <div class="combat-log-title">Combat Log</div>
-        <div class="combat-log-entries" id="playerDeathLog"></div>
+      <div class="killing-blow-box">
+        <div class="label">Killing Blow</div>
+        <div class="text" id="killingBlowText">&mdash;</div>
       </div>
-      <div class="card-footer">
-        <button id="btnRiseAgain" class="btn-rise-again">Rise, Again!</button>
-      </div>
+    </div>
+    <div class="combat-log">
+      <div class="combat-log-title">Combat Log</div>
+      <div class="combat-log-entries" id="playerDeathLog"></div>
+    </div>
+    <div class="card-footer">
+      <button id="btnRiseAgain" class="btn-rise-again">Rise, Again!</button>
     </div>
   </section>
 
-</main>
+  <!-- ── Frame footer — always visible ── -->
+  <footer class="frame-footer">
+    <a class="nav-link" href="index.html">&larr; Back to the Vault</a>
+  </footer>
 
-<!-- ============================================
-     FOOTER
-     ============================================ -->
-<footer>
-  <a class="nav-link" href="index.html">&larr; Back to the Vault</a>
-</footer>
+</div>
 
 <script>
 // ============================================================
@@ -653,8 +675,8 @@ const CONFIG = {
 //  ► This keeps combat.html self-contained while avoiding
 //    duplication of a ~4-6KB byte payload in Claude's output.
 // ============================================================
-const FAIL_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' // (long base64 string)
-const SUCCESS_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' // (long base64 string)
+const FAIL_IMG = 'PASTE_FAIL_IMG_FROM_COINFLIP_HTML_HERE';
+const PASS_IMG = 'PASTE_PASS_IMG_FROM_COINFLIP_HTML_HERE';
 
 const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
   <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
