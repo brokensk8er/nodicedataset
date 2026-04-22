@@ -653,8 +653,8 @@ const CONFIG = {
 //  ► This keeps combat.html self-contained while avoiding
 //    duplication of a ~4-6KB byte payload in Claude's output.
 // ============================================================
-const FAIL_IMG = 'PASTE_FAIL_IMG_FROM_COINFLIP_HTML_HERE';
-const PASS_IMG = 'PASTE_PASS_IMG_FROM_COINFLIP_HTML_HERE';
+const FAIL_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' // (long base64 string)
+const SUCCESS_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' // (long base64 string)
 
 const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
   <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
