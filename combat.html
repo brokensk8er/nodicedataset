@@ -287,6 +287,11 @@
     position: relative;
     transform-origin: center;
   }
+  .combat-coin.animating .face {
+    animation: coinFlip 0.11s linear 4;
+    animation-fill-mode: forwards;
+  }
+
   .face {
     position: absolute;
     inset: 0;
@@ -818,21 +823,17 @@ function setFace(el, outcome) {
 // alive HP pip for the given actor.  Falls back to {0,0,1} (stage centre)
 // if no pip exists yet (e.g. called before renderHP).
 function getPipOffset(actor) {
-  const coinEl  = document.getElementById('combatCoin');
-  const stageEl = coinEl.parentElement;              // .coin-stage
-  const hpId    = actor === 'player' ? 'playerHP' : 'enemyHP';
-  const pip     = document.querySelector(`#${hpId} .hp-coin:not(.lost)`)
-               || document.querySelector(`#${hpId} .hp-coin`);
+  const coinEl = document.getElementById('combatCoin');
+  const hpId   = actor === 'player' ? 'playerHP' : 'enemyHP';
+  const pip    = document.querySelector(`#${hpId} .hp-coin:not(.lost)`)
+              || document.querySelector(`#${hpId} .hp-coin`);
   if (!pip) return { dx: 0, dy: 0, scale: 1 };
-  const sr = stageEl.getBoundingClientRect();
+  const cr = coinEl.getBoundingClientRect();
   const pr = pip.getBoundingClientRect();
-  const coinCX   = sr.left + sr.width  / 2;
-  const coinCY   = sr.top  + sr.height / 2;
-  const naturalW = coinEl.offsetWidth;               // unaffected by CSS transform
   return {
-    dx:    (pr.left + pr.width  / 2) - coinCX,
-    dy:    (pr.top  + pr.height / 2) - coinCY,
-    scale: pr.width / naturalW,
+    dx:    (pr.left + pr.width  / 2) - (cr.left + cr.width  / 2),
+    dy:    (pr.top  + pr.height / 2) - (cr.top  + cr.height / 2),
+    scale: pr.width / cr.width,
   };
 }
 
@@ -843,55 +844,45 @@ function snapCoinToPip(actor) {
   const { dx, dy, scale } = getPipOffset(actor);
   coinEl.style.transition = 'none';
   coinEl.style.transform  = `translate(${dx}px,${dy}px) scale(${scale})`;
-  coinEl.style.opacity    = '0';
 }
 
 // Coin lifts from the actor's HP pip → travels to the centre stage →
 // holds showing the result face → returns to the pip.  Total ≈ 1.28 s.
 function animateCoinRoll(coinEl, faceEl, outcome, actor = 'player') {
-  const TRAVEL_IN  = 420;
-  const HOLD       = 520;
-  const TRAVEL_OUT = 340;
-  const FLIP_DUR   = 110;  // ms per flip cycle
-  const FLIP_COUNT = 4;    // total flips
-  const FACE_AT    = (FLIP_COUNT - 0.5) * FLIP_DUR; // 385ms — scaleX=0 on last flip
+  const TRAVEL_IN  = 420;   // ms  pip → centre (coin grows, spins)
+  const HOLD       = 520;   // ms  held at centre showing result face
+  const TRAVEL_OUT = 340;   // ms  centre → pip (coin shrinks back)
 
   return new Promise((resolve) => {
-    // Snap to pip (hidden)
+    // Snap to pip start position (instant, no transition)
     const { dx, dy, scale } = getPipOffset(actor);
     coinEl.style.transition = 'none';
     coinEl.style.transform  = `translate(${dx}px,${dy}px) scale(${scale})`;
-    coinEl.style.opacity    = '0';
+
     setFace(faceEl, 'mystery');
+    coinEl.classList.remove('animating');
+    void coinEl.offsetWidth; // flush reflow so CSS animation re-triggers
 
-    // Start face-flip via Web Animations API (reliable re-trigger)
-    faceEl.animate(
-      [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
-      { duration: FLIP_DUR, iterations: FLIP_COUNT, easing: 'linear' }
-    );
+    // .animating kicks off the 4-flip face-flip CSS animation
+    coinEl.classList.add('animating');
 
-    // Phase 1 — fly to centre with fade-in
+    // Phase 1 — fly to centre stage (two rAF ticks let the snap settle first)
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      coinEl.style.transition = `transform ${TRAVEL_IN}ms cubic-bezier(0.22,1,0.36,1),`
-                              + ` opacity ${Math.round(TRAVEL_IN * 0.3)}ms ease-out`;
+      coinEl.style.transition = `transform ${TRAVEL_IN}ms cubic-bezier(0.22,1,0.36,1)`;
       coinEl.style.transform  = 'translate(0,0) scale(1)';
-      coinEl.style.opacity    = '1';
     }));
 
-    // Reveal result face at scaleX=0 (edge-on moment of last flip)
-    setTimeout(() => setFace(faceEl, outcome), FACE_AT);
+    // Reveal result face at ~75 % of travel (coin is edge-on mid-flip)
+    setTimeout(() => setFace(faceEl, outcome), (TRAVEL_IN * 0.75) | 0);
 
-    // Phase 2 → Phase 3 — after hold, return to pip with fade-out
+    // Phase 2 → Phase 3 — after hold, return to pip
     setTimeout(() => {
       const { dx: rx, dy: ry, scale: rs } = getPipOffset(actor);
-      const fadeDelay = Math.round(TRAVEL_OUT * 0.7);
-      const fadeDur   = TRAVEL_OUT - fadeDelay;
-      coinEl.style.transition = `transform ${TRAVEL_OUT}ms cubic-bezier(0.64,0,0.78,0),`
-                              + ` opacity ${fadeDur}ms ${fadeDelay}ms ease-in`;
+      coinEl.style.transition = `transform ${TRAVEL_OUT}ms cubic-bezier(0.64,0,0.78,0)`;
       coinEl.style.transform  = `translate(${rx}px,${ry}px) scale(${rs})`;
-      coinEl.style.opacity    = '0';
 
       setTimeout(() => {
+        coinEl.classList.remove('animating');
         coinEl.style.transition = '';
         resolve();
       }, TRAVEL_OUT);
