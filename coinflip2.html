@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>No Dice — Fate's Flip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+  <!-- Shared styles (colours, fonts, nav link, animations) -->
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Page-specific styles in styles.css -->
+  <!-- Prevent theme flash: apply saved theme before first paint -->
+  <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+
+  </head>
+<body class="coinflip-page">
+
+<!-- Theme toggle — sun/moon light/dark switch (CSS in styles.css) -->
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
+
+  <!-- ============================================
+       HEADER
+       Edit: site-label eyebrow, h1 title, subtitle.
+       The gold word in h1 is wrapped in a <span>.
+       ============================================ -->
+  <header>
+    <p class="site-label">No Dice &mdash; Improv RPG</p>
+    <h1>Fate's <span>Flip</span></h1>
+    <p class="subtitle">One flip. Pass or fail. No negotiating with the dice.</p>
+    <div class="divider"></div>
+  </header>
+
+  <!-- ============================================
+       MAIN CARD
+       Contains the coin animation, result text,
+       and the flip button.
+       ============================================ -->
+  <main>
+    <div class="card">
+
+      <div class="coin-stage" aria-live="polite" aria-label="Coin result">
+        <div class="coin" id="coin">
+          <div class="face face-mystery" id="coinFace" aria-hidden="true">
+            <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+                stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+              <text x="55" y="70" text-anchor="middle"
+                font-family="Georgia, serif" font-size="52" font-weight="bold"
+                fill="rgba(26,26,46,0.75)">?</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="result-banner" id="resultBanner">&nbsp;</p>
+        <p class="result-sub"   id="resultSub">&nbsp;</p>
+      </div>
+
+      <button class="btn-roll" id="btnRoll">⚔ Flip the Coin</button>
+
+    </div>
+  </main>
+
+  <!-- ============================================
+       FOOTER
+       ← Back to the Vault nav link.
+       ============================================ -->
+  <footer>
+    <a class="nav-link" href="index.html">← Back to the Vault</a>
+  </footer>
+
+  <!-- ============================================
+       CONFETTI CANVAS
+       Full-screen overlay for the pass animation.
+       pointer-events: none keeps it non-blocking.
+       Do not remove — it is referenced by JS.
+       ============================================ -->
+  <canvas id="confettiCanvas" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  "></canvas>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION — FLAVOUR TEXT
+    // Edit PASS_LINES and FAIL_LINES to change the result text
+    // shown after a flip. Add or remove lines freely.
+    // ============================================================
+    const coin       = document.getElementById('coin');
+    const coinFace   = document.getElementById('coinFace');
+    const btnRoll    = document.getElementById('btnRoll');
+    const banner     = document.getElementById('resultBanner');
+    const sub        = document.getElementById('resultSub');
+
+    const PASS_LINES = [
+      "The fates smile upon thee.",
+      "Fortune favours the bold.",
+      "Against all odds, glory.",
+      "The dice gods are pleased.",
+      "A hero's moment — take it.",
+      "Even the bards saw that coming.",
+      "The stars aligned for you.",
+      "Destiny bends to your will.",
+      "The realm rejoices in your name.",
+      "Boldness rewarded. Press on.",
+      "The fates have spoken — loudly.",
+      "Victory tastes sweet today.",
+      "Not luck. Greatness.",
+      "The gods nod in your favour.",
+      "Written in the stars, apparently.",
+      "Your legend grows.",
+    ];
+
+    const FAIL_LINES = [
+      "The fates are unmoved.",
+      "Even heroes stumble.",
+      "The dice gods demand drama.",
+      "Not today, adventurer.",
+      "A bold attempt, poorly executed.",
+      "The tavern will hear of this.",
+      "The stars were otherwise engaged.",
+      "Destiny had other plans.",
+      "The realm weeps. Briefly.",
+      "Boldness penalised. Regroup.",
+      "The fates have spoken — curtly.",
+      "Defeat tastes bitter today.",
+      "Not greatness. Not yet.",
+      "The gods look away.",
+      "Perhaps next time, adventurer.",
+      "Your legend… continues building.",
+    ];
+
+    // Full-resolution coin face images
+    const FAIL_IMG = 'data:image/png;base64,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';
+    const PASS_IMG = 'data:image/png;base64,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';
+
+    const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+                stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+              <text x="55" y="70" text-anchor="middle"
+                font-family="Georgia, serif" font-size="52" font-weight="bold"
+                fill="rgba(26,26,46,0.75)">?</text>
+            </svg>`;
+
+    function setFaceMystery() {
+      coinFace.className = 'face face-mystery';
+      coinFace.innerHTML = MYSTERY_SVG;
+    }
+    function setFaceFail() {
+      coinFace.className = 'face face-fail';
+      coinFace.innerHTML = `<img src="${FAIL_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    }
+    function setFacePass() {
+      coinFace.className = 'face face-pass';
+      coinFace.innerHTML = `<img src="${PASS_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    }
+
+    function pickResult() {
+      return Math.random() < 0.5 ? 'pass' : 'fail';
+    }
+
+    let isSpinning = false;
+
+    function rand(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // ============================================================
+    // CORE LOGIC — FLIP ANIMATION
+    // flip() runs the CSS scaleX animation, then resolves pass
+    // or fail, updates the face, shows the result banner, and
+    // triggers confetti on a pass.
+    // ============================================================
+    function flip() {
+      if (isSpinning) return;
+      isSpinning = true;
+      btnRoll.disabled = true;
+
+      banner.className = 'result-banner';
+      sub.className    = 'result-sub';
+      banner.textContent = '\u00a0';
+      sub.textContent    = '\u00a0';
+
+      const result = pickResult();
+
+      playFlipSound();
+
+      setFaceMystery();
+
+      const flips   = 5 + Math.floor(Math.random() * 4);
+      const halfDur = 0.13 + Math.random() * 0.04;
+      const iters   = flips - 0.5;
+
+      coin.style.setProperty('--half-duration', halfDur + 's');
+      coin.style.setProperty('--flip-count', iters);
+
+      coin.classList.remove('spinning', 'wobbling');
+      void coin.offsetWidth;
+      coin.classList.add('spinning');
+
+      coin.addEventListener('animationend', function onSpinEnd() {
+        coin.removeEventListener('animationend', onSpinEnd);
+        coin.classList.remove('spinning');
+
+        if (result === 'fail') setFaceFail();
+        else                   setFacePass();
+
+        coin.style.transition = `transform ${halfDur}s ease-in-out`;
+        coin.style.transform  = 'scaleX(1)';
+
+        setTimeout(() => {
+          coin.style.transition = '';
+          coin.classList.add('wobbling');
+
+          if (result === 'pass') {
+            banner.textContent = 'Go Time';
+            banner.className   = 'result-banner visible pass';
+            sub.textContent    = rand(PASS_LINES);
+            sub.className      = 'result-sub visible';
+            launchConfetti();
+            playCoinSound();
+          } else {
+            banner.textContent = 'No Time';
+            banner.className   = 'result-banner visible fail';
+            sub.textContent    = rand(FAIL_LINES);
+            sub.className      = 'result-sub visible';
+            playWompWomp();
+          }
+
+          setTimeout(() => {
+            coin.classList.remove('wobbling');
+            isSpinning = false;
+            btnRoll.disabled = false;
+          }, 520);
+
+        }, halfDur * 1000);
+      });
+    }
+
+    btnRoll.addEventListener('click', flip);
+
+    /* ── Confetti ── */
+    const canvas  = document.getElementById('confettiCanvas');
+    const ctx     = canvas.getContext('2d');
+    let particles = [];
+    let rafId     = null;
+
+    const COLORS = ['#c9a84c','#e2bc6a','#27ae60','#2ecc71','#ffffff','#faf7f2','#a0d8a0','#f0c040'];
+
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function makeParticle(x, angleDeg) {
+      const angleRad = angleDeg * Math.PI / 180;
+      const speed    = 12 + Math.random() * 14;
+      return {
+        x,
+        y: canvas.height,
+        vx: Math.cos(angleRad) * speed,
+        vy: -Math.sin(angleRad) * speed,
+        w:  5 + Math.random() * 7,
+        h:  3 + Math.random() * 4,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        rot:   Math.random() * 360,
+        rotV:  (Math.random() - 0.5) * 10,
+        gravity: 0.25 + Math.random() * 0.15,
+        life: 1,
+        decay: 0.005 + Math.random() * 0.005,
+      };
+    }
+
+    function launchConfetti() {
+      resizeCanvas();
+      particles = [];
+      const W = canvas.width;
+      const cannons = [
+        { x: 0,       minAngle: 20,  maxAngle: 70  },
+        { x: W * 0.25, minAngle: 40,  maxAngle: 85  },
+        { x: W * 0.5,  minAngle: 60,  maxAngle: 120 },
+        { x: W * 0.75, minAngle: 95,  maxAngle: 140 },
+        { x: W,        minAngle: 110, maxAngle: 160 },
+      ];
+      for (const cannon of cannons) {
+        for (let i = 0; i < 60; i++) {
+          const angleDeg = cannon.minAngle + Math.random() * (cannon.maxAngle - cannon.minAngle);
+          particles.push(makeParticle(cannon.x, angleDeg));
+        }
+      }
+      if (rafId) cancelAnimationFrame(rafId);
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.life > 0);
+
+      for (const p of particles) {
+        p.x   += p.vx;
+        p.y   += p.vy;
+        p.vy  += p.gravity;
+        p.rot += p.rotV;
+        p.life -= p.decay;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+
+      if (particles.length > 0) {
+        rafId = requestAnimationFrame(animateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    /* ── Coin flip launch sound ── */
+    function playFlipSound() {
+      const ac  = new (window.AudioContext || window.webkitAudioContext)();
+      const t   = ac.currentTime;
+
+      const tickBuf = ac.createBuffer(1, ac.sampleRate * 0.04, ac.sampleRate);
+      const tickData = tickBuf.getChannelData(0);
+      for (let i = 0; i < tickData.length; i++) tickData[i] = (Math.random() * 2 - 1);
+      const tick     = ac.createBufferSource();
+      tick.buffer    = tickBuf;
+      const tickHp   = ac.createBiquadFilter();
+      tickHp.type    = 'highpass';
+      tickHp.frequency.value = 3000;
+      const tickGain = ac.createGain();
+      tickGain.gain.setValueAtTime(0.55, t);
+      tickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+      tick.connect(tickHp);
+      tickHp.connect(tickGain);
+      tickGain.connect(ac.destination);
+      tick.start(t);
+
+      const spinDur   = 0.72;
+      const numClicks = 14;
+      for (let i = 0; i < numClicks; i++) {
+        const progress = i / numClicks;
+        const interval = 0.025 + progress * 0.07;
+        const clickAt  = 0.04 + i * interval - (progress * progress * 0.04);
+
+        const buf  = ac.createBuffer(1, ac.sampleRate * 0.018, ac.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let j = 0; j < data.length; j++) data[j] = (Math.random() * 2 - 1);
+
+        const src  = ac.createBufferSource();
+        src.buffer = buf;
+
+        const hp   = ac.createBiquadFilter();
+        hp.type    = 'bandpass';
+        hp.frequency.value = 2200 - progress * 800;
+        hp.Q.value = 1.2;
+
+        const g    = ac.createGain();
+        const vol  = 0.18 * (1 - progress * 0.5);
+        g.gain.setValueAtTime(vol, t + clickAt);
+        g.gain.exponentialRampToValueAtTime(0.001, t + clickAt + 0.016);
+
+        src.connect(hp);
+        hp.connect(g);
+        g.connect(ac.destination);
+        src.start(t + clickAt);
+      }
+
+      const thudBuf  = ac.createBuffer(1, ac.sampleRate * 0.12, ac.sampleRate);
+      const thudData = thudBuf.getChannelData(0);
+      for (let i = 0; i < thudData.length; i++) thudData[i] = (Math.random() * 2 - 1);
+      const thud     = ac.createBufferSource();
+      thud.buffer    = thudBuf;
+      const thudLp   = ac.createBiquadFilter();
+      thudLp.type    = 'lowpass';
+      thudLp.frequency.value = 280;
+      const thudGain = ac.createGain();
+      const thudAt   = spinDur;
+      thudGain.gain.setValueAtTime(0.5, t + thudAt);
+      thudGain.gain.exponentialRampToValueAtTime(0.001, t + thudAt + 0.09);
+      thud.connect(thudLp);
+      thudLp.connect(thudGain);
+      thudGain.connect(ac.destination);
+      thud.start(t + thudAt);
+
+      setTimeout(() => ac.close(), 1200);
+    }
+
+    /* ── Mario-ish coin sound ── */
+    function playCoinSound() {
+      const ac  = new (window.AudioContext || window.webkitAudioContext)();
+      const vol = ac.createGain();
+      vol.gain.setValueAtTime(0.042, ac.currentTime);
+      vol.connect(ac.destination);
+
+      const notes = [
+        { freq: 988,  start: 0,    dur: 0.08 },
+        { freq: 1319, start: 0.07, dur: 0.18 },
+      ];
+
+      notes.forEach(({ freq, start, dur }) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, ac.currentTime + start);
+        osc.frequency.linearRampToValueAtTime(freq * 1.06, ac.currentTime + start + dur);
+
+        gain.gain.setValueAtTime(0, ac.currentTime + start);
+        gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + 0.01);
+        gain.gain.setValueAtTime(1,  ac.currentTime + start + dur * 0.6);
+        gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + start + dur);
+
+        osc.connect(gain);
+        gain.connect(vol);
+        osc.start(ac.currentTime + start);
+        osc.stop(ac.currentTime + start + dur + 0.02);
+      });
+
+      setTimeout(() => ac.close(), 600);
+    }
+
+    /* ── Womp womp ── */
+    function playWompWomp() {
+      const ac  = new (window.AudioContext || window.webkitAudioContext)();
+      const vol = ac.createGain();
+      vol.gain.setValueAtTime(0.042, ac.currentTime);
+      vol.connect(ac.destination);
+
+      const blats = [
+        { start: 0,    freqStart: 440, freqEnd: 220, dur: 0.55 },
+        { start: 0.45, freqStart: 330, freqEnd: 110, dur: 0.75 },
+      ];
+
+      blats.forEach(({ start, freqStart, freqEnd, dur }) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freqStart, ac.currentTime + start);
+        osc.frequency.exponentialRampToValueAtTime(freqEnd, ac.currentTime + start + dur);
+
+        const lfo  = ac.createOscillator();
+        const lfoG = ac.createGain();
+        lfo.frequency.value  = 5.5;
+        lfoG.gain.value      = 8;
+        lfo.connect(lfoG);
+        lfoG.connect(osc.frequency);
+        lfo.start(ac.currentTime + start);
+        lfo.stop(ac.currentTime + start + dur);
+
+        gain.gain.setValueAtTime(0, ac.currentTime + start);
+        gain.gain.linearRampToValueAtTime(1, ac.currentTime + start + 0.04);
+        gain.gain.setValueAtTime(1, ac.currentTime + start + dur - 0.12);
+        gain.gain.linearRampToValueAtTime(0, ac.currentTime + start + dur);
+
+        osc.connect(gain);
+        gain.connect(vol);
+        osc.start(ac.currentTime + start);
+        osc.stop(ac.currentTime + start + dur + 0.05);
+      });
+
+      setTimeout(() => ac.close(), 1600);
+    }
+
+  </script>
+<script src="theme-toggle.js"></script>
+<script type="module">
+import { mountProfileButton } from './profile-auth.js';
+mountProfileButton();
+</script>
+</body>
+</html>
