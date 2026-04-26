@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>No Dice — Boss Battle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+  <style>
+    body.bossbattle-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    .attack-panel {
+      max-width: 500px;
+      text-align: center;
+    }
+    .attack-panel h1 {
+      margin-bottom: 2rem;
+    }
+    .attack-status {
+      font-size: 1.2rem;
+      margin: 1rem 0;
+      min-height: 3rem;
+    }
+    .cooldown-timer {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--color-accent);
+      margin: 0.5rem 0;
+    }
+    .coin-display {
+      width: 120px;
+      height: 120px;
+      margin: 1rem auto;
+      border: 2px solid var(--color-accent);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3rem;
+      background: rgba(218, 165, 32, 0.1);
+    }
+    .result-text {
+      font-size: 1.3rem;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+    .btn-attack {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      cursor: pointer;
+      border: 2px solid var(--color-accent);
+      background: transparent;
+      color: var(--color-accent);
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    .btn-attack:hover:not(:disabled) {
+      background: var(--color-accent);
+      color: var(--color-bg);
+    }
+    .btn-attack:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-attack.rolling {
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body class="bossbattle-page">
+
+<button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
+
+<header>
+  <p class="site-label">No Dice &mdash; Improv RPG</p>
+  <h1>Boss <span>Battle</span></h1>
+  <p class="subtitle">Attack the dragon. Work together to bring it down.</p>
+  <div class="divider"></div>
+</header>
+
+<main class="attack-panel">
+  <div id="authPanel" style="display:none;">
+    <p>Loading authentication...</p>
+  </div>
+
+  <div id="gamePanel" style="display:none;">
+    <p class="attack-status" id="attackStatus">Ready to attack!</p>
+
+    <div class="coin-display" id="coinDisplay" style="display:none;">
+      <span id="coinResult">?</span>
+    </div>
+
+    <div id="resultText" class="result-text" style="display:none;"></div>
+
+    <div class="cooldown-timer" id="cooldownTimer" style="display:none;">
+      Cooldown: <span id="cooldownCount">0</span>s
+    </div>
+
+    <button class="btn-roll btn-attack" id="btnAttack">⚔ Attack the Dragon</button>
+  </div>
+</main>
+
+<footer>
+  <a class="nav-link" href="index.html">← Back to the Vault</a>
+</footer>
+
+<script type="module">
+  import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getDatabase, ref, onValue, set, push, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { currentUser, onUser } from './profile-auth.js';
+
+  // ============================================================
+  // CONFIG
+  // ============================================================
+  const ENCOUNTER_ID = 'encounter_001';
+  const FAIL_LINES = [
+    "The fates are unmoved.",
+    "Even heroes stumble.",
+    "The dice gods demand drama.",
+    "Not today, adventurer.",
+    "The stars were otherwise engaged.",
+  ];
+
+  const PASS_LINES = [
+    "Fortune favours the bold.",
+    "The fates smile upon thee.",
+    "A hero's moment — take it.",
+    "The stars aligned for you.",
+    "Victory tastes sweet today.",
+  ];
+
+  // ============================================================
+  // FIREBASE SETUP
+  // ============================================================
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyAXcvi644izGZhK8nPGlkfV4vAc3ZWPH8w",
+    authDomain:        "nodicetools.firebaseapp.com",
+    databaseURL:       "https://nodicetools-default-rtdb.firebaseio.com",
+    projectId:         "nodicetools",
+    storageBucket:     "nodicetools.firebasestorage.app",
+    messagingSenderId: "387258889697",
+    appId:             "1:387258889697:web:5467488ab109ea67b74ea0",
+  };
+
+  const _appName = 'ndt-boss-battle';
+  const _app = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
+  const _db = getDatabase(_app);
+
+  // ============================================================
+  // UI ELEMENTS
+  // ============================================================
+  const authPanel = document.getElementById('authPanel');
+  const gamePanel = document.getElementById('gamePanel');
+  const btnAttack = document.getElementById('btnAttack');
+  const attackStatus = document.getElementById('attackStatus');
+  const coinDisplay = document.getElementById('coinDisplay');
+  const coinResult = document.getElementById('coinResult');
+  const resultText = document.getElementById('resultText');
+  const cooldownTimer = document.getElementById('cooldownTimer');
+  const cooldownCount = document.getElementById('cooldownCount');
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  let currentUserId = null;
+  let isRolling = false;
+  let cooldownUntil = 0;
+  let counterAttackTarget = null;
+
+  // ============================================================
+  // AUTH CHECK
+  // ============================================================
+  onUser(user => {
+    if (!user) {
+      authPanel.style.display = 'block';
+      authPanel.innerHTML = '<p>Please <a href="profile.html">sign in</a> to join the battle.</p>';
+      gamePanel.style.display = 'none';
+      return;
+    }
+
+    currentUserId = user.uid;
+    authPanel.style.display = 'none';
+    gamePanel.style.display = 'block';
+
+    // Register this user in the encounter
+    registerPlayerInEncounter(user.uid);
+
+    // Listen to counter-attack events targeting this player
+    listenForCounterAttacks(user.uid);
+
+    // Listen to cooldown state
+    listenToCooldownState(user.uid);
+  });
+
+  // ============================================================
+  // ENCOUNTER REGISTRATION
+  // ============================================================
+  function registerPlayerInEncounter(userId) {
+    const playerRef = ref(_db, `encounters/${ENCOUNTER_ID}/activePlayers/${userId}`);
+    set(playerRef, {
+      lastAttackTime: Date.now(),
+      onCooldown: false,
+      cooldownUntil: 0,
+    }).catch(err => console.error('Error registering player:', err));
+  }
+
+  // ============================================================
+  // LISTEN TO COUNTER-ATTACKS
+  // ============================================================
+  function listenForCounterAttacks(userId) {
+    const counterLogsRef = ref(_db, `encounters/${ENCOUNTER_ID}/counterAttackLog`);
+    onValue(counterLogsRef, snapshot => {
+      if (!snapshot.exists()) return;
+
+      const logs = snapshot.val();
+      const recentCounter = Object.values(logs).reverse()[0];
+
+      if (recentCounter && recentCounter.targetUserId === userId) {
+        triggerCounterAttack(recentCounter.cooldownUntil);
+      }
+    });
+  }
+
+  // ============================================================
+  // LISTEN TO COOLDOWN STATE (from Cloud Function)
+  // ============================================================
+  function listenToCooldownState(userId) {
+    const playerRef = ref(_db, `encounters/${ENCOUNTER_ID}/activePlayers/${userId}`);
+    onValue(playerRef, snapshot => {
+      if (!snapshot.exists()) return;
+
+      const player = snapshot.val();
+      if (player.onCooldown) {
+        cooldownUntil = player.cooldownUntil || Date.now() + 1500;
+        startCooldownTimer();
+      }
+    });
+  }
+
+  // ============================================================
+  // ATTACK LOGIC
+  // ============================================================
+  btnAttack.addEventListener('click', async () => {
+    if (isRolling || !currentUserId) return;
+
+    // Check cooldown client-side first
+    if (Date.now() < cooldownUntil) {
+      attackStatus.textContent = 'You are still recovering...';
+      return;
+    }
+
+    isRolling = true;
+    btnAttack.disabled = true;
+    btnAttack.classList.add('rolling');
+    coinDisplay.style.display = 'none';
+    resultText.style.display = 'none';
+    attackStatus.textContent = 'Rolling...';
+
+    // Flip coin (50/50 RNG client-side)
+    const rollResult = Math.random() < 0.5 ? 'go_time' : 'no_time';
+
+    // Animate coin flip
+    await animateCoinFlip(rollResult === 'go_time' ? '✓' : '✗');
+
+    // Send to Cloud Function for validation and damage application
+    const successMsg = rollResult === 'go_time'
+      ? PASS_LINES[Math.floor(Math.random() * PASS_LINES.length)]
+      : FAIL_LINES[Math.floor(Math.random() * FAIL_LINES.length)];
+
+    // Write attack to Realtime DB (Cloud Function will validate and apply damage)
+    try {
+      const attackRef = ref(_db, `encounters/${ENCOUNTER_ID}/recentAttacks`);
+      await push(attackRef, {
+        userId: currentUserId,
+        rollResult: rollResult,
+        timestamp: serverTimestamp(),
+      });
+
+      resultText.textContent = successMsg;
+      resultText.style.display = 'block';
+      attackStatus.textContent = rollResult === 'go_time'
+        ? 'Hit! The dragon takes damage!'
+        : 'Miss! The dragon is unimpressed.';
+
+      if (rollResult === 'no_time') {
+        cooldownUntil = Date.now() + 1500;
+        startCooldownTimer();
+      }
+    } catch (err) {
+      console.error('Error writing attack:', err);
+      attackStatus.textContent = 'Error sending attack. Try again.';
+    }
+
+    isRolling = false;
+    btnAttack.disabled = false;
+    btnAttack.classList.remove('rolling');
+  });
+
+  // ============================================================
+  // COIN FLIP ANIMATION
+  // ============================================================
+  async function animateCoinFlip(result) {
+    return new Promise(resolve => {
+      coinDisplay.style.display = 'flex';
+      coinResult.textContent = '?';
+
+      let rotations = 0;
+      const interval = setInterval(() => {
+        rotations++;
+        coinDisplay.style.transform = `rotateY(${rotations * 360}deg)`;
+
+        if (rotations >= 3) {
+          clearInterval(interval);
+          coinResult.textContent = result;
+          coinDisplay.style.transform = 'rotateY(0deg)';
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  // ============================================================
+  // COUNTER-ATTACK (5 second timeout)
+  // ============================================================
+  function triggerCounterAttack(cooldownUntilTime) {
+    cooldownUntil = cooldownUntilTime;
+    attackStatus.textContent = '⚠️ Dragon Counter-Attack! You\'ve been hit!';
+    startCooldownTimer();
+  }
+
+  // ============================================================
+  // COOLDOWN TIMER
+  // ============================================================
+  function startCooldownTimer() {
+    btnAttack.disabled = true;
+    cooldownTimer.style.display = 'block';
+
+    const updateTimer = () => {
+      const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+
+      if (remaining <= 0) {
+        cooldownTimer.style.display = 'none';
+        btnAttack.disabled = false;
+        attackStatus.textContent = 'Ready to attack!';
+      } else {
+        cooldownCount.textContent = remaining;
+        setTimeout(updateTimer, 100);
+      }
+    };
+
+    updateTimer();
+  }
+</script>
+
+<script src="theme-toggle.js"></script>
+
+</body>
+</html>
