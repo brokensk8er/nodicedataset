@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>No Dice — Dragon Lair (Backdrop)</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@4.0.0-beta.22/dist/phaser.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+      background: #1a1a2e;
+    }
+    #gameContainer {
+      width: 100vw;
+      height: 100vh;
+    }
+    .ui-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #daa520;
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 4px;
+      max-width: 300px;
+    }
+    .status-text {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #daa520;
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px 25px;
+      border-radius: 4px;
+      display: none;
+      z-index: 100;
+    }
+    .victory-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #daa520;
+      font-family: 'Cinzel', serif;
+      z-index: 200;
+    }
+    .victory-screen.active {
+      display: flex;
+    }
+    .victory-text {
+      font-size: 48px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .victory-emoji {
+      font-size: 120px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer"></div>
+
+<div class="ui-overlay" id="uiOverlay">
+  <div>Players: <span id="playerCount">0</span></div>
+  <div>Dragon HP: <span id="dragonHP">100</span> / <span id="dragonMaxHP">100</span></div>
+</div>
+
+<div class="status-text" id="statusText"></div>
+
+<div class="victory-screen" id="victoryScreen">
+  <div class="victory-emoji">💀</div>
+  <div class="victory-text">The Dragon is Defeated!</div>
+  <div class="victory-text" style="font-size: 24px;">Redirecting...</div>
+</div>
+
+<script type="module">
+  import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, onValue, off } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+  // ============================================================
+  // FIREBASE CONFIG
+  // ============================================================
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyAXcvi644izGZhK8nPGlkfV4vAc3ZWPH8w",
+    authDomain:        "nodicetools.firebaseapp.com",
+    databaseURL:       "https://nodicetools-default-rtdb.firebaseio.com",
+    projectId:         "nodicetools",
+    storageBucket:     "nodicetools.firebasestorage.app",
+    messagingSenderId: "387258889697",
+    appId:             "1:387258889697:web:5467488ab109ea67b74ea0",
+  };
+
+  const _appName = 'ndt-boss-display';
+  const _app = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
+  const _db = getDatabase(_app);
+
+  // ============================================================
+  // PHASER CONFIG
+  // ============================================================
+  const ENCOUNTER_ID = 'encounter_001';
+  const DRAGON_EMOJI = '🐉';
+
+  const config = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    parent: 'gameContainer',
+    scene: {
+      create: create,
+      update: update,
+    },
+    backgroundColor: '#1a1a2e',
+  };
+
+  const game = new Phaser.Game(config);
+
+  // ============================================================
+  // SCENE STATE
+  // ============================================================
+  let dragonSprite;
+  let healthBarBg;
+  let healthBarFg;
+  let healthBarText;
+  let dragonMaxHP = 100;
+  let dragonCurrentHP = 100;
+  let animationQueue = [];
+  let isAnimating = false;
+
+  // ============================================================
+  // CREATE SCENE
+  // ============================================================
+  function create(scene) {
+    const centerX = scene.cameras.main.centerX;
+    const centerY = scene.cameras.main.centerY - 80;
+
+    // Dragon sprite (emoji text)
+    dragonSprite = scene.add.text(centerX, centerY - 100, DRAGON_EMOJI, {
+      fontSize: '180px',
+      origin: { x: 0.5, y: 0.5 },
+    });
+
+    // Health bar background (red, underneath)
+    healthBarBg = scene.make.graphics({ x: centerX - 150, y: centerY + 50, add: true });
+    healthBarBg.fillStyle(0xcc0000, 1);
+    healthBarBg.fillRect(0, 0, 300, 40);
+
+    // Health bar foreground (green, on top)
+    healthBarFg = scene.make.graphics({ x: centerX - 150, y: centerY + 50, add: true });
+    updateHealthBar(dragonCurrentHP);
+
+    // Health bar text
+    healthBarText = scene.add.text(centerX, centerY + 70, `HP: ${dragonCurrentHP} / ${dragonMaxHP}`, {
+      fontSize: '16px',
+      fill: '#daa520',
+      align: 'center',
+      origin: { x: 0.5, y: 0 },
+    });
+
+    // Listen to Realtime DB for dragon state
+    listenToDragonState(scene);
+  }
+
+  // ============================================================
+  // UPDATE FUNCTION (animations)
+  // ============================================================
+  function update(scene) {
+    // Process animation queue
+    if (!isAnimating && animationQueue.length > 0) {
+      const nextAnim = animationQueue.shift();
+      playAnimation(scene, nextAnim);
+    }
+  }
+
+  // ============================================================
+  // LISTEN TO DRAGON STATE
+  // ============================================================
+  function listenToDragonState(scene) {
+    const encounterRef = ref(_db, `encounters/${ENCOUNTER_ID}`);
+
+    onValue(encounterRef, snapshot => {
+      if (!snapshot.exists()) {
+        console.log('Encounter not found, initializing...');
+        return;
+      }
+
+      const encounter = snapshot.val();
+      const newHP = encounter.dragonHP || 0;
+      const newMaxHP = encounter.dragonMaxHP || 100;
+      const playerCount = encounter.activePlayers ? Object.keys(encounter.activePlayers).length : 0;
+
+      // Update UI
+      document.getElementById('dragonHP').textContent = Math.max(0, newHP);
+      document.getElementById('dragonMaxHP').textContent = newMaxHP;
+      document.getElementById('playerCount').textContent = playerCount;
+
+      // If HP changed, animate it
+      if (newHP !== dragonCurrentHP) {
+        animationQueue.push({
+          type: 'damage',
+          fromHP: dragonCurrentHP,
+          toHP: newHP,
+          maxHP: newMaxHP,
+        });
+        dragonCurrentHP = newHP;
+        dragonMaxHP = newMaxHP;
+      }
+
+      // Check defeat condition
+      if (newHP <= 0 && encounter.status === 'defeated') {
+        showVictoryScreen(scene);
+      }
+    });
+
+    // Also listen to recent attacks for coin animation
+    const attacksRef = ref(_db, `encounters/${ENCOUNTER_ID}/recentAttacks`);
+    onValue(attacksRef, snapshot => {
+      if (!snapshot.exists()) return;
+
+      const attacks = snapshot.val();
+      const recentAttack = Object.values(attacks).reverse()[0];
+
+      if (recentAttack) {
+        animationQueue.push({
+          type: 'attack',
+          rollResult: recentAttack.rollResult,
+        });
+      }
+    });
+  }
+
+  // ============================================================
+  // PLAY ANIMATION
+  // ============================================================
+  async function playAnimation(scene, anim) {
+    isAnimating = true;
+
+    if (anim.type === 'damage') {
+      await animateDamage(scene, anim.fromHP, anim.toHP, anim.maxHP);
+    } else if (anim.type === 'attack') {
+      await animateAttackCoin(scene, anim.rollResult);
+    }
+
+    isAnimating = false;
+  }
+
+  // ============================================================
+  // ANIMATE DAMAGE
+  // ============================================================
+  async function animateDamage(scene, fromHP, toHP, maxHP) {
+    return new Promise(resolve => {
+      const duration = 500;
+      const startTime = Date.now();
+
+      const animFrame = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease-out animation
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        const currentHP = fromHP + (toHP - fromHP) * easeProgress;
+
+        updateHealthBar(currentHP);
+        healthBarText.setText(`HP: ${Math.ceil(currentHP)} / ${maxHP}`);
+
+        if (progress < 1) {
+          requestAnimationFrame(animFrame);
+        } else {
+          dragonCurrentHP = toHP;
+          updateHealthBar(toHP);
+          healthBarText.setText(`HP: ${Math.ceil(toHP)} / ${maxHP}`);
+          resolve();
+        }
+      };
+
+      animFrame();
+    });
+  }
+
+  // ============================================================
+  // UPDATE HEALTH BAR GRAPHIC
+  // ============================================================
+  function updateHealthBar(currentHP) {
+    const maxBarWidth = 300;
+    const barWidth = Math.max(0, (currentHP / dragonMaxHP) * maxBarWidth);
+
+    healthBarFg.clear();
+    healthBarFg.fillStyle(0x00cc00, 1);
+    healthBarFg.fillRect(0, 0, barWidth, 40);
+  }
+
+  // ============================================================
+  // ANIMATE ATTACK COIN (brief flash above health bar)
+  // ============================================================
+  async function animateAttackCoin(scene, rollResult) {
+    return new Promise(resolve => {
+      const centerX = scene.cameras.main.centerX;
+      const centerY = scene.cameras.main.centerY + 60;
+
+      const coinEmoji = rollResult === 'go_time' ? '✓' : '✗';
+      const coinColor = rollResult === 'go_time' ? '#00cc00' : '#cc0000';
+
+      const coinText = scene.add.text(centerX, centerY - 60, coinEmoji, {
+        fontSize: '60px',
+        fill: coinColor,
+        origin: { x: 0.5, y: 0.5 },
+      });
+
+      // Animate coin floating up and fading out
+      scene.tweens.add({
+        targets: coinText,
+        y: centerY - 160,
+        alpha: 0,
+        duration: 1000,
+        ease: 'Power2.easeOut',
+        onComplete: () => {
+          coinText.destroy();
+          resolve();
+        },
+      });
+    });
+  }
+
+  // ============================================================
+  // VICTORY SCREEN
+  // ============================================================
+  function showVictoryScreen(scene) {
+    const victoryScreen = document.getElementById('victoryScreen');
+    victoryScreen.classList.add('active');
+
+    // Redirect to coinflip2.html after 3 seconds
+    setTimeout(() => {
+      window.location.href = 'coinflip2.html';
+    }, 3000);
+  }
+
+  // ============================================================
+  // HANDLE WINDOW RESIZE
+  // ============================================================
+  window.addEventListener('resize', () => {
+    game.scale.resize(window.innerWidth, window.innerHeight);
+  });
+</script>
+
+</body>
+</html>
