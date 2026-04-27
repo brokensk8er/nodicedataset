@@ -134,8 +134,8 @@
 
   const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="55,22 86,39 86,71 55,88 24,71 24,39" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/><text x="55" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="rgba(26,26,46,0.75)">?</text></svg>`;
   function setFaceMystery() { coinFace.className='face face-mystery'; coinFace.innerHTML=MYSTERY_SVG; }
-  function setFaceFail()    { coinFace.className='face face-fail';    coinFace.innerHTML=`<img src="${FAIL_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; }
-  function setFacePass()    { coinFace.className='face face-pass';    coinFace.innerHTML=`<img src="${PASS_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; }
+  function setFaceFail()    { coinFace.className='face face-fail';    coinFace.innerHTML=`<img src="${window.FAIL_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; }
+  function setFacePass()    { coinFace.className='face face-pass';    coinFace.innerHTML=`<img src="${window.PASS_IMG}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`; }
 
   let currentUserId=null, isRolling=false, cooldownUntil=0;
 
@@ -182,6 +182,7 @@
       const flips   = 5 + Math.floor(Math.random() * 4);
       const halfDur = 0.13 + Math.random() * 0.04;
       const iters   = flips - 0.5;
+      const totalMs = Math.round(halfDur * iters * 1000);
 
       coin.style.setProperty('--half-duration', halfDur + 's');
       coin.style.setProperty('--flip-count', iters);
@@ -189,19 +190,16 @@
       void coin.offsetWidth;
       coin.classList.add('spinning');
 
-      coin.addEventListener('animationend', function onSpinEnd() {
-        coin.removeEventListener('animationend', onSpinEnd);
+      setTimeout(() => {
         coin.classList.remove('spinning');
+        coin.style.transform = '';
         if (isPass) setFacePass(); else setFaceFail();
-        coin.style.transition = `transform ${halfDur}s ease-in-out`;
-        coin.style.transform  = 'scaleX(1)';
         setTimeout(() => {
-          coin.style.transition = '';
           coin.classList.add('wobbling');
           document.body.setAttribute('data-result', isPass ? 'pass' : 'fail');
           setTimeout(() => { coin.classList.remove('wobbling'); resolve(); }, 520);
-        }, halfDur * 1000);
-      });
+        }, 60);
+      }, totalMs);
     });
   }
 
