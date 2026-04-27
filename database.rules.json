@@ -25,72 +25,38 @@
           ".write": true,
           ".validate": "newData.isString() && (newData.val() == '0' || newData.val() == '1' || newData.val() == '2' || newData.val() == '3' || newData.val() == '4') && !data.exists()"
         }
-      }
-    },
-    "encounters": {
-      "{encounterId}": {
-        ".read": true,
-        ".write": "auth != null",
-        "dragonHP": { ".validate": "newData.isNumber()" },
-        "dragonMaxHP": { ".validate": "newData.isNumber()" },
-        "status": { ".validate": "newData.isString() && (newData.val() == 'active' || newData.val() == 'defeated' || newData.val() == 'waiting')" },
-        "startedAt": { ".validate": "newData.isNumber()" },
-        "activePlayers": {
-          "{userId}": {
-            ".write": "auth != null",
-            "lastAttackTime": { ".validate": "newData.isNumber()" },
-            "onCooldown": { ".validate": "newData.isBoolean()" },
-            "cooldownUntil": { ".validate": "newData.isNumber()" }
-          }
-        },
-        "recentAttacks": {
-          "{attackId}": {
-            ".write": "auth != null",
-            "userId": { ".validate": "newData.isString()" },
-            "rollResult": { ".validate": "newData.isString() && (newData.val() == 'go_time' || newData.val() == 'no_time')" },
-            "timestamp": { ".validate": "newData.isNumber()" }
-          }
-        },
-        "counterAttackLog": {
-          "{counterId}": {
-            ".write": "auth != null",
-            "targetUserId": { ".validate": "newData.isString()" },
-            "timestamp": { ".validate": "newData.isNumber()" },
-            "cooldownUntil": { ".validate": "newData.isNumber()" }
-          }
-        }
-      }
-    },
-    "encounters": {
-      "{encounterId}": {
-        ".read": true,
-        ".write": "auth != null",
-        "dragonHP": { ".validate": "newData.isNumber()" },
-        "dragonMaxHP": { ".validate": "newData.isNumber()" },
-        "status": { ".validate": "newData.val() matches /^(active|defeated|waiting)$/" },
-        "startedAt": { ".validate": "newData.isNumber()" },
-        "activePlayers": {
-          "{userId}": {
-            ".write": "auth != null",
-            "lastAttackTime": { ".validate": "newData.isNumber()" },
-            "onCooldown": { ".validate": "newData.isBoolean()" },
-            "cooldownUntil": { ".validate": "newData.isNumber()" }
-          }
-        },
-        "recentAttacks": {
-          "{attackId}": {
-            ".write": "auth != null",
-            "userId": { ".validate": "newData.isString()" },
-            "rollResult": { ".validate": "newData.val() matches /^(go_time|no_time)$/" },
-            "timestamp": { ".validate": "newData.isNumber()" || newData.val() === null" }
-          }
-        },
-        "counterAttackLog": {
-          "{counterId}": {
-            ".write": "auth != null",
-            "targetUserId": { ".validate": "newData.isString()" },
-            "timestamp": { ".validate": "newData.isNumber()" || newData.val() === null" },
-            "cooldownUntil": { ".validate": "newData.isNumber()" }
+      },
+      "encounters": {
+        "{encounterId}": {
+          ".read": true,
+          ".write": "auth != null",
+          "dragonHP":    { ".validate": "newData.isNumber()" },
+          "dragonMaxHP": { ".validate": "newData.isNumber()" },
+          "status":      { ".validate": "newData.isString() && (newData.val() == 'active' || newData.val() == 'defeated' || newData.val() == 'waiting')" },
+          "startedAt":   { ".validate": "newData.isNumber()" },
+          "activePlayers": {
+            "{userId}": {
+              ".write": "auth != null",
+              "lastAttackTime": { ".validate": "newData.isNumber()" },
+              "onCooldown":     { ".validate": "newData.isBoolean()" },
+              "cooldownUntil":  { ".validate": "newData.isNumber()" }
+            }
+          },
+          "recentAttacks": {
+            "{attackId}": {
+              ".write": "auth != null",
+              "userId":     { ".validate": "newData.isString()" },
+              "rollResult": { ".validate": "newData.isString() && (newData.val() == 'go_time' || newData.val() == 'no_time')" },
+              "timestamp":  { ".validate": "newData.isNumber()" }
+            }
+          },
+          "counterAttackLog": {
+            "{counterId}": {
+              ".write": "auth != null",
+              "targetUserId": { ".validate": "newData.isString()" },
+              "timestamp":    { ".validate": "newData.isNumber()" },
+              "cooldownUntil":{ ".validate": "newData.isNumber()" }
+            }
           }
         }
       }
