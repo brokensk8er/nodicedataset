@@ -119,6 +119,7 @@
   // PHASER CONFIG
   // ============================================================
   const ENCOUNTER_ID = 'dragon';
+  const DB_ROOT      = 'nodice/encounters';
   const DRAGON_EMOJI = '🐉';
 
   const config = {
@@ -138,220 +139,126 @@
   // ============================================================
   // SCENE STATE
   // ============================================================
+  let phaserScene;   // stored in create(), used everywhere
   let dragonSprite;
   let healthBarBg;
   let healthBarFg;
   let healthBarText;
-  let dragonMaxHP = 100;
-  let dragonCurrentHP = 100;
-  let animationQueue = [];
-  let isAnimating = false;
+  let dragonMaxHP     = 500;
+  let dragonCurrentHP = 500;
+  let animationQueue  = [];
+  let isAnimating     = false;
 
-  // ============================================================
-  // CREATE SCENE
-  // ============================================================
-  function create(scene) {
-    const centerX = scene.cameras.main.centerX;
-    const centerY = scene.cameras.main.centerY - 80;
+  function create() {
+    phaserScene = this;                         // store reference
+    const cx = this.cameras.main.centerX;
+    const cy = this.cameras.main.centerY - 80;
 
-    // Dragon sprite (emoji text)
-    dragonSprite = scene.add.text(centerX, centerY - 100, DRAGON_EMOJI, {
-      fontSize: '180px',
-      origin: { x: 0.5, y: 0.5 },
-    });
+    dragonSprite = this.add.text(cx, cy - 100, DRAGON_EMOJI, { fontSize: '180px' })
+                           .setOrigin(0.5, 0.5);
 
-    // Health bar background (red, underneath)
-    healthBarBg = scene.make.graphics({ x: centerX - 150, y: centerY + 50, add: true });
+    // Red background bar
+    healthBarBg = this.add.graphics();
     healthBarBg.fillStyle(0xcc0000, 1);
-    healthBarBg.fillRect(0, 0, 300, 40);
+    healthBarBg.fillRect(cx - 150, cy + 50, 300, 40);
 
-    // Health bar foreground (green, on top)
-    healthBarFg = scene.make.graphics({ x: centerX - 150, y: centerY + 50, add: true });
-    updateHealthBar(dragonCurrentHP);
+    // Green foreground bar
+    healthBarFg = this.add.graphics();
+    drawHealthBar(cx, cy);
 
-    // Health bar text
-    healthBarText = scene.add.text(centerX, centerY + 70, `HP: ${dragonCurrentHP} / ${dragonMaxHP}`, {
-      fontSize: '16px',
-      fill: '#daa520',
-      align: 'center',
-      origin: { x: 0.5, y: 0 },
-    });
+    healthBarText = this.add.text(cx, cy + 100, `HP: ${dragonCurrentHP} / ${dragonMaxHP}`, {
+      fontSize: '18px', color: '#daa520',
+    }).setOrigin(0.5, 0);
 
-    // Listen to Realtime DB for dragon state
-    listenToDragonState(scene);
+    listenToDragonState();
   }
 
-  // ============================================================
-  // UPDATE FUNCTION (animations)
-  // ============================================================
-  function update(scene) {
-    // Process animation queue
+  function update() {
     if (!isAnimating && animationQueue.length > 0) {
-      const nextAnim = animationQueue.shift();
-      playAnimation(scene, nextAnim);
+      const anim = animationQueue.shift();
+      playAnimation(anim);
     }
   }
 
-  // ============================================================
-  // LISTEN TO DRAGON STATE
-  // ============================================================
-  function listenToDragonState(scene) {
-    const encounterRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`);
+  function drawHealthBar(cx, cy) {
+    if (!phaserScene) return;
+    const barWidth = Math.max(0, (dragonCurrentHP / dragonMaxHP) * 300);
+    healthBarFg.clear();
+    healthBarFg.fillStyle(0x00cc00, 1);
+    healthBarFg.fillRect(cx - 150, cy + 50, barWidth, 40);
+  }
 
-    onValue(encounterRef, snapshot => {
-      if (!snapshot.exists()) {
-        console.log('Encounter not found, initializing...');
-        return;
-      }
+  function listenToDragonState() {
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`), snapshot => {
+      if (!snapshot.exists()) { console.warn('Encounter not found at', `${DB_ROOT}/${ENCOUNTER_ID}`); return; }
 
-      const encounter = snapshot.val();
-      const newHP = encounter.dragonHP || 0;
-      const newMaxHP = encounter.dragonMaxHP || 100;
-      const playerCount = encounter.activePlayers ? Object.keys(encounter.activePlayers).length : 0;
+      const encounter  = snapshot.val();
+      const newHP      = encounter.dragonHP    ?? 0;
+      const newMaxHP   = encounter.dragonMaxHP ?? 500;
+      const players    = encounter.activePlayers ? Object.keys(encounter.activePlayers).length : 0;
 
-      // Update UI
-      document.getElementById('dragonHP').textContent = Math.max(0, newHP);
+      document.getElementById('dragonHP').textContent    = Math.max(0, newHP);
       document.getElementById('dragonMaxHP').textContent = newMaxHP;
-      document.getElementById('playerCount').textContent = playerCount;
+      document.getElementById('playerCount').textContent = players;
 
-      // If HP changed, animate it
       if (newHP !== dragonCurrentHP) {
-        animationQueue.push({
-          type: 'damage',
-          fromHP: dragonCurrentHP,
-          toHP: newHP,
-          maxHP: newMaxHP,
-        });
+        animationQueue.push({ type: 'damage', fromHP: dragonCurrentHP, toHP: newHP, maxHP: newMaxHP });
         dragonCurrentHP = newHP;
-        dragonMaxHP = newMaxHP;
+        dragonMaxHP     = newMaxHP;
       }
 
-      // Check defeat condition
-      if (newHP <= 0 && encounter.status === 'defeated') {
-        showVictoryScreen(scene);
-      }
-    });
-
-    // Also listen to recent attacks for coin animation
-    const attacksRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/recentAttacks`);
-    onValue(attacksRef, snapshot => {
-      if (!snapshot.exists()) return;
-
-      const attacks = snapshot.val();
-      const recentAttack = Object.values(attacks).reverse()[0];
-
-      if (recentAttack) {
-        animationQueue.push({
-          type: 'attack',
-          rollResult: recentAttack.rollResult,
-        });
-      }
+      if (newHP <= 0 && encounter.status === 'defeated') showVictoryScreen();
     });
   }
 
-  // ============================================================
-  // PLAY ANIMATION
-  // ============================================================
-  async function playAnimation(scene, anim) {
+  async function playAnimation(anim) {
     isAnimating = true;
-
-    if (anim.type === 'damage') {
-      await animateDamage(scene, anim.fromHP, anim.toHP, anim.maxHP);
-    } else if (anim.type === 'attack') {
-      await animateAttackCoin(scene, anim.rollResult);
-    }
-
+    if (anim.type === 'damage') await animateDamage(anim.fromHP, anim.toHP, anim.maxHP);
+    if (anim.type === 'attack') await animateAttackCoin(anim.rollResult);
     isAnimating = false;
   }
 
-  // ============================================================
-  // ANIMATE DAMAGE
-  // ============================================================
-  async function animateDamage(scene, fromHP, toHP, maxHP) {
+  async function animateDamage(fromHP, toHP, maxHP) {
+    if (!phaserScene) return;
+    const cx       = phaserScene.cameras.main.centerX;
+    const cy       = phaserScene.cameras.main.centerY - 80;
+    const duration = 500;
+    const start    = Date.now();
+
     return new Promise(resolve => {
-      const duration = 500;
-      const startTime = Date.now();
-
-      const animFrame = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Ease-out animation
-        const easeProgress = 1 - Math.pow(1 - progress, 3);
-        const currentHP = fromHP + (toHP - fromHP) * easeProgress;
-
-        updateHealthBar(currentHP);
-        healthBarText.setText(`HP: ${Math.ceil(currentHP)} / ${maxHP}`);
-
-        if (progress < 1) {
-          requestAnimationFrame(animFrame);
-        } else {
-          dragonCurrentHP = toHP;
-          updateHealthBar(toHP);
-          healthBarText.setText(`HP: ${Math.ceil(toHP)} / ${maxHP}`);
-          resolve();
-        }
+      const tick = () => {
+        const progress    = Math.min((Date.now() - start) / duration, 1);
+        const ease        = 1 - Math.pow(1 - progress, 3);
+        dragonCurrentHP   = fromHP + (toHP - fromHP) * ease;
+        drawHealthBar(cx, cy);
+        healthBarText.setText(`HP: ${Math.ceil(dragonCurrentHP)} / ${maxHP}`);
+        if (progress < 1) requestAnimationFrame(tick);
+        else { dragonCurrentHP = toHP; drawHealthBar(cx, cy); resolve(); }
       };
-
-      animFrame();
+      tick();
     });
   }
 
-  // ============================================================
-  // UPDATE HEALTH BAR GRAPHIC
-  // ============================================================
-  function updateHealthBar(currentHP) {
-    const maxBarWidth = 300;
-    const barWidth = Math.max(0, (currentHP / dragonMaxHP) * maxBarWidth);
+  async function animateAttackCoin(rollResult) {
+    if (!phaserScene) return;
+    const cx    = phaserScene.cameras.main.centerX;
+    const cy    = phaserScene.cameras.main.centerY + 60;
+    const emoji = rollResult === 'go_time' ? '✓' : '✗';
+    const color = rollResult === 'go_time' ? '#00cc00' : '#cc0000';
 
-    healthBarFg.clear();
-    healthBarFg.fillStyle(0x00cc00, 1);
-    healthBarFg.fillRect(0, 0, barWidth, 40);
-  }
-
-  // ============================================================
-  // ANIMATE ATTACK COIN (brief flash above health bar)
-  // ============================================================
-  async function animateAttackCoin(scene, rollResult) {
     return new Promise(resolve => {
-      const centerX = scene.cameras.main.centerX;
-      const centerY = scene.cameras.main.centerY + 60;
-
-      const coinEmoji = rollResult === 'go_time' ? '✓' : '✗';
-      const coinColor = rollResult === 'go_time' ? '#00cc00' : '#cc0000';
-
-      const coinText = scene.add.text(centerX, centerY - 60, coinEmoji, {
-        fontSize: '60px',
-        fill: coinColor,
-        origin: { x: 0.5, y: 0.5 },
-      });
-
-      // Animate coin floating up and fading out
-      scene.tweens.add({
-        targets: coinText,
-        y: centerY - 160,
-        alpha: 0,
-        duration: 1000,
-        ease: 'Power2.easeOut',
-        onComplete: () => {
-          coinText.destroy();
-          resolve();
-        },
+      const txt = phaserScene.add.text(cx, cy - 60, emoji, { fontSize: '60px', color }).setOrigin(0.5, 0.5);
+      phaserScene.tweens.add({
+        targets: txt, y: cy - 160, alpha: 0, duration: 1000,
+        ease: 'Power2',
+        onComplete: () => { txt.destroy(); resolve(); },
       });
     });
   }
 
-  // ============================================================
-  // VICTORY SCREEN
-  // ============================================================
-  function showVictoryScreen(scene) {
-    const victoryScreen = document.getElementById('victoryScreen');
-    victoryScreen.classList.add('active');
-
-    // Redirect to coinflip2.html after 3 seconds
-    setTimeout(() => {
-      window.location.href = 'coinflip2.html';
-    }, 3000);
+  function showVictoryScreen() {
+    document.getElementById('victoryScreen').classList.add('active');
+    setTimeout(() => { window.location.href = 'coinflip2.html'; }, 3000);
   }
 
   // ============================================================
