@@ -118,7 +118,7 @@
   // ============================================================
   // PHASER CONFIG
   // ============================================================
-  const ENCOUNTER_ID = 'encounter_001';
+  const ENCOUNTER_ID = 'dragon';
   const DRAGON_EMOJI = '🐉';
 
   const config = {
@@ -196,7 +196,7 @@
   // LISTEN TO DRAGON STATE
   // ============================================================
   function listenToDragonState(scene) {
-    const encounterRef = ref(_db, `encounters/${ENCOUNTER_ID}`);
+    const encounterRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`);
 
     onValue(encounterRef, snapshot => {
       if (!snapshot.exists()) {
@@ -233,7 +233,7 @@
     });
 
     // Also listen to recent attacks for coin animation
-    const attacksRef = ref(_db, `encounters/${ENCOUNTER_ID}/recentAttacks`);
+    const attacksRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/recentAttacks`);
     onValue(attacksRef, snapshot => {
       if (!snapshot.exists()) return;
 
