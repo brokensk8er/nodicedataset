@@ -119,14 +119,13 @@
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getDatabase, ref, onValue, set, push, get, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, push, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
   import { currentUser, onUser } from './profile-auth.js';
 
   // ============================================================
   // CONFIG
   // ============================================================
-  const ENCOUNTER_ID = 'dragon';
-  const DB_ROOT = 'nodice/encounters';
+  const ENCOUNTER_ID = 'encounter_001';
   const FAIL_LINES = [
     "The fates are unmoved.",
     "Even heroes stumble.",
@@ -198,13 +197,19 @@
 
     // Register this user in the encounter
     registerPlayerInEncounter(user.uid);
+
+    // Listen to counter-attack events targeting this player
+    listenForCounterAttacks(user.uid);
+
+    // Listen to cooldown state
+    listenToCooldownState(user.uid);
   });
 
   // ============================================================
   // ENCOUNTER REGISTRATION
   // ============================================================
   function registerPlayerInEncounter(userId) {
-    const playerRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${userId}`);
+    const playerRef = ref(_db, `encounters/${ENCOUNTER_ID}/activePlayers/${userId}`);
     set(playerRef, {
       lastAttackTime: Date.now(),
       onCooldown: false,
@@ -212,6 +217,38 @@
     }).catch(err => console.error('Error registering player:', err));
   }
 
+  // ============================================================
+  // LISTEN TO COUNTER-ATTACKS
+  // ============================================================
+  function listenForCounterAttacks(userId) {
+    const counterLogsRef = ref(_db, `encounters/${ENCOUNTER_ID}/counterAttackLog`);
+    onValue(counterLogsRef, snapshot => {
+      if (!snapshot.exists()) return;
+
+      const logs = snapshot.val();
+      const recentCounter = Object.values(logs).reverse()[0];
+
+      if (recentCounter && recentCounter.targetUserId === userId) {
+        triggerCounterAttack(recentCounter.cooldownUntil);
+      }
+    });
+  }
+
+  // ============================================================
+  // LISTEN TO COOLDOWN STATE (from Cloud Function)
+  // ============================================================
+  function listenToCooldownState(userId) {
+    const playerRef = ref(_db, `encounters/${ENCOUNTER_ID}/activePlayers/${userId}`);
+    onValue(playerRef, snapshot => {
+      if (!snapshot.exists()) return;
+
+      const player = snapshot.val();
+      if (player.onCooldown) {
+        cooldownUntil = player.cooldownUntil || Date.now() + 1500;
+        startCooldownTimer();
+      }
+    });
+  }
 
   // ============================================================
   // ATTACK LOGIC
@@ -238,53 +275,32 @@
     // Animate coin flip
     await animateCoinFlip(rollResult === 'go_time' ? '✓' : '✗');
 
+    // Send to Cloud Function for validation and damage application
     const successMsg = rollResult === 'go_time'
       ? PASS_LINES[Math.floor(Math.random() * PASS_LINES.length)]
       : FAIL_LINES[Math.floor(Math.random() * FAIL_LINES.length)];
 
-    // Apply game logic directly (client-side)
+    // Write attack to Realtime DB (Cloud Function will validate and apply damage)
     try {
-      const encounterRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`);
-      const encounterSnap = await get(encounterRef);
+      const attackRef = ref(_db, `encounters/${ENCOUNTER_ID}/recentAttacks`);
+      await push(attackRef, {
+        userId: currentUserId,
+        rollResult: rollResult,
+        timestamp: serverTimestamp(),
+      });
 
-      if (!encounterSnap.exists()) {
-        attackStatus.textContent = 'Encounter not found!';
-        isRolling = false;
-        btnAttack.disabled = false;
-        btnAttack.classList.remove('rolling');
-        return;
-      }
+      resultText.textContent = successMsg;
+      resultText.style.display = 'block';
+      attackStatus.textContent = rollResult === 'go_time'
+        ? 'Hit! The dragon takes damage!'
+        : 'Miss! The dragon is unimpressed.';
 
-      const encounter = encounterSnap.val();
-      const updates = {};
-
-      if (rollResult === 'go_time') {
-        // Damage the dragon (1 HP per hit)
-        const newHP = Math.max(0, encounter.dragonHP - 1);
-        updates[`${DB_ROOT}/${ENCOUNTER_ID}/dragonHP`] = newHP;
-
-        // Check defeat condition
-        if (newHP <= 0) {
-          updates[`${DB_ROOT}/${ENCOUNTER_ID}/status`] = 'defeated';
-        }
-
-        resultText.textContent = successMsg;
-        resultText.style.display = 'block';
-        attackStatus.textContent = 'Hit! The dragon takes damage!';
-      } else {
-        // Failed roll: apply 1.5 second cooldown
+      if (rollResult === 'no_time') {
         cooldownUntil = Date.now() + 1500;
         startCooldownTimer();
-
-        resultText.textContent = successMsg;
-        resultText.style.display = 'block';
-        attackStatus.textContent = 'Miss! The dragon is unimpressed.';
       }
-
-      // Write all updates atomically
-      await set(ref(_db), updates, { merge: true });
     } catch (err) {
-      console.error('Error processing attack:', err);
+      console.error('Error writing attack:', err);
       attackStatus.textContent = 'Error sending attack. Try again.';
     }
 
@@ -316,6 +332,14 @@
     });
   }
 
+  // ============================================================
+  // COUNTER-ATTACK (5 second timeout)
+  // ============================================================
+  function triggerCounterAttack(cooldownUntilTime) {
+    cooldownUntil = cooldownUntilTime;
+    attackStatus.textContent = '⚠️ Dragon Counter-Attack! You\'ve been hit!';
+    startCooldownTimer();
+  }
 
   // ============================================================
   // COOLDOWN TIMER
