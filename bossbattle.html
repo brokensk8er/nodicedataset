@@ -60,8 +60,7 @@
     appId:"1:387258889697:web:5467488ab109ea67b74ea0",
   };
 
-  const _appName = 'ndt-boss-battle';
-  const _app = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
+  const _app = getApps().find(a => a.name === 'ndt-profile') ?? initializeApp(FIREBASE_CONFIG, 'ndt-profile');
   const _db  = getDatabase(_app);
 
   const authPanel=document.getElementById('authPanel'), gamePanel=document.getElementById('gamePanel'),
