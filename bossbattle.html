@@ -125,7 +125,8 @@
   // ============================================================
   // CONFIG
   // ============================================================
-  const ENCOUNTER_ID = 'encounter_001';
+  const ENCOUNTER_ID = 'dragon';
+  const DB_ROOT = 'nodice/encounters';
   const FAIL_LINES = [
     "The fates are unmoved.",
     "Even heroes stumble.",
@@ -203,7 +204,7 @@
   // ENCOUNTER REGISTRATION
   // ============================================================
   function registerPlayerInEncounter(userId) {
-    const playerRef = ref(_db, `encounters/${ENCOUNTER_ID}/activePlayers/${userId}`);
+    const playerRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${userId}`);
     set(playerRef, {
       lastAttackTime: Date.now(),
       onCooldown: false,
@@ -243,7 +244,7 @@
 
     // Apply game logic directly (client-side)
     try {
-      const encounterRef = ref(_db, `encounters/${ENCOUNTER_ID}`);
+      const encounterRef = ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`);
       const encounterSnap = await get(encounterRef);
 
       if (!encounterSnap.exists()) {
@@ -260,11 +261,11 @@
       if (rollResult === 'go_time') {
         // Damage the dragon (1 HP per hit)
         const newHP = Math.max(0, encounter.dragonHP - 1);
-        updates[`encounters/${ENCOUNTER_ID}/dragonHP`] = newHP;
+        updates[`${DB_ROOT}/${ENCOUNTER_ID}/dragonHP`] = newHP;
 
         // Check defeat condition
         if (newHP <= 0) {
-          updates[`encounters/${ENCOUNTER_ID}/status`] = 'defeated';
+          updates[`${DB_ROOT}/${ENCOUNTER_ID}/status`] = 'defeated';
         }
 
         resultText.textContent = successMsg;
