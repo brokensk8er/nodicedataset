@@ -45,8 +45,8 @@
 <footer><a class="nav-link" href="index.html">← Back to the Vault</a></footer>
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
   import { getDatabase, ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-  import { onUser } from './profile-auth.js';
 
   const ENCOUNTER_ID = 'dragon';
   const DB_ROOT      = 'nodice/encounters';
@@ -60,8 +60,10 @@
     appId:"1:387258889697:web:5467488ab109ea67b74ea0",
   };
 
-  const _app = getApps().find(a => a.name === 'ndt-profile') ?? initializeApp(FIREBASE_CONFIG, 'ndt-profile');
-  const _db  = getDatabase(_app);
+  // Use the same named app as profile-auth.js so auth + database share one context
+  const _app  = getApps().find(a => a.name === 'ndt-profile') ?? initializeApp(FIREBASE_CONFIG, 'ndt-profile');
+  const _auth = getAuth(_app);
+  const _db   = getDatabase(_app);
 
   const authPanel=document.getElementById('authPanel'), gamePanel=document.getElementById('gamePanel'),
         btnAttack=document.getElementById('btnAttack'), attackStatus=document.getElementById('attackStatus'),
@@ -71,7 +73,7 @@
 
   let currentUserId=null, isRolling=false, cooldownUntil=0;
 
-  onUser(user => {
+  onAuthStateChanged(_auth, user => {
     if (!user) { authPanel.style.display='block'; authPanel.innerHTML='<p>Please <a href="profile.html">sign in</a> to join the battle.</p>'; gamePanel.style.display='none'; return; }
     currentUserId=user.uid; authPanel.style.display='none'; gamePanel.style.display='block';
     set(ref(_db,`${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${user.uid}`),{lastAttackTime:Date.now(),onCooldown:false,cooldownUntil:0}).catch(console.error);
