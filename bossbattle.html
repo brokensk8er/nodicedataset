@@ -60,8 +60,11 @@
     appId:"1:387258889697:web:5467488ab109ea67b74ea0",
   };
 
-  // Use the same named app as profile-auth.js so auth + database share one context
-  const _app  = getApps().find(a => a.name === 'ndt-profile') ?? initializeApp(FIREBASE_CONFIG, 'ndt-profile');
+  // Own app instance: both auth + database on same app so the RTDB connection
+  // carries the auth token. Firebase auth state persists per-project in localStorage
+  // so getAuth() restores the signed-in user automatically.
+  const _appName = 'ndt-boss-battle';
+  const _app  = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
   const _auth = getAuth(_app);
   const _db   = getDatabase(_app);
 
