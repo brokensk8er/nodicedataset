@@ -11,7 +11,7 @@
         "options": {
           ".validate": "newData.hasChildren(['0', '1'])",
           "$idx": {
-            ".validate": "$idx.matches(/^[0-4]$/) && newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+            ".validate": "($idx == '0' || $idx == '1' || $idx == '2' || $idx == '3' || $idx == '4') && newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
           }
         },
         "active":   { ".validate": "newData.isBoolean()" },
@@ -23,7 +23,7 @@
         ".write": "auth != null",
         "$voterId": {
           ".write": true,
-          ".validate": "newData.isString() && newData.val().matches(/^[0-4]$/) && !data.exists()"
+          ".validate": "newData.isString() && (newData.val() == '0' || newData.val() == '1' || newData.val() == '2' || newData.val() == '3' || newData.val() == '4') && !data.exists()"
         }
       }
     },
@@ -33,7 +33,7 @@
         ".write": "auth != null",
         "dragonHP": { ".validate": "newData.isNumber()" },
         "dragonMaxHP": { ".validate": "newData.isNumber()" },
-        "status": { ".validate": "newData.val() matches /^(active|defeated|waiting)$/" },
+        "status": { ".validate": "newData.isString() && (newData.val() == 'active' || newData.val() == 'defeated' || newData.val() == 'waiting')" },
         "startedAt": { ".validate": "newData.isNumber()" },
         "activePlayers": {
           "{userId}": {
@@ -47,7 +47,7 @@
           "{attackId}": {
             ".write": "auth != null",
             "userId": { ".validate": "newData.isString()" },
-            "rollResult": { ".validate": "newData.val() matches /^(go_time|no_time)$/" },
+            "rollResult": { ".validate": "newData.isString() && (newData.val() == 'go_time' || newData.val() == 'no_time')" },
             "timestamp": { ".validate": "newData.isNumber()" }
           }
         },
