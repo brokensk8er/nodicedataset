@@ -155,7 +155,7 @@
     appId:"1:387258889697:web:5467488ab109ea67b74ea0",
   };
 
-  const _appName = 'ndt-boss-battle';
+  const _appName = 'ndt-profile';
   const _app  = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
   const _auth = getAuth(_app);
   const _db   = getDatabase(_app);
