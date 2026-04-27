@@ -48,14 +48,14 @@
             ".write": "auth != null",
             "userId": { ".validate": "newData.isString()" },
             "rollResult": { ".validate": "newData.val() matches /^(go_time|no_time)$/" },
-            "timestamp": { ".validate": "newData.isNumber()" || newData.val() === null" }
+            "timestamp": { ".validate": "newData.isNumber()" }
           }
         },
         "counterAttackLog": {
           "{counterId}": {
             ".write": "auth != null",
             "targetUserId": { ".validate": "newData.isString()" },
-            "timestamp": { ".validate": "newData.isNumber()" || newData.val() === null" },
+            "timestamp": { ".validate": "newData.isNumber()" },
             "cooldownUntil": { ".validate": "newData.isNumber()" }
           }
         }
