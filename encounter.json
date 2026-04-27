@@ -1,0 +1,9 @@
+{
+  "dragonHP": 500,
+  "dragonMaxHP": 500,
+  "status": "active",
+  "startedAt": 0,
+  "activePlayers": {},
+  "recentAttacks": {},
+  "counterAttackLog": {}
+}
