@@ -22,18 +22,13 @@
     .btn-attack:hover:not(:disabled) { background:var(--color-accent); color:var(--color-bg); }
     .btn-attack:disabled { opacity:0.5; cursor:not-allowed; }
     .btn-attack.rolling { opacity:0.7; }
-    @keyframes coinFlip {
+    @keyframes bbCoinFlip {
       0%   { transform: scaleX(1); }
       50%  { transform: scaleX(0); }
       100% { transform: scaleX(1); }
     }
-    .coin-display.spinning { animation: coinFlip var(--half-duration, 0.17s) ease-in-out var(--flip-count, 4.5) forwards; }
-    .face { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .face-mystery { background: radial-gradient(circle at 38% 32%, #e2bc6a, #9c7b2e 55%, #785f23); }
-    .face-fail { background: #000; box-shadow: 0 6px 32px rgba(235,46,46,.55); }
-    .face-pass { background: #000; box-shadow: 0 6px 28px rgba(0,166,81,.55); }
-    .face img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .face svg { width: 100%; height: 100%; }
+    /* .face / .face-mystery / .face-fail / .face-pass / .face img / .face::before
+       all come from styles.css and apply globally — no need to redeclare here. */
   </style>
 </head>
 <body class="bossbattle-page">
@@ -48,7 +43,7 @@
   <div id="authPanel" style="display:none;"><p>Loading authentication...</p></div>
   <div id="gamePanel" style="display:none;">
     <p class="attack-status" id="attackStatus">Ready to attack!</p>
-    <div class="coin-display" id="coinDisplay" style="display:none;"><div class="face" id="coinFace"></div></div>
+    <div class="coin-display" id="coinDisplay" style="display:none;"><div class="face face-mystery" id="coinFace"><svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="55,22 86,39 86,71 55,88 24,71 24,39" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/><text x="55" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="rgba(26,26,46,0.75)">?</text></svg></div></div>
     <div id="resultText" class="result-text" style="display:none;"></div>
     <div class="cooldown-timer" id="cooldownTimer" style="display:none;">Cooldown: <span id="cooldownCount">0</span>s</div>
     <button class="btn-roll btn-attack" id="btnAttack">⚔ Attack the Dragon</button>
@@ -131,21 +126,31 @@
     const flips   = 3 + Math.floor(Math.random() * 3);
     const halfDur = 0.13 + Math.random() * 0.04;
     const iters   = flips - 0.5;
+    const totalMs = halfDur * iters * 1000;
 
-    coinDisplay.style.setProperty('--half-duration', halfDur + 's');
-    coinDisplay.style.setProperty('--flip-count', iters);
-    coinDisplay.classList.remove('spinning');
+    // Set animation directly — CSS-var-driven iteration counts are unreliable
+    // across browsers (same workaround used in index.html's doFlip).
+    coinDisplay.style.animation = 'none';
     void coinDisplay.offsetWidth;
-    coinDisplay.classList.add('spinning');
+    coinDisplay.style.animation = `bbCoinFlip ${halfDur}s ease-in-out ${iters} forwards`;
 
     return new Promise(resolve => {
-      coinDisplay.addEventListener('animationend', function onEnd() {
-        coinDisplay.removeEventListener('animationend', onEnd);
-        coinDisplay.classList.remove('spinning');
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        coinDisplay.style.animation = 'none';
         if (result === '✓') setFacePass(coinFace);
         else                setFaceFail(coinFace);
         setTimeout(resolve, 300);
+      };
+      coinDisplay.addEventListener('animationend', function onEnd() {
+        coinDisplay.removeEventListener('animationend', onEnd);
+        finish();
       });
+      // Fallback in case animationend doesn't fire (sub-pixel iteration counts,
+      // tab-switch, etc.)
+      setTimeout(finish, totalMs + 200);
     });
   }
 
