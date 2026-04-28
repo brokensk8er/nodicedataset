@@ -16,12 +16,24 @@
     .attack-panel h1 { margin-bottom:2rem; }
     .attack-status { font-size:1.2rem; margin:1rem 0; min-height:3rem; }
     .cooldown-timer { font-size:1.5rem; font-weight:bold; color:var(--color-accent); margin:0.5rem 0; }
-    .coin-display { width:120px; height:120px; margin:1rem auto; border:2px solid var(--color-accent); border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:3rem; background:rgba(218,165,32,0.1); }
+    .coin-display { width:120px; height:120px; margin:1rem auto; border:2px solid var(--color-accent); border-radius:50%; position:relative; overflow:hidden; }
     .result-text { font-size:1.3rem; margin:1rem 0; font-weight:bold; }
     .btn-attack { padding:1rem 2rem; font-size:1.2rem; font-weight:bold; margin:1rem 0; cursor:pointer; border:2px solid var(--color-accent); background:transparent; color:var(--color-accent); border-radius:4px; transition:all 0.3s; }
     .btn-attack:hover:not(:disabled) { background:var(--color-accent); color:var(--color-bg); }
     .btn-attack:disabled { opacity:0.5; cursor:not-allowed; }
     .btn-attack.rolling { opacity:0.7; }
+    @keyframes coinFlip {
+      0%   { transform: scaleX(1); }
+      50%  { transform: scaleX(0); }
+      100% { transform: scaleX(1); }
+    }
+    .coin-display.spinning { animation: coinFlip var(--half-duration, 0.17s) ease-in-out var(--flip-count, 4.5) forwards; }
+    .face { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .face-mystery { background: radial-gradient(circle at 38% 32%, #e2bc6a, #9c7b2e 55%, #785f23); }
+    .face-fail { background: #000; box-shadow: 0 6px 32px rgba(235,46,46,.55); }
+    .face-pass { background: #000; box-shadow: 0 6px 28px rgba(0,166,81,.55); }
+    .face img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .face svg { width: 100%; height: 100%; }
   </style>
 </head>
 <body class="bossbattle-page">
@@ -36,7 +48,7 @@
   <div id="authPanel" style="display:none;"><p>Loading authentication...</p></div>
   <div id="gamePanel" style="display:none;">
     <p class="attack-status" id="attackStatus">Ready to attack!</p>
-    <div class="coin-display" id="coinDisplay" style="display:none;"><span id="coinResult">?</span></div>
+    <div class="coin-display" id="coinDisplay" style="display:none;"><div class="face" id="coinFace"></div></div>
     <div id="resultText" class="result-text" style="display:none;"></div>
     <div class="cooldown-timer" id="cooldownTimer" style="display:none;">Cooldown: <span id="cooldownCount">0</span>s</div>
     <button class="btn-roll btn-attack" id="btnAttack">⚔ Attack the Dragon</button>
@@ -47,6 +59,7 @@
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
   import { getDatabase, ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { setFaceMystery, setFaceFail, setFacePass } from './coin-asset.js';
 
   const ENCOUNTER_ID = 'dragon';
   const DB_ROOT      = 'nodice/encounters';
@@ -70,7 +83,7 @@
 
   const authPanel=document.getElementById('authPanel'), gamePanel=document.getElementById('gamePanel'),
         btnAttack=document.getElementById('btnAttack'), attackStatus=document.getElementById('attackStatus'),
-        coinDisplay=document.getElementById('coinDisplay'), coinResult=document.getElementById('coinResult'),
+        coinDisplay=document.getElementById('coinDisplay'),
         resultText=document.getElementById('resultText'), cooldownTimer=document.getElementById('cooldownTimer'),
         cooldownCount=document.getElementById('cooldownCount');
 
@@ -111,12 +124,28 @@
   });
 
   async function animateCoinFlip(result) {
+    const coinFace = document.getElementById('coinFace');
+    setFaceMystery(coinFace);
+    coinDisplay.style.display = 'flex';
+
+    const flips   = 3 + Math.floor(Math.random() * 3);
+    const halfDur = 0.13 + Math.random() * 0.04;
+    const iters   = flips - 0.5;
+
+    coinDisplay.style.setProperty('--half-duration', halfDur + 's');
+    coinDisplay.style.setProperty('--flip-count', iters);
+    coinDisplay.classList.remove('spinning');
+    void coinDisplay.offsetWidth;
+    coinDisplay.classList.add('spinning');
+
     return new Promise(resolve => {
-      coinDisplay.style.display='flex'; coinResult.textContent='?';
-      let rotations=0;
-      const interval=setInterval(()=>{ rotations++; coinDisplay.style.transform=`rotateY(${rotations*360}deg)`;
-        if(rotations>=3){ clearInterval(interval); coinResult.textContent=result; coinDisplay.style.transform='rotateY(0deg)'; resolve(); }
-      },100);
+      coinDisplay.addEventListener('animationend', function onEnd() {
+        coinDisplay.removeEventListener('animationend', onEnd);
+        coinDisplay.classList.remove('spinning');
+        if (result === '✓') setFacePass(coinFace);
+        else                setFaceFail(coinFace);
+        setTimeout(resolve, 300);
+      });
     });
   }
 
