@@ -137,12 +137,11 @@
 
 <footer><a class="nav-link" href="index.html">← Back to the Vault</a></footer>
 
-<script src="coin-assets.js"></script>
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
   import { getDatabase, ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-  import { setFaceMystery, setFaceFail, setFacePass } from './coin-asset.js';
+  import { FAIL_IMG, PASS_IMG, MYSTERY_SVG } from './coin-asset.js';
 
   const ENCOUNTER_ID = 'dragon';
   const DB_ROOT      = 'nodice/encounters';
@@ -173,25 +172,17 @@
   const cooldownCount = document.getElementById('cooldownCount');
 
   // ── Coin face helpers ─────────────────────────────────────────────────
-  const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
-      stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
-    <text x="55" y="70" text-anchor="middle"
-      font-family="Georgia, serif" font-size="52" font-weight="bold"
-      fill="rgba(26,26,46,0.75)">?</text>
-  </svg>`;
-
   function setFaceMystery() {
     coinFace.className = 'bb-face bb-face-mystery';
     coinFace.innerHTML = MYSTERY_SVG;
   }
   function setFaceFail() {
     coinFace.className = 'bb-face bb-face-fail';
-    coinFace.innerHTML = `<img src="${window.FAIL_IMG}" alt="fail" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    coinFace.innerHTML = `<img src="${FAIL_IMG}" alt="fail" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
   }
   function setFacePass() {
     coinFace.className = 'bb-face bb-face-pass';
-    coinFace.innerHTML = `<img src="${window.PASS_IMG}" alt="pass" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    coinFace.innerHTML = `<img src="${PASS_IMG}" alt="pass" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
   }
 
   // ── Auth ──────────────────────────────────────────────────────────────
