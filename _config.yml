@@ -1,0 +1,14 @@
+exclude:
+  - functions/
+  - "*.md"
+  - README.md
+  - BOSS_BATTLE_CODE_REVIEW.md
+  - BOSS_BATTLE_DEBUG.md
+  - BOSS_BATTLE_HANDOFF.md
+  - BOSS_BATTLE_MANUAL_SETUP.md
+  - BOSS_BATTLE_QUICKREF.md
+  - BOSS_BATTLE_README.md
+  - FIREBASE_SETUP.md
+  - node_modules/
+  - package.json
+  - package-lock.json

@@ -11,45 +11,133 @@
   <link rel="stylesheet" href="styles.css" />
   <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
   <style>
-    body.bossbattle-page { display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:100vh; padding:1rem; }
-    .attack-panel { max-width:500px; text-align:center; }
-    .attack-panel h1 { margin-bottom:2rem; }
-    .attack-status { font-size:1.2rem; margin:1rem 0; min-height:3rem; }
+    /* ── Page shell ──────────────────────────────────────────────────── */
+    body.bossbattle-page {
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      min-height: 100vh; padding: 1rem;
+    }
+
+    /* ── Result glow from beneath (matches coinflip2) ────────────────── */
+    body.bossbattle-page::before {
+      content: ''; position: fixed; bottom: 0; left: 0; right: 0; height: 65vh;
+      pointer-events: none; z-index: 0; opacity: 0; transition: opacity 0.9s ease;
+    }
+    body.bossbattle-page[data-result="pass"]::before {
+      background: radial-gradient(ellipse 90% 70% at 50% 100%, rgba(0,166,81,0.42) 0%, transparent 100%);
+      opacity: 1;
+    }
+    body.bossbattle-page[data-result="fail"]::before {
+      background: radial-gradient(ellipse 90% 70% at 50% 100%, rgba(235,46,46,0.42) 0%, transparent 100%);
+      opacity: 1;
+    }
+
+    /* ── Smoke (matches coinflip2) ───────────────────────────────────── */
+    .smoke-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .smoke { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0; }
+    .s1 { width:60vw; height:38vh; bottom:-8%; left:12%; background:radial-gradient(ellipse,rgba(255,255,255,0.055) 0%,transparent 70%); animation:smokeRise 18s ease-in-out infinite; }
+    .s2 { width:48vw; height:30vh; bottom:-6%; left:42%; background:radial-gradient(ellipse,rgba(255,255,255,0.038) 0%,transparent 70%); animation:smokeRise 22s ease-in-out infinite -7s; }
+    .s3 { width:36vw; height:24vh; bottom:-10%; left:62%; background:radial-gradient(ellipse,rgba(255,255,255,0.028) 0%,transparent 70%); animation:smokeRise 26s ease-in-out infinite -13s; }
+    @keyframes smokeRise {
+      0%   { opacity:0; transform:translateY(0) scaleX(1); }
+      20%  { opacity:1; }
+      65%  { opacity:0.5; transform:translateY(-22%) scaleX(1.18); }
+      100% { opacity:0; transform:translateY(-40%) scaleX(0.88); }
+    }
+
+    /* ── Coin (ported from coinflip2, size reduced for in-page use) ──── */
+    .bb-coin-stage { width:min(72vw,280px); height:min(72vw,280px); position:relative; margin:0.5rem auto; display:none; }
+    .bb-coin { width:100%; height:100%; position:relative; }
+    .bb-face {
+      position:absolute; inset:0; border-radius:50%;
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+    }
+    .bb-face-mystery {
+      background: radial-gradient(circle at 38% 32%, #e2bc6a, rgba(156,123,46,1) 55%, rgba(120,95,35,1));
+      box-shadow: inset 0 0 0 6px rgba(255,255,255,.18), inset 0 -8px 24px rgba(0,0,0,.3), 0 6px 28px rgba(201,168,76,.5);
+    }
+    .bb-face-fail { background:#000; box-shadow:0 6px 32px rgba(235,46,46,.55); }
+    .bb-face-pass { background:#000; box-shadow:0 6px 28px rgba(0,166,81,.55); }
+    .bb-face::before {
+      content:''; position:absolute; inset:5px; border-radius:50%;
+      border:2px solid rgba(255,255,255,.18); pointer-events:none; z-index:1;
+    }
+    .bb-face img { width:100%; height:100%; object-fit:cover; border-radius:50%; position:relative; z-index:2; }
+    .bb-face-mystery svg { width:100%; height:100%; position:relative; z-index:2; }
+
+    @keyframes bbCoinFlip {
+      0%   { transform:scaleX(1); }
+      50%  { transform:scaleX(0); }
+      100% { transform:scaleX(1); }
+    }
+    .bb-coin.spinning { animation:bbCoinFlip var(--half-duration,0.2s) ease-in-out var(--flip-count,8) forwards; }
+    @keyframes bbWobble {
+      0%,100% { transform:scaleX(1) rotateZ(0deg); }
+      20%     { transform:scaleX(1) rotateZ(2deg); }
+      40%     { transform:scaleX(1) rotateZ(-1.5deg); }
+      60%     { transform:scaleX(1) rotateZ(1deg); }
+    }
+    .bb-coin.wobbling { animation:bbWobble .5s ease-out forwards; }
+
+    /* ── Stacking: content above smoke/glow ─────────────────────────── */
+    header, .attack-panel, footer { position:relative; z-index:1; }
+
+    /* ── Game UI ─────────────────────────────────────────────────────── */
+    .attack-panel   { max-width:500px; text-align:center; }
+    .attack-status  { font-size:1.2rem; margin:1rem 0; min-height:3rem; }
     .cooldown-timer { font-size:1.5rem; font-weight:bold; color:var(--color-accent); margin:0.5rem 0; }
-    .coin-display { width:120px; height:120px; margin:1rem auto; border:2px solid var(--color-accent); border-radius:50%; position:relative; overflow:hidden; }
-    .result-text { font-size:1.3rem; margin:1rem 0; font-weight:bold; }
+    .result-text    { font-size:1.3rem; margin:1rem 0; font-weight:bold; }
     .btn-attack { padding:1rem 2rem; font-size:1.2rem; font-weight:bold; margin:1rem 0; cursor:pointer; border:2px solid var(--color-accent); background:transparent; color:var(--color-accent); border-radius:4px; transition:all 0.3s; }
     .btn-attack:hover:not(:disabled) { background:var(--color-accent); color:var(--color-bg); }
-    .btn-attack:disabled { opacity:0.5; cursor:not-allowed; }
-    .btn-attack.rolling { opacity:0.7; }
-    @keyframes bbCoinFlip {
-      0%   { transform: scaleX(1); }
-      50%  { transform: scaleX(0); }
-      100% { transform: scaleX(1); }
-    }
-    /* .face / .face-mystery / .face-fail / .face-pass / .face img / .face::before
-       all come from styles.css and apply globally — no need to redeclare here. */
+    .btn-attack:disabled  { opacity:0.5; cursor:not-allowed; }
+    .btn-attack.rolling   { opacity:0.7; }
   </style>
 </head>
 <body class="bossbattle-page">
+
+<div class="smoke-wrap" aria-hidden="true">
+  <div class="smoke s1"></div>
+  <div class="smoke s2"></div>
+  <div class="smoke s3"></div>
+</div>
+
 <button id="themeBtn" class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light/dark mode"></button>
+
 <header>
   <p class="site-label">No Dice &mdash; Improv RPG</p>
   <h1>Boss <span>Battle</span></h1>
   <p class="subtitle">Attack the dragon. Work together to bring it down.</p>
   <div class="divider"></div>
 </header>
+
 <main class="attack-panel">
   <div id="authPanel" style="display:none;"><p>Loading authentication...</p></div>
   <div id="gamePanel" style="display:none;">
     <p class="attack-status" id="attackStatus">Ready to attack!</p>
-    <div class="coin-display" id="coinDisplay" style="display:none;"><div class="face face-mystery" id="coinFace"><svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="55,22 86,39 86,71 55,88 24,71 24,39" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/><text x="55" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="rgba(26,26,46,0.75)">?</text></svg></div></div>
+
+    <div class="bb-coin-stage" id="coinStage" aria-live="polite" aria-label="Coin result">
+      <div class="bb-coin" id="coin">
+        <div class="bb-face bb-face-mystery" id="coinFace" aria-hidden="true">
+          <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+              stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+            <text x="55" y="70" text-anchor="middle"
+              font-family="Georgia, serif" font-size="52" font-weight="bold"
+              fill="rgba(26,26,46,0.75)">?</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
     <div id="resultText" class="result-text" style="display:none;"></div>
     <div class="cooldown-timer" id="cooldownTimer" style="display:none;">Cooldown: <span id="cooldownCount">0</span>s</div>
-    <button class="btn-roll btn-attack" id="btnAttack">⚔ Attack the Dragon</button>
+    <button class="btn-roll btn-attack" id="btnAttack">&#9876; Attack the Dragon</button>
   </div>
 </main>
+
 <footer><a class="nav-link" href="index.html">← Back to the Vault</a></footer>
+
+<script src="coin-assets.js"></script>
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -68,98 +156,169 @@
     appId:"1:387258889697:web:5467488ab109ea67b74ea0",
   };
 
-  // Own app instance: both auth + database on same app so the RTDB connection
-  // carries the auth token. Firebase auth state persists per-project in localStorage
-  // so getAuth() restores the signed-in user automatically.
-  const _appName = 'ndt-boss-battle';
+  const _appName = 'ndt-profile';
   const _app  = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
   const _auth = getAuth(_app);
   const _db   = getDatabase(_app);
 
-  const authPanel=document.getElementById('authPanel'), gamePanel=document.getElementById('gamePanel'),
-        btnAttack=document.getElementById('btnAttack'), attackStatus=document.getElementById('attackStatus'),
-        coinDisplay=document.getElementById('coinDisplay'),
-        resultText=document.getElementById('resultText'), cooldownTimer=document.getElementById('cooldownTimer'),
-        cooldownCount=document.getElementById('cooldownCount');
+  const authPanel    = document.getElementById('authPanel');
+  const gamePanel    = document.getElementById('gamePanel');
+  const btnAttack    = document.getElementById('btnAttack');
+  const attackStatus = document.getElementById('attackStatus');
+  const coinStage    = document.getElementById('coinStage');
+  const coin         = document.getElementById('coin');
+  const coinFace     = document.getElementById('coinFace');
+  const resultText   = document.getElementById('resultText');
+  const cooldownTimer = document.getElementById('cooldownTimer');
+  const cooldownCount = document.getElementById('cooldownCount');
 
-  let currentUserId=null, isRolling=false, cooldownUntil=0;
+  // ── Coin face helpers ─────────────────────────────────────────────────
+  const MYSTERY_SVG = `<svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="55,22 86,39 86,71 55,88 24,71 24,39"
+      stroke="rgba(255,255,255,0.20)" stroke-width="1.5" fill="none"/>
+    <text x="55" y="70" text-anchor="middle"
+      font-family="Georgia, serif" font-size="52" font-weight="bold"
+      fill="rgba(26,26,46,0.75)">?</text>
+  </svg>`;
+
+  function setFaceMystery() {
+    coinFace.className = 'bb-face bb-face-mystery';
+    coinFace.innerHTML = MYSTERY_SVG;
+  }
+  function setFaceFail() {
+    coinFace.className = 'bb-face bb-face-fail';
+    coinFace.innerHTML = `<img src="${window.FAIL_IMG}" alt="fail" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  }
+  function setFacePass() {
+    coinFace.className = 'bb-face bb-face-pass';
+    coinFace.innerHTML = `<img src="${window.PASS_IMG}" alt="pass" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  }
+
+  // ── Auth ──────────────────────────────────────────────────────────────
+  let currentUserId = null, isRolling = false, cooldownUntil = 0;
 
   onAuthStateChanged(_auth, user => {
-    if (!user) { authPanel.style.display='block'; authPanel.innerHTML='<p>Please <a href="profile.html">sign in</a> to join the battle.</p>'; gamePanel.style.display='none'; return; }
-    currentUserId=user.uid; authPanel.style.display='none'; gamePanel.style.display='block';
-    set(ref(_db,`${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${user.uid}`),{lastAttackTime:Date.now(),onCooldown:false,cooldownUntil:0}).catch(console.error);
+    if (!user) {
+      authPanel.style.display = 'block';
+      authPanel.innerHTML = '<p>Please <a href="profile.html">sign in</a> to join the battle.</p>';
+      gamePanel.style.display = 'none';
+      return;
+    }
+    currentUserId = user.uid;
+    authPanel.style.display = 'none';
+    gamePanel.style.display = 'block';
+    set(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${user.uid}`),
+      { lastAttackTime: Date.now(), onCooldown: false, cooldownUntil: 0 }).catch(console.error);
   });
 
+  // ── Attack handler ────────────────────────────────────────────────────
   btnAttack.addEventListener('click', async () => {
     if (isRolling || !currentUserId) return;
-    if (Date.now() < cooldownUntil) { attackStatus.textContent='You are still recovering...'; return; }
-    isRolling=true; btnAttack.disabled=true; btnAttack.classList.add('rolling');
-    coinDisplay.style.display='none'; resultText.style.display='none'; attackStatus.textContent='Rolling...';
+    if (Date.now() < cooldownUntil) { attackStatus.textContent = 'You are still recovering...'; return; }
+
+    isRolling = true;
+    btnAttack.disabled = true;
+    btnAttack.classList.add('rolling');
+    resultText.style.display = 'none';
+    attackStatus.textContent = 'Rolling...';
+    document.body.removeAttribute('data-result');
+
     const rollResult = Math.random() < 0.5 ? 'go_time' : 'no_time';
-    await animateCoinFlip(rollResult==='go_time' ? '✓' : '✗');
+    await animateCoinFlip(rollResult === 'go_time');
+
     try {
-      const snap = await get(ref(_db,`${DB_ROOT}/${ENCOUNTER_ID}`));
-      if (!snap.exists()) { attackStatus.textContent='Encounter not found!'; isRolling=false; btnAttack.disabled=false; btnAttack.classList.remove('rolling'); return; }
-      const encounter=snap.val(), updates={};
-      if (rollResult==='go_time') {
-        const newHP=Math.max(0,encounter.dragonHP-1);
-        updates[`${DB_ROOT}/${ENCOUNTER_ID}/dragonHP`]=newHP;
-        if (newHP<=0) updates[`${DB_ROOT}/${ENCOUNTER_ID}/status`]='defeated';
-        resultText.textContent=PASS_LINES[Math.floor(Math.random()*PASS_LINES.length)];
-        attackStatus.textContent='Hit! The dragon takes damage!';
-      } else {
-        cooldownUntil=Date.now()+1500; startCooldownTimer();
-        resultText.textContent=FAIL_LINES[Math.floor(Math.random()*FAIL_LINES.length)];
-        attackStatus.textContent='Miss! The dragon is unimpressed.';
+      const snap = await get(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`));
+      if (!snap.exists()) {
+        attackStatus.textContent = 'Encounter not found!';
+        isRolling = false; btnAttack.disabled = false; btnAttack.classList.remove('rolling');
+        return;
       }
-      resultText.style.display='block';
-      if (Object.keys(updates).length>0) await update(ref(_db),updates);
-    } catch(err) { console.error('Attack error:',err); attackStatus.textContent='Error sending attack. Try again.'; }
-    isRolling=false; btnAttack.disabled=false; btnAttack.classList.remove('rolling');
+      const encounter = snap.val(), updates = {};
+      if (rollResult === 'go_time') {
+        const newHP = Math.max(0, encounter.dragonHP - 1);
+        updates[`${DB_ROOT}/${ENCOUNTER_ID}/dragonHP`] = newHP;
+        if (newHP <= 0) updates[`${DB_ROOT}/${ENCOUNTER_ID}/status`] = 'defeated';
+        resultText.textContent = PASS_LINES[Math.floor(Math.random() * PASS_LINES.length)];
+        attackStatus.textContent = 'Hit! The dragon takes damage!';
+      } else {
+        cooldownUntil = Date.now() + 1500;
+        startCooldownTimer();
+        resultText.textContent = FAIL_LINES[Math.floor(Math.random() * FAIL_LINES.length)];
+        attackStatus.textContent = 'Miss! The dragon is unimpressed.';
+      }
+      resultText.style.display = 'block';
+      if (Object.keys(updates).length > 0) await update(ref(_db), updates);
+    } catch (err) {
+      console.error('Attack error:', err);
+      attackStatus.textContent = 'Error sending attack. Try again.';
+    }
+
+    isRolling = false;
+    btnAttack.disabled = false;
+    btnAttack.classList.remove('rolling');
   });
 
-  async function animateCoinFlip(result) {
-    const coinFace = document.getElementById('coinFace');
-    setFaceMystery(coinFace);
-    coinDisplay.style.display = 'flex';
-
-    const flips   = 3 + Math.floor(Math.random() * 3);
-    const halfDur = 0.13 + Math.random() * 0.04;
-    const iters   = flips - 0.5;
-    const totalMs = halfDur * iters * 1000;
-
-    // Set animation directly — CSS-var-driven iteration counts are unreliable
-    // across browsers (same workaround used in index.html's doFlip).
-    coinDisplay.style.animation = 'none';
-    void coinDisplay.offsetWidth;
-    coinDisplay.style.animation = `bbCoinFlip ${halfDur}s ease-in-out ${iters} forwards`;
-
+  // ── Coin flip animation (coinflip2 logic, setTimeout-based) ──────────
+  function animateCoinFlip(isPass) {
     return new Promise(resolve => {
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        coinDisplay.style.animation = 'none';
-        if (result === '✓') setFacePass(coinFace);
-        else                setFaceFail(coinFace);
-        setTimeout(resolve, 300);
-      };
-      coinDisplay.addEventListener('animationend', function onEnd() {
-        coinDisplay.removeEventListener('animationend', onEnd);
-        finish();
-      });
-      // Fallback in case animationend doesn't fire (sub-pixel iteration counts,
-      // tab-switch, etc.)
-      setTimeout(finish, totalMs + 200);
+      // Reset
+      document.body.removeAttribute('data-result');
+      coin.classList.remove('spinning', 'wobbling');
+      coin.style.transform = '';
+      setFaceMystery();
+      coinStage.style.display = 'block';
+
+      // Randomise duration exactly as coinflip2 does
+      const flips   = 5 + Math.floor(Math.random() * 4);   // 5–8 full flips
+      const halfDur = 0.13 + Math.random() * 0.04;          // 0.13–0.17 s per cycle
+      const iters   = flips - 0.5;                           // land face-down mid-cycle
+      const totalMs = Math.round(halfDur * iters * 1000);
+
+      coin.style.setProperty('--half-duration', halfDur + 's');
+      coin.style.setProperty('--flip-count',    iters);
+
+      // Force reflow so removing/adding classes restarts animation cleanly
+      void coin.offsetWidth;
+      coin.classList.add('spinning');
+
+      // Wait for the exact animation duration, then reveal face
+      setTimeout(() => {
+        coin.classList.remove('spinning');
+        coin.style.transform = '';
+
+        if (isPass) setFacePass(); else setFaceFail();
+
+        // Brief pause then wobble + glow
+        setTimeout(() => {
+          void coin.offsetWidth;
+          coin.classList.add('wobbling');
+          document.body.setAttribute('data-result', isPass ? 'pass' : 'fail');
+          setTimeout(() => {
+            coin.classList.remove('wobbling');
+            resolve();
+          }, 520);
+        }, 60);
+
+      }, totalMs);
     });
   }
 
+  // ── Cooldown timer ────────────────────────────────────────────────────
   function startCooldownTimer() {
-    btnAttack.disabled=true; cooldownTimer.style.display='block';
-    const tick=()=>{ const r=Math.ceil((cooldownUntil-Date.now())/1000);
-      if(r<=0){ cooldownTimer.style.display='none'; btnAttack.disabled=false; attackStatus.textContent='Ready to attack!'; }
-      else { cooldownCount.textContent=r; setTimeout(tick,100); }
-    }; tick();
+    btnAttack.disabled = true;
+    cooldownTimer.style.display = 'block';
+    const tick = () => {
+      const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+      if (remaining <= 0) {
+        cooldownTimer.style.display = 'none';
+        btnAttack.disabled = false;
+        attackStatus.textContent = 'Ready to attack!';
+      } else {
+        cooldownCount.textContent = remaining;
+        setTimeout(tick, 100);
+      }
+    };
+    tick();
   }
 </script>
 <script src="theme-toggle.js"></script>
