@@ -92,7 +92,6 @@
     /* ── Game UI ─────────────────────────────────────────────────────── */
     .attack-panel   { max-width:500px; text-align:center; }
     .attack-status  { font-size:1.2rem; margin:1rem 0; min-height:3rem; }
-    .cooldown-timer { font-size:1.5rem; font-weight:bold; color:var(--color-accent); margin:0.5rem 0; }
     .result-text    { font-size:1.3rem; margin:1rem 0; font-weight:bold; }
     .btn-attack { padding:1rem 2rem; font-size:1.2rem; font-weight:bold; margin:1rem 0; cursor:pointer; border:2px solid var(--color-accent); background:transparent; color:var(--color-accent); border-radius:4px; transition:all 0.3s; }
     .btn-attack:hover:not(:disabled) { background:var(--color-accent); color:var(--color-bg); }
@@ -138,7 +137,6 @@
     </div>
 
     <div id="resultText" class="result-text" style="visibility:hidden;"></div>
-    <div class="cooldown-timer" id="cooldownTimer" style="visibility:hidden;">Cooldown</div>
     <button class="btn-roll btn-attack" id="btnAttack">&#9876; Attack the Dragon</button>
   </div>
 </main>
@@ -176,7 +174,6 @@
   const coin         = document.getElementById('coin');
   const coinFace     = document.getElementById('coinFace');
   const resultText   = document.getElementById('resultText');
-  const cooldownTimer = document.getElementById('cooldownTimer');
   const coinOverlay   = document.getElementById('coinOverlay');
 
   // ── Coin face helpers ─────────────────────────────────────────────────
@@ -305,7 +302,6 @@
   // 0–500ms: face visible, no overlay; 500–2000ms: sweep clears from 12 o'clock
   function startCooldownTimer() {
     btnAttack.disabled = true;
-    cooldownTimer.style.visibility = 'visible';
     const sweepDuration = 1500;
     setTimeout(() => {
       coinOverlay.style.visibility = 'visible';
@@ -319,7 +315,6 @@
           requestAnimationFrame(frame);
         } else {
           coinOverlay.style.visibility = 'hidden';
-          cooldownTimer.style.visibility = 'hidden';
           btnAttack.disabled = false;
           attackStatus.textContent = 'Ready to attack!';
         }
