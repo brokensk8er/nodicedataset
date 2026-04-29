@@ -240,12 +240,12 @@
         resultText.textContent = PASS_LINES[Math.floor(Math.random() * PASS_LINES.length)];
         attackStatus.textContent = 'Hit! The dragon takes damage!';
       } else {
-        cooldownUntil = Date.now() + 1500;
-        startCooldownTimer();
         resultText.textContent = FAIL_LINES[Math.floor(Math.random() * FAIL_LINES.length)];
         attackStatus.textContent = 'Miss! The dragon is unimpressed.';
       }
       resultText.style.visibility = 'visible';
+      cooldownUntil = Date.now() + 4000;
+      startCooldownTimer();
       if (Object.keys(updates).length > 0) await update(ref(_db), updates);
     } catch (err) {
       console.error('Attack error:', err);
@@ -253,7 +253,6 @@
     }
 
     isRolling = false;
-    btnAttack.disabled = false;
     btnAttack.classList.remove('rolling');
   });
 
