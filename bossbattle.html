@@ -46,7 +46,7 @@
     }
 
     /* ── Coin (ported from coinflip2, size reduced for in-page use) ──── */
-    .bb-coin-stage { width:min(72vw,280px); height:min(72vw,280px); position:relative; margin:0.5rem auto; display:none; }
+    .bb-coin-stage { width:min(72vw,280px); height:min(72vw,280px); position:relative; margin:0.5rem auto; visibility:hidden; }
     .bb-coin { width:100%; height:100%; position:relative; }
     .bb-face {
       position:absolute; inset:0; border-radius:50%;
@@ -129,8 +129,8 @@
       </div>
     </div>
 
-    <div id="resultText" class="result-text" style="display:none;"></div>
-    <div class="cooldown-timer" id="cooldownTimer" style="display:none;">Cooldown: <span id="cooldownCount">0</span>s</div>
+    <div id="resultText" class="result-text" style="visibility:hidden;"></div>
+    <div class="cooldown-timer" id="cooldownTimer" style="visibility:hidden;">Cooldown: <span id="cooldownCount">0</span>s</div>
     <button class="btn-roll btn-attack" id="btnAttack">&#9876; Attack the Dragon</button>
   </div>
 </main>
@@ -210,7 +210,7 @@
     isRolling = true;
     btnAttack.disabled = true;
     btnAttack.classList.add('rolling');
-    resultText.style.display = 'none';
+    resultText.style.visibility = 'hidden';
     attackStatus.textContent = 'Rolling...';
     document.body.removeAttribute('data-result');
 
@@ -237,7 +237,7 @@
         resultText.textContent = FAIL_LINES[Math.floor(Math.random() * FAIL_LINES.length)];
         attackStatus.textContent = 'Miss! The dragon is unimpressed.';
       }
-      resultText.style.display = 'block';
+      resultText.style.visibility = 'visible';
       if (Object.keys(updates).length > 0) await update(ref(_db), updates);
     } catch (err) {
       console.error('Attack error:', err);
@@ -257,7 +257,7 @@
       coin.classList.remove('spinning', 'wobbling');
       coin.style.transform = '';
       setFaceMystery();
-      coinStage.style.display = 'block';
+      coinStage.style.visibility = 'visible';
 
       // Randomise duration exactly as coinflip2 does
       const flips   = 5 + Math.floor(Math.random() * 4);   // 5–8 full flips
@@ -297,11 +297,11 @@
   // ── Cooldown timer ────────────────────────────────────────────────────
   function startCooldownTimer() {
     btnAttack.disabled = true;
-    cooldownTimer.style.display = 'block';
+    cooldownTimer.style.visibility = 'visible';
     const tick = () => {
       const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
       if (remaining <= 0) {
-        cooldownTimer.style.display = 'none';
+        cooldownTimer.style.visibility = 'hidden';
         btnAttack.disabled = false;
         attackStatus.textContent = 'Ready to attack!';
       } else {
