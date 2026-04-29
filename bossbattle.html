@@ -118,8 +118,8 @@
 </header>
 
 <main class="attack-panel">
-  <div id="authPanel" style="display:none;"><p>Loading authentication...</p></div>
-  <div id="gamePanel" style="display:none;">
+  <div id="authPanel" style="visibility:hidden; position:absolute; width:100%; text-align:center;"><p>Loading authentication...</p></div>
+  <div id="gamePanel" style="visibility:hidden;">
     <p class="attack-status" id="attackStatus">Ready to attack!</p>
 
     <div class="bb-coin-stage" id="coinStage" aria-live="polite" aria-label="Coin result">
@@ -198,14 +198,14 @@
 
   onAuthStateChanged(_auth, user => {
     if (!user) {
-      authPanel.style.display = 'block';
+      authPanel.style.visibility = 'visible';
       authPanel.innerHTML = '<p>Please <a href="profile.html">sign in</a> to join the battle.</p>';
-      gamePanel.style.display = 'none';
+      gamePanel.style.visibility = 'hidden';
       return;
     }
     currentUserId = user.uid;
-    authPanel.style.display = 'none';
-    gamePanel.style.display = 'block';
+    authPanel.style.visibility = 'hidden';
+    gamePanel.style.visibility = 'visible';
     set(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${user.uid}`),
       { lastAttackTime: Date.now(), onCooldown: false, cooldownUntil: 0 }).catch(console.error);
   });
