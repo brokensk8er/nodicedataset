@@ -97,6 +97,113 @@
     .btn-attack:hover:not(:disabled) { background:var(--color-accent); color:var(--color-bg); }
     .btn-attack:disabled  { opacity:0.5; cursor:not-allowed; }
     .btn-attack.rolling   { opacity:0.7; }
+
+    /* ── Strike banner (shown to all players when dragon strikes) ── */
+    #strikeBanner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 400;
+      background: linear-gradient(135deg, rgba(80,0,0,0.97), rgba(40,0,0,0.97));
+      border-bottom: 2px solid #cc2200;
+      color: #fff; font-family: 'Cinzel', serif; font-weight: 700;
+      font-size: clamp(0.9rem, 3vw, 1.15rem);
+      text-align: center; padding: 0.9rem 1.5rem;
+      text-shadow: 0 0 10px rgba(255,80,0,0.7);
+      transform: translateY(-110%); transition: transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275);
+      pointer-events: none;
+    }
+    #strikeBanner.visible { transform: translateY(0); }
+
+    /* ── Fire Bath overlay ─────────────────────────────────────── */
+    #fireBathOverlay {
+      position: fixed; inset: 0; z-index: 500;
+      display: none; flex-direction: column;
+      justify-content: center; align-items: center; gap: 1.2rem;
+      animation: fire-bg-pulse 0.5s ease-in-out infinite alternate;
+    }
+    #fireBathOverlay.active { display: flex; }
+
+    @keyframes fire-bg-pulse {
+      from { background: radial-gradient(ellipse at 50% 110%, rgba(255,50,0,0.55) 0%, rgba(0,0,0,0.88) 100%); }
+      to   { background: radial-gradient(ellipse at 50% 110%, rgba(255,120,0,0.75) 0%, rgba(70,0,0,0.93) 100%); }
+    }
+
+    /* CSS flame pillars at the bottom */
+    .flames-row {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 45vh;
+      overflow: hidden; pointer-events: none;
+    }
+    .flame {
+      position: absolute; bottom: 0;
+      border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+      transform-origin: 50% 100%;
+      filter: blur(2px);
+      animation: flicker linear infinite;
+    }
+    @keyframes flicker {
+      0%   { transform: scaleX(1.0) scaleY(1.0) rotate(-2deg); }
+      20%  { transform: scaleX(1.1) scaleY(0.92) rotate(1.5deg); }
+      45%  { transform: scaleX(0.9) scaleY(1.08) rotate(-1deg); }
+      70%  { transform: scaleX(1.05) scaleY(0.96) rotate(2deg); }
+      100% { transform: scaleX(1.0) scaleY(1.0) rotate(-2deg); }
+    }
+    .fl1  { left:3%;  width:90px;  height:170px; background:linear-gradient(to top,#ff0000,#ff6600,#ffcc00 80%,transparent); animation-duration:0.75s; }
+    .fl2  { left:10%; width:140px; height:240px; background:linear-gradient(to top,#cc0000,#ff4400,#ff9900 80%,transparent); animation-duration:1.05s; animation-delay:-0.2s; }
+    .fl3  { left:20%; width:100px; height:190px; background:linear-gradient(to top,#ff0000,#ff5500,#ffaa00 80%,transparent); animation-duration:0.85s; animation-delay:-0.5s; }
+    .fl4  { left:30%; width:160px; height:270px; background:linear-gradient(to top,#dd0000,#ff3300,#ff8800 80%,transparent); animation-duration:1.2s;  animation-delay:-0.1s; }
+    .fl5  { left:42%; width:120px; height:210px; background:linear-gradient(to top,#ff0000,#ff6600,#ffcc00 80%,transparent); animation-duration:0.9s;  animation-delay:-0.35s; }
+    .fl6  { left:54%; width:150px; height:255px; background:linear-gradient(to top,#cc0000,#ff4400,#ff9900 80%,transparent); animation-duration:1.1s;  animation-delay:-0.6s; }
+    .fl7  { left:66%; width:110px; height:195px; background:linear-gradient(to top,#ff0000,#ff5500,#ffaa00 80%,transparent); animation-duration:0.8s;  animation-delay:-0.15s; }
+    .fl8  { left:76%; width:145px; height:235px; background:linear-gradient(to top,#dd0000,#ff3300,#ff8800 80%,transparent); animation-duration:1.0s;  animation-delay:-0.45s; }
+    .fl9  { left:88%; width:100px; height:175px; background:linear-gradient(to top,#ff0000,#ff6600,#ffcc00 80%,transparent); animation-duration:0.7s;  animation-delay:-0.25s; }
+
+    /* Fire bath content */
+    .fire-title {
+      font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 5vw, 2.2rem);
+      font-weight: 900; color: #fff;
+      text-shadow: 0 0 20px rgba(255,80,0,1), 0 0 40px rgba(255,40,0,0.7);
+      z-index: 1; text-align: center; padding: 0 1rem;
+      animation: fire-text-flicker 0.4s ease-in-out infinite alternate;
+    }
+    @keyframes fire-text-flicker {
+      from { text-shadow: 0 0 20px rgba(255,80,0,1),  0 0 40px rgba(255,40,0,0.7); }
+      to   { text-shadow: 0 0 30px rgba(255,140,0,1), 0 0 60px rgba(255,80,0,0.9); }
+    }
+
+    .fire-cooldown-bar-wrap {
+      width: min(80vw, 340px); z-index: 1;
+      background: rgba(0,0,0,0.5); border-radius: 6px; overflow: hidden;
+      border: 1px solid rgba(255,100,0,0.5); height: 12px;
+    }
+    #fireCooldownBar {
+      height: 100%; width: 100%;
+      background: linear-gradient(90deg, #ff2200, #ff8800);
+      transition: width 0.1s linear;
+    }
+    .fire-cooldown-label {
+      font-family: 'Cinzel', serif; color: rgba(255,200,100,0.9);
+      font-size: 0.85rem; z-index: 1;
+    }
+
+    .btn-smash {
+      z-index: 1; padding: 1.2rem 2.8rem;
+      font-family: 'Cinzel', serif; font-size: clamp(1.2rem, 4vw, 1.7rem);
+      font-weight: 900; color: #fff; letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #ff4400, #cc1100);
+      border: 3px solid #ff8800; border-radius: 8px; cursor: pointer;
+      text-shadow: 0 0 12px rgba(255,120,0,0.9);
+      box-shadow: 0 0 30px rgba(255,60,0,0.7), inset 0 1px 0 rgba(255,200,0,0.3);
+      animation: smash-pulse 0.55s ease-in-out infinite alternate;
+      user-select: none; -webkit-user-select: none; touch-action: manipulation;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+    @keyframes smash-pulse {
+      from { transform: scale(1);    box-shadow: 0 0 30px rgba(255,60,0,0.7); }
+      to   { transform: scale(1.04); box-shadow: 0 0 55px rgba(255,100,0,0.95); }
+    }
+    .btn-smash:active { transform: scale(0.94) !important; box-shadow: 0 0 15px rgba(255,60,0,0.5) !important; }
+    .smash-counter {
+      font-family: 'Cinzel', serif; color: rgba(255,200,100,0.8);
+      font-size: 0.9rem; z-index: 1;
+    }
   </style>
 </head>
 <body class="bossbattle-page">
@@ -141,12 +248,29 @@
   </div>
 </main>
 
+<!-- ── Strike banner ─────────────────────────────────── -->
+<div id="strikeBanner" aria-live="assertive"></div>
+
+<!-- ── Fire Bath overlay ─────────────────────────────── -->
+<div id="fireBathOverlay" role="alert" aria-live="assertive">
+  <div class="flames-row" aria-hidden="true">
+    <div class="flame fl1"></div><div class="flame fl2"></div><div class="flame fl3"></div>
+    <div class="flame fl4"></div><div class="flame fl5"></div><div class="flame fl6"></div>
+    <div class="flame fl7"></div><div class="flame fl8"></div><div class="flame fl9"></div>
+  </div>
+  <div class="fire-title">🔥 THE DRAGON BREATHES FIRE! 🔥</div>
+  <div class="fire-cooldown-bar-wrap"><div id="fireCooldownBar"></div></div>
+  <div class="fire-cooldown-label" id="fireCooldownLabel">Recovering…</div>
+  <button class="btn-smash" id="btnSmash">⚡ SMASH! ⚡</button>
+  <div class="smash-counter" id="smashCounter"></div>
+</div>
+
 <footer><a class="nav-link" href="index.html">← Back to the Vault</a></footer>
 
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getDatabase, ref, set, get, update } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, set, get, update, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
   import { MYSTERY_SVG, FAIL_IMG, PASS_IMG } from './coin-asset.js';
 
   const ENCOUNTER_ID = 'dragon';
@@ -203,8 +327,10 @@
     currentUserId = user.uid;
     authPanel.style.visibility = 'hidden';
     gamePanel.style.visibility = 'visible';
+    const displayName = user.displayName || user.email?.split('@')[0] || 'An adventurer';
     set(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/activePlayers/${user.uid}`),
-      { lastAttackTime: Date.now(), onCooldown: false, cooldownUntil: 0 }).catch(console.error);
+      { lastAttackTime: Date.now(), onCooldown: false, cooldownUntil: 0, displayName }).catch(console.error);
+    listenToBossEvents();
   });
 
   // ── Attack handler ────────────────────────────────────────────────────
@@ -299,11 +425,13 @@
   }
 
   // ── Cooldown sweep (WoW-style clock wipe) ────────────────────────────
-  // 0–500ms: face visible, no overlay; 500–2000ms: sweep clears from 12 o'clock
-  function startCooldownTimer() {
+  // 0–500ms: face visible, no overlay; then sweep clears from 12 o'clock
+  function startCooldownTimer(durationMs = 1500) {
     btnAttack.disabled = true;
-    const sweepDuration = 1500;
+    cooldownUntil = Date.now() + durationMs;
+    const sweepDuration = Math.max(0, durationMs - 500);
     setTimeout(() => {
+      if (sweepDuration <= 0) { btnAttack.disabled = false; attackStatus.textContent = 'Ready to attack!'; return; }
       coinOverlay.style.visibility = 'visible';
       const start = Date.now();
       (function frame() {
@@ -320,6 +448,103 @@
         }
       })();
     }, 500);
+  }
+
+  // ── Boss event listener ───────────────────────────────────────────────
+  let lastHandledEventId = null;
+
+  function listenToBossEvents() {
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/bossEvent`), snapshot => {
+      if (!snapshot.exists()) return;
+      const event = snapshot.val();
+
+      // Ignore stale events (cooldown already expired) and duplicates
+      if (!event?.id) return;
+      if (event.id === lastHandledEventId) return;
+      if (Date.now() > event.cooldownUntil) return;
+      lastHandledEventId = event.id;
+
+      if (event.type === 'strike') handleStrike(event);
+      else if (event.type === 'fireBath') handleFireBath(event);
+    });
+  }
+
+  // ── Strike: one targeted player gets 10s cooldown ─────────────────────
+  function handleStrike(event) {
+    showStrikeBanner(`⚔️ ${event.targetName} was struck a mighty blow by the dragon!`);
+    if (event.target === currentUserId) {
+      attackStatus.textContent = 'You were struck! Recovering…';
+      cooldownUntil = event.cooldownUntil;
+      startCooldownTimer(event.cooldownMs ?? 10_000);
+    }
+  }
+
+  function showStrikeBanner(msg) {
+    const banner = document.getElementById('strikeBanner');
+    banner.textContent = msg;
+    banner.classList.add('visible');
+    setTimeout(() => banner.classList.remove('visible'), 5000);
+  }
+
+  // ── Fire Bath: all players, 5s cooldown with smash-to-reduce ─────────
+  let fireBathCooldownUntil = 0;
+  let fireBathRafId         = null;
+  let smashCount            = 0;
+  let fireBathOriginalMs    = 5000;
+
+  function handleFireBath(event) {
+    fireBathOriginalMs    = event.cooldownMs ?? 5_000;
+    fireBathCooldownUntil = event.cooldownUntil;
+    smashCount            = 0;
+    cooldownUntil         = fireBathCooldownUntil;
+    btnAttack.disabled    = true;
+    attackStatus.textContent = '🔥 Scorched by dragonfire!';
+
+    document.getElementById('smashCounter').textContent = '';
+    document.getElementById('fireBathOverlay').classList.add('active');
+    document.getElementById('btnSmash').focus();
+
+    runFireBathBar(event.smashReductionMs ?? 200);
+  }
+
+  function runFireBathBar(reductionMs) {
+    cancelAnimationFrame(fireBathRafId);
+    const bar   = document.getElementById('fireCooldownBar');
+    const label = document.getElementById('fireCooldownLabel');
+
+    (function frame() {
+      const remaining = Math.max(0, fireBathCooldownUntil - Date.now());
+      const pct       = (remaining / fireBathOriginalMs) * 100;
+      bar.style.width = pct + '%';
+      const secs = (remaining / 1000).toFixed(1);
+      label.textContent = remaining > 0 ? `${secs}s remaining` : 'Recovered!';
+
+      if (remaining > 0) {
+        fireBathRafId = requestAnimationFrame(frame);
+      } else {
+        endFireBath();
+      }
+    })();
+
+    // Smash button
+    const btnSmash    = document.getElementById('btnSmash');
+    const smashCnt    = document.getElementById('smashCounter');
+    // Remove previous listener by cloning
+    const newSmash = btnSmash.cloneNode(true);
+    btnSmash.parentNode.replaceChild(newSmash, btnSmash);
+    newSmash.addEventListener('click', () => {
+      fireBathCooldownUntil = Math.max(Date.now(), fireBathCooldownUntil - reductionMs);
+      smashCount++;
+      smashCnt.textContent = `Smashed ${smashCount}×  (−${(smashCount * reductionMs / 1000).toFixed(1)}s)`;
+    });
+  }
+
+  function endFireBath() {
+    document.getElementById('fireBathOverlay').classList.remove('active');
+    coinOverlay.style.visibility = 'hidden';
+    cooldownUntil  = 0;
+    btnAttack.disabled = false;
+    attackStatus.textContent = 'Ready to attack!';
   }
 </script>
 <script src="theme-toggle.js"></script>

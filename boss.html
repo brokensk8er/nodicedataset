@@ -9,27 +9,13 @@
   <title>No Dice — Dragon Lair (Backdrop)</title>
   <script src="https://cdn.jsdelivr.net/npm/phaser@4.0.0/dist/phaser.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Cinzel', serif;
-      overflow: hidden;
-      background: #0a0005;
-    }
-    #gameContainer {
-      width: 100vw;
-      height: 100vh;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Cinzel', serif; overflow: hidden; background: #0a0005; }
+    #gameContainer { width: 100vw; height: 100vh; }
 
-    /* ── Vignette overlay — intensifies at low HP via JS class ── */
+    /* ── Vignette ── */
     #vignette {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 10;
+      position: absolute; inset: 0; pointer-events: none; z-index: 10;
       background: radial-gradient(ellipse at center, transparent 40%, rgba(120,0,0,0) 100%);
       transition: background 1s ease;
     }
@@ -40,83 +26,42 @@
       background: radial-gradient(ellipse at center, transparent 20%, rgba(160,0,0,0.7) 100%);
       animation: vignette-pulse 1.2s ease-in-out infinite alternate;
     }
-    @keyframes vignette-pulse {
-      from { opacity: 0.7; }
-      to   { opacity: 1.0; }
-    }
+    @keyframes vignette-pulse { from { opacity: 0.7; } to { opacity: 1.0; } }
 
-    /* ── HUD top-left ── */
+    /* ── HUD ── */
     .ui-overlay {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: #daa520;
-      font-family: 'Cinzel', serif;
-      font-size: 16px;
-      background: rgba(0,0,0,0.65);
-      padding: 10px 16px;
-      border-radius: 4px;
-      border: 1px solid rgba(218,165,32,0.3);
-      z-index: 50;
+      position: absolute; top: 20px; left: 20px; color: #daa520;
+      font-family: 'Cinzel', serif; font-size: 16px;
+      background: rgba(0,0,0,0.65); padding: 10px 16px; border-radius: 4px;
+      border: 1px solid rgba(218,165,32,0.3); z-index: 50;
     }
 
-    /* ── Status banner ── */
-    .status-text {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #daa520;
-      font-family: 'Cinzel', serif;
-      font-size: 20px;
-      text-align: center;
-      background: rgba(0,0,0,0.8);
-      padding: 15px 25px;
-      border-radius: 4px;
-      display: none;
-      z-index: 100;
+    /* ── Ability message banner ── */
+    #abilityMsg {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      color: #fff; font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700;
+      text-align: center; background: rgba(0,0,0,0.88); padding: 16px 30px;
+      border-radius: 6px; border: 1px solid rgba(218,165,32,0.4);
+      text-shadow: 0 0 12px rgba(255,100,0,0.8);
+      display: none; z-index: 100; white-space: nowrap;
+      animation: msg-pop 0.25s cubic-bezier(0.175,0.885,0.32,1.275) both;
     }
+    #abilityMsg.visible { display: block; }
+    @keyframes msg-pop { from { transform: translateX(-50%) scale(0.85); opacity: 0; } to { transform: translateX(-50%) scale(1); opacity: 1; } }
 
     /* ── Victory screen ── */
     .victory-screen {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background: radial-gradient(ellipse at center, #2a0000 0%, #000000 100%);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: #daa520;
-      font-family: 'Cinzel', serif;
-      z-index: 200;
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      color: #daa520; font-family: 'Cinzel', serif; z-index: 200;
     }
-    .victory-screen.active {
-      display: flex;
-    }
-    .victory-skull {
-      font-size: 120px;
-      animation: skull-drop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-    }
-    .victory-title {
-      font-size: 52px;
-      font-weight: 900;
-      margin: 20px 0 10px;
-      text-shadow: 0 0 30px rgba(218,165,32,0.8), 0 0 60px rgba(218,165,32,0.4);
-      animation: text-glow-in 0.8s 0.4s ease both;
-    }
-    .victory-sub {
-      font-size: 22px;
-      opacity: 0.7;
-      animation: text-glow-in 0.8s 0.8s ease both;
-    }
-    @keyframes skull-drop {
-      from { transform: scale(0) rotate(-20deg); opacity: 0; }
-      to   { transform: scale(1) rotate(0deg);   opacity: 1; }
-    }
-    @keyframes text-glow-in {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0);    }
-    }
+    .victory-screen.active { display: flex; }
+    .victory-skull { font-size: 120px; animation: skull-drop 0.6s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+    .victory-title { font-size: 52px; font-weight: 900; margin: 20px 0 10px; text-shadow: 0 0 30px rgba(218,165,32,0.8), 0 0 60px rgba(218,165,32,0.4); animation: text-glow-in 0.8s 0.4s ease both; }
+    .victory-sub   { font-size: 22px; opacity: 0.7; animation: text-glow-in 0.8s 0.8s ease both; }
+    @keyframes skull-drop    { from { transform: scale(0) rotate(-20deg); opacity: 0; } to { transform: scale(1) rotate(0deg); opacity: 1; } }
+    @keyframes text-glow-in  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
@@ -126,10 +71,10 @@
 
 <div class="ui-overlay" id="uiOverlay">
   <div>Players: <span id="playerCount">0</span></div>
-  <div>Dragon HP: <span id="dragonHP">100</span> / <span id="dragonMaxHP">100</span></div>
+  <div>Dragon HP: <span id="dragonHP">—</span> / <span id="dragonMaxHP">—</span></div>
 </div>
 
-<div class="status-text" id="statusText"></div>
+<div id="abilityMsg"></div>
 
 <div class="victory-screen" id="victoryScreen">
   <div class="victory-skull">💀</div>
@@ -139,7 +84,8 @@
 
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-  import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getDatabase, ref, onValue, get, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { DragonBoss } from './boss-types/dragon.js';
 
   // ── Firebase ──────────────────────────────────────────────────
   const FIREBASE_CONFIG = {
@@ -155,35 +101,53 @@
   const _app = getApps().find(a => a.name === _appName) ?? initializeApp(FIREBASE_CONFIG, _appName);
   const _db  = getDatabase(_app);
 
-  // ── Constants ─────────────────────────────────────────────────
-  const ENCOUNTER_ID  = 'dragon';
-  const DB_ROOT       = 'nodice/encounters';
-  const DRAGON_EMOJI  = '🐉';
-  const BAR_W         = 420;
-  const BAR_H         = 38;
-  const BAR_SEGMENTS  = 10;
+  // ── Boss config (swap import to change boss type) ─────────────
+  const BOSS        = DragonBoss;
+  const ENCOUNTER_ID = BOSS.id;
+  const DB_ROOT      = 'nodice/encounters';
+
+  // ── Health bar constants ───────────────────────────────────────
+  const BAR_W        = 420;
+  const BAR_H        = 38;
+  const BAR_SEGMENTS = 10;
 
   // ── Scene state ───────────────────────────────────────────────
   let phaserScene;
   let dragonSprite;
+  let spriteMode      = false;  // true when real atlas loaded
   let healthBarBg, healthBarGhost, healthBarFg, healthBarBorder;
   let healthBarText;
-  let dragonMaxHP       = 500;
-  let dragonCurrentHP   = 500;
-  let dragonGhostHP     = 500;   // lags behind for ghost bar
-  let animationQueue    = [];
-  let isAnimating       = false;
+  let dragonMaxHP     = 500;
+  let dragonCurrentHP = 500;
+  let dragonGhostHP   = 500;
+  let animationQueue  = [];
+  let isAnimating     = false;
+  let abilitiesStarted = false;
+  let msgTimer;
 
-  // ── Phaser setup ──────────────────────────────────────────────
-  const config = {
+  // ─────────────────────────────────────────────────────────────
+  // PHASER SETUP
+  // ─────────────────────────────────────────────────────────────
+  const phaserConfig = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
     parent: 'gameContainer',
-    transparent: true,          // let CSS body bg show through
-    scene: { create, update },
+    transparent: true,
+    scene: { preload, create, update },
   };
-  const game = new Phaser.Game(config);
+  const game = new Phaser.Game(phaserConfig);
+
+  // ─────────────────────────────────────────────────────────────
+  // PRELOAD
+  // ─────────────────────────────────────────────────────────────
+  function preload() {
+    if (BOSS.sprite.hasSprite) {
+      for (const [key, atlas] of Object.entries(BOSS.sprite.atlases)) {
+        this.load.atlas(`dragon-${key}`, atlas.image, atlas.data);
+      }
+    }
+  }
 
   // ─────────────────────────────────────────────────────────────
   // CREATE
@@ -197,147 +161,150 @@
     buildFog(cx, cy);
     buildDragon(cx, cy);
     buildHealthBar(cx, cy);
-    startDragonIdle();
     listenToDragonState();
   }
 
-  // ── Background: cave gradient via Graphics ────────────────────
-  function buildBackground(cx, cy) {
-    const g   = phaserScene.add.graphics();
-    const w   = phaserScene.scale.width;
-    const h   = phaserScene.scale.height;
+  // ─────────────────────────────────────────────────────────────
+  // UPDATE
+  // ─────────────────────────────────────────────────────────────
+  function update() {
+    // Drift ghost bar toward current HP
+    if (dragonGhostHP > dragonCurrentHP) {
+      dragonGhostHP = Math.max(dragonCurrentHP, dragonGhostHP - 0.4);
+      const cx  = phaserScene.cameras.main.centerX;
+      const barY = phaserScene.cameras.main.centerY - 80 + 90;
+      drawHealthBar(cx, barY);
+    }
+    if (!isAnimating && animationQueue.length > 0) {
+      playAnimation(animationQueue.shift());
+    }
+  }
 
-    // deep cave gradient: dark purple top → near-black mid → lava glow bottom
+  // ─────────────────────────────────────────────────────────────
+  // BACKGROUND, PARTICLES, DRAGON
+  // ─────────────────────────────────────────────────────────────
+  function buildBackground(cx, cy) {
+    const w = phaserScene.scale.width, h = phaserScene.scale.height;
+    const g = phaserScene.add.graphics();
     g.fillGradientStyle(0x0a0015, 0x0a0015, 0x1a0500, 0x1a0500, 1);
     g.fillRect(0, 0, w, h);
 
-    // lava glow at the very bottom
-    const lavaGrad = phaserScene.add.graphics();
-    lavaGrad.fillGradientStyle(0x000000, 0x000000, 0xcc2200, 0xcc2200, 0, 0, 0.55, 0.55);
-    lavaGrad.fillRect(0, h * 0.72, w, h * 0.28);
+    const lava = phaserScene.add.graphics();
+    lava.fillGradientStyle(0x000000, 0x000000, 0xcc2200, 0xcc2200, 0, 0, 0.55, 0.55);
+    lava.fillRect(0, h * 0.72, w, h * 0.28);
 
-    // subtle rock silhouette stalactites at top
     const rocks = phaserScene.add.graphics();
     rocks.fillStyle(0x050008, 1);
-    const stalactites = [
-      [0, 0, 80, 0, 40, 90],
-      [60, 0, 160, 0, 110, 120],
-      [140, 0, 220, 0, 180, 75],
-      [w - 200, 0, w - 120, 0, w - 160, 100],
-      [w - 110, 0, w - 30, 0, w - 70, 80],
-      [w - 30, 0, w + 10, 0, w - 10, 60],
-    ];
-    stalactites.forEach(([x1, y1, x2, y2, tx, ty]) => {
-      rocks.fillTriangle(x1, y1, x2, y2, tx, ty);
-    });
+    [[0,0,80,0,40,90],[60,0,160,0,110,120],[140,0,220,0,180,75],
+     [w-200,0,w-120,0,w-160,100],[w-110,0,w-30,0,w-70,80],[w-30,0,w+10,0,w-10,60]]
+    .forEach(([x1,y1,x2,y2,tx,ty]) => rocks.fillTriangle(x1,y1,x2,y2,tx,ty));
 
-    // stalagmites at bottom
     const stals = phaserScene.add.graphics();
     stals.fillStyle(0x050008, 1);
-    const stalagmites = [
-      [0, h, 70, h, 35, h - 80],
-      [55, h, 130, h, 92, h - 110],
-      [w - 130, h, w - 50, h, w - 90, h - 95],
-      [w - 60, h, w, h, w - 30, h - 70],
-    ];
-    stalagmites.forEach(([x1, y1, x2, y2, tx, ty]) => {
-      stals.fillTriangle(x1, y1, x2, y2, tx, ty);
-    });
+    [[0,h,70,h,35,h-80],[55,h,130,h,92,h-110],
+     [w-130,h,w-50,h,w-90,h-95],[w-60,h,w,h,w-30,h-70]]
+    .forEach(([x1,y1,x2,y2,tx,ty]) => stals.fillTriangle(x1,y1,x2,y2,tx,ty));
   }
 
-  // ── Ember particles ───────────────────────────────────────────
   function buildEmbers() {
-    const w = phaserScene.scale.width;
-    const h = phaserScene.scale.height;
-
-    // create a tiny circle texture for embers
-    const gfx = phaserScene.make.graphics({ x: 0, y: 0, add: false });
-    gfx.fillStyle(0xffffff, 1);
-    gfx.fillCircle(4, 4, 4);
-    gfx.generateTexture('ember', 8, 8);
-    gfx.destroy();
-
-    phaserScene.add.particles(w / 2, h + 10, 'ember', {
-      x: { min: -w / 2, max: w / 2 },
-      y: { min: 0, max: 20 },
-      lifespan: { min: 2500, max: 5000 },
-      speedY: { min: -120, max: -40 },
-      speedX: { min: -25, max: 25 },
-      scale: { start: 0.6, end: 0 },
-      alpha: { start: 0.9, end: 0 },
-      tint: [0xff4400, 0xff8800, 0xffcc00, 0xff2200],
-      frequency: 55,
-      blendMode: 'ADD',
+    const w = phaserScene.scale.width, h = phaserScene.scale.height;
+    const gfx = phaserScene.make.graphics({ x:0, y:0, add:false });
+    gfx.fillStyle(0xffffff,1); gfx.fillCircle(4,4,4);
+    gfx.generateTexture('ember',8,8); gfx.destroy();
+    phaserScene.add.particles(w/2, h+10, 'ember', {
+      x: { min:-w/2, max:w/2 }, y: { min:0, max:20 },
+      lifespan: { min:2500, max:5000 }, speedY: { min:-120, max:-40 },
+      speedX: { min:-25, max:25 }, scale: { start:0.6, end:0 },
+      alpha: { start:0.9, end:0 },
+      tint: [0xff4400,0xff8800,0xffcc00,0xff2200],
+      frequency: 55, blendMode: 'ADD',
     });
   }
 
-  // ── Fog / mist near the bottom ────────────────────────────────
   function buildFog(cx, cy) {
-    const h = phaserScene.scale.height;
-    const w = phaserScene.scale.width;
-
-    const fogGfx = phaserScene.make.graphics({ x: 0, y: 0, add: false });
-    fogGfx.fillStyle(0xffffff, 1);
-    fogGfx.fillEllipse(60, 20, 120, 40);
-    fogGfx.generateTexture('fog-puff', 120, 40);
-    fogGfx.destroy();
-
-    phaserScene.add.particles(0, h * 0.78, 'fog-puff', {
-      x: { min: 0, max: w },
-      y: { min: 0, max: 60 },
-      lifespan: { min: 6000, max: 10000 },
-      speedX: { min: 8, max: 30 },
-      speedY: { min: -5, max: 5 },
-      scale: { start: 0.6, end: 1.4 },
-      alpha: { start: 0.12, end: 0 },
-      tint: [0xcc3300, 0x881100, 0xaa2200],
-      frequency: 300,
-      blendMode: 'NORMAL',
+    const w = phaserScene.scale.width, h = phaserScene.scale.height;
+    const fg = phaserScene.make.graphics({ x:0, y:0, add:false });
+    fg.fillStyle(0xffffff,1); fg.fillEllipse(60,20,120,40);
+    fg.generateTexture('fog-puff',120,40); fg.destroy();
+    phaserScene.add.particles(0, h*0.78, 'fog-puff', {
+      x: { min:0, max:w }, y: { min:0, max:60 },
+      lifespan: { min:6000, max:10000 }, speedX: { min:8, max:30 },
+      speedY: { min:-5, max:5 }, scale: { start:0.6, end:1.4 },
+      alpha: { start:0.12, end:0 },
+      tint: [0xcc3300,0x881100,0xaa2200],
+      frequency: 300, blendMode: 'NORMAL',
     });
   }
 
-  // ── Dragon sprite ─────────────────────────────────────────────
   function buildDragon(cx, cy) {
-    dragonSprite = phaserScene.add.text(cx, cy - 120, DRAGON_EMOJI, {
-      fontSize: '200px',
-    }).setOrigin(0.5, 0.5);
+    const spriteCy = cy - 120;
 
-    // soft glow behind dragon using a blurred circle
+    // Glow aura
     const glow = phaserScene.add.graphics();
-    glow.fillStyle(0xff3300, 0.18);
-    glow.fillCircle(cx, cy - 120, 130);
+    glow.fillStyle(0xff3300,0.18);
+    glow.fillCircle(cx, spriteCy, 130);
     glow.setBlendMode('ADD');
-    dragonSprite.setDepth(2);
     phaserScene.tweens.add({
-      targets: glow, alpha: { from: 0.18, to: 0.38 },
-      duration: 2200, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      targets: glow, alpha: { from:0.18, to:0.38 },
+      duration:2200, yoyo:true, repeat:-1, ease:'Sine.easeInOut',
+    });
+
+    // Real sprite (if atlas loaded) or emoji fallback
+    if (BOSS.sprite.hasSprite &&
+        phaserScene.textures.exists('dragon-main') &&
+        phaserScene.textures.exists('dragon-actions')) {
+      dragonSprite = phaserScene.add.sprite(cx, spriteCy, 'dragon-main');
+      dragonSprite.setDepth(2);
+      spriteMode = true;
+      registerAnimations();
+      dragonSprite.play(BOSS.sprite.defaultAnim);
+      dragonSprite.on('animationcomplete', (anim) => {
+        const def = BOSS.sprite.animations[anim.key];
+        if (def?.returnTo) dragonSprite.play(def.returnTo);
+      });
+    } else {
+      dragonSprite = phaserScene.add.text(cx, spriteCy,
+        BOSS.sprite.fallbackEmoji, { fontSize: BOSS.sprite.fallbackSize })
+        .setOrigin(0.5).setDepth(2);
+    }
+
+    // Idle float bob
+    phaserScene.tweens.add({
+      targets: dragonSprite, y: dragonSprite.y + 18,
+      duration:2000, yoyo:true, repeat:-1, ease:'Sine.easeInOut',
     });
   }
 
-  // ── Segmented health bar ───────────────────────────────────────
+  function registerAnimations() {
+    for (const [animId, def] of Object.entries(BOSS.sprite.animations)) {
+      phaserScene.anims.create({
+        key: animId,
+        frames: phaserScene.anims.generateFrameNames(`dragon-${def.atlas}`, {
+          prefix: def.prefix, start: 0, end: def.frameCount - 1, zeroPad: 4,
+        }),
+        frameRate: def.fps,
+        repeat: def.repeat,
+      });
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // HEALTH BAR
+  // ─────────────────────────────────────────────────────────────
   function buildHealthBar(cx, cy) {
-    const barY = cy + 90;
-
-    healthBarBg     = phaserScene.add.graphics();
-    healthBarGhost  = phaserScene.add.graphics();
-    healthBarFg     = phaserScene.add.graphics();
-    healthBarBorder = phaserScene.add.graphics();
-
-    // static backing
-    healthBarBg.fillStyle(0x1a0000, 1);
-    healthBarBg.fillRoundedRect(cx - BAR_W / 2 - 3, barY - 3, BAR_W + 6, BAR_H + 6, 6);
-
-    drawHealthBar(cx, barY, true);
-
-    healthBarText = phaserScene.add.text(cx, barY + BAR_H + 10,
+    const barY = cy - 80 + 90;
+    healthBarBg    = phaserScene.add.graphics();
+    healthBarGhost = phaserScene.add.graphics();
+    healthBarFg    = phaserScene.add.graphics();
+    healthBarBorder= phaserScene.add.graphics();
+    healthBarBg.fillStyle(0x1a0000,1);
+    healthBarBg.fillRoundedRect(cx-BAR_W/2-3, barY-3, BAR_W+6, BAR_H+6, 6);
+    drawHealthBar(cx, barY);
+    healthBarText = phaserScene.add.text(cx, barY+BAR_H+10,
       `HP: ${dragonCurrentHP} / ${dragonMaxHP}`, {
-        fontSize: '17px',
-        color: '#daa520',
-        fontFamily: 'Cinzel, serif',
-        stroke: '#000000',
-        strokeThickness: 3,
-      }
-    ).setOrigin(0.5, 0).setDepth(3);
+        fontSize:'17px', color:'#daa520', fontFamily:'Cinzel,serif',
+        stroke:'#000000', strokeThickness:3,
+      }).setOrigin(0.5,0).setDepth(3);
   }
 
   function hpColor(ratio) {
@@ -346,59 +313,37 @@
     return 0xcc1100;
   }
 
-  function drawHealthBar(cx, barY, snap = false) {
+  function drawHealthBar(cx, barY) {
     if (!phaserScene) return;
-    const currentRatio = Math.max(0, dragonCurrentHP / dragonMaxHP);
-    const ghostRatio   = Math.max(0, dragonGhostHP  / dragonMaxHP);
+    const cur   = Math.max(0, dragonCurrentHP / dragonMaxHP);
+    const ghost = Math.max(0, dragonGhostHP  / dragonMaxHP);
 
-    // ghost bar (trailing yellow)
     healthBarGhost.clear();
-    if (ghostRatio > currentRatio) {
-      healthBarGhost.fillStyle(0xddaa00, 0.55);
-      healthBarGhost.fillRoundedRect(
-        cx - BAR_W / 2, barY,
-        BAR_W * ghostRatio, BAR_H, 4
-      );
+    if (ghost > cur) {
+      healthBarGhost.fillStyle(0xddaa00,0.55);
+      healthBarGhost.fillRoundedRect(cx-BAR_W/2, barY, BAR_W*ghost, BAR_H, 4);
     }
-
-    // foreground bar
     healthBarFg.clear();
-    healthBarFg.fillStyle(hpColor(currentRatio), 1);
-    healthBarFg.fillRoundedRect(
-      cx - BAR_W / 2, barY,
-      Math.max(0, BAR_W * currentRatio), BAR_H, 4
-    );
+    healthBarFg.fillStyle(hpColor(cur),1);
+    healthBarFg.fillRoundedRect(cx-BAR_W/2, barY, Math.max(0,BAR_W*cur), BAR_H, 4);
 
-    // segment dividers
     healthBarBorder.clear();
-    healthBarBorder.lineStyle(1, 0x000000, 0.5);
-    for (let i = 1; i < BAR_SEGMENTS; i++) {
-      const x = cx - BAR_W / 2 + (BAR_W / BAR_SEGMENTS) * i;
-      healthBarBorder.lineBetween(x, barY, x, barY + BAR_H);
+    healthBarBorder.lineStyle(1,0x000000,0.5);
+    for (let i=1; i<BAR_SEGMENTS; i++) {
+      const x = cx-BAR_W/2+(BAR_W/BAR_SEGMENTS)*i;
+      healthBarBorder.lineBetween(x, barY, x, barY+BAR_H);
     }
-    // outer border — golden at high HP, red at critical
-    const borderColor = currentRatio < 0.25 ? 0xff2200 : 0x886622;
-    healthBarBorder.lineStyle(2, borderColor, 1);
-    healthBarBorder.strokeRoundedRect(cx - BAR_W / 2, barY, BAR_W, BAR_H, 4);
+    const borderCol = cur < 0.25 ? 0xff2200 : 0x886622;
+    healthBarBorder.lineStyle(2, borderCol, 1);
+    healthBarBorder.strokeRoundedRect(cx-BAR_W/2, barY, BAR_W, BAR_H, 4);
   }
 
-  // ── Idle bob ──────────────────────────────────────────────────
-  function startDragonIdle() {
-    phaserScene.tweens.add({
-      targets: dragonSprite,
-      y: dragonSprite.y + 18,
-      duration: 2000,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut',
-    });
-  }
-
-  // ── Firebase listener ─────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // FIREBASE LISTENER
+  // ─────────────────────────────────────────────────────────────
   function listenToDragonState() {
     onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`), snapshot => {
       if (!snapshot.exists()) { console.warn('Encounter not found'); return; }
-
       const encounter = snapshot.val();
       const newHP     = encounter.dragonHP    ?? 0;
       const newMaxHP  = encounter.dragonMaxHP ?? 500;
@@ -411,10 +356,22 @@
 
       if (newHP !== dragonCurrentHP) {
         const damage = dragonCurrentHP - newHP;
-        animationQueue.push({ type: 'damage', fromHP: dragonCurrentHP, toHP: newHP, maxHP: newMaxHP, damage });
+        animationQueue.push({ type:'damage', fromHP:dragonCurrentHP, toHP:newHP, maxHP:newMaxHP, damage });
         dragonCurrentHP = newHP;
         dragonMaxHP     = newMaxHP;
         updateVignette(newHP, newMaxHP);
+      }
+
+      // Switch to battle idle once players join
+      if (players > 0 && spriteMode) {
+        const current = dragonSprite.anims.currentAnim?.key;
+        if (current === BOSS.sprite.defaultAnim) dragonSprite.play(BOSS.sprite.battleAnim);
+      }
+
+      // Start boss ability scheduler once (first time we see active players)
+      if (players > 0 && !abilitiesStarted && newHP > 0) {
+        abilitiesStarted = true;
+        BOSS.abilities.forEach(ability => scheduleAbility(ability));
       }
 
       if (newHP <= 0 && encounter.status === 'defeated') showVictoryScreen();
@@ -422,25 +379,77 @@
   }
 
   // ─────────────────────────────────────────────────────────────
-  // UPDATE
+  // BOSS ABILITY ENGINE
   // ─────────────────────────────────────────────────────────────
-  function update() {
-    // drift ghost bar toward current HP
-    if (dragonGhostHP > dragonCurrentHP) {
-      dragonGhostHP = Math.max(dragonCurrentHP, dragonGhostHP - 0.4);
-      const cx  = phaserScene.cameras.main.centerX;
-      const cy  = phaserScene.cameras.main.centerY;
-      const barY = cy - 80 + 90;
-      drawHealthBar(cx, barY);
-    }
+  function scheduleAbility(ability) {
+    const delay = ability.intervalMin + Math.random() * (ability.intervalMax - ability.intervalMin);
+    setTimeout(() => triggerAbility(ability), delay);
+  }
 
-    if (!isAnimating && animationQueue.length > 0) {
-      playAnimation(animationQueue.shift());
+  async function triggerAbility(ability) {
+    try {
+      const snap = await get(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`));
+      if (!snap.exists()) return;
+      const encounter = snap.val();
+      if ((encounter.dragonHP ?? 0) <= 0 || encounter.status === 'defeated') return;
+
+      const event = ability.buildEvent(encounter);
+      if (!event) { scheduleAbility(ability); return; }
+
+      // Play animation, then write event to Firebase, then show message
+      await playBossAnimation(ability.animation);
+      await set(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/bossEvent`), event);
+      showAbilityMessage(ability.displayMessage(event));
+    } catch (err) {
+      console.error('Ability error:', err);
     }
+    scheduleAbility(ability);
+  }
+
+  async function playBossAnimation(animKey) {
+    if (!phaserScene) return;
+    return new Promise(resolve => {
+      if (spriteMode) {
+        // Wait for animationcomplete, then resolve
+        dragonSprite.once('animationcomplete', () => resolve());
+        dragonSprite.play(animKey);
+      } else {
+        // Emoji visual stand-ins
+        const dur = 1800;
+        if (animKey === 'attack1') {
+          // Scale punch
+          phaserScene.tweens.add({
+            targets: dragonSprite, scaleX:1.5, scaleY:1.5,
+            duration:150, yoyo:true, repeat:1,
+          });
+          phaserScene.cameras.main.shake(250, 0.012);
+        } else if (animKey === 'attack2') {
+          // Rapid shake (fire breath feel)
+          phaserScene.cameras.main.shake(dur, 0.01);
+          phaserScene.tweens.add({
+            targets: dragonSprite, angle: { from:-8, to:8 },
+            duration:80, yoyo:true, repeat:10, ease:'Sine.easeInOut',
+          });
+        } else {
+          phaserScene.cameras.main.shake(200, 0.006);
+        }
+        setTimeout(resolve, dur);
+      }
+    });
+  }
+
+  function showAbilityMessage(msg) {
+    clearTimeout(msgTimer);
+    const el = document.getElementById('abilityMsg');
+    el.textContent = msg;
+    el.classList.remove('visible');
+    void el.offsetWidth; // restart animation
+    el.classList.add('visible');
+    msgTimer = setTimeout(() => el.classList.remove('visible'), 5000);
   }
 
   // ─────────────────────────────────────────────────────────────
-  // ANIMATIONS
+  // DAMAGE ANIMATION
   // ─────────────────────────────────────────────────────────────
   async function playAnimation(anim) {
     isAnimating = true;
@@ -450,47 +459,39 @@
 
   async function animateDamage({ fromHP, toHP, maxHP, damage }) {
     if (!phaserScene) return;
-    const cx    = phaserScene.cameras.main.centerX;
-    const cy    = phaserScene.cameras.main.centerY;
-    const barY  = cy - 80 + 90;
+    const cx   = phaserScene.cameras.main.centerX;
+    const cy   = phaserScene.cameras.main.centerY;
+    const barY = cy - 80 + 90;
 
-    // screen shake
     phaserScene.cameras.main.shake(180, 0.009);
 
-    // dragon flash red
-    phaserScene.tweens.add({
-      targets: dragonSprite,
-      alpha: { from: 1, to: 0.25 },
-      duration: 80,
-      yoyo: true,
-      repeat: 2,
-    });
+    if (spriteMode) {
+      dragonSprite.play('hurt');
+    } else {
+      phaserScene.tweens.add({
+        targets: dragonSprite, alpha: { from:1, to:0.25 },
+        duration:80, yoyo:true, repeat:2,
+      });
+    }
 
-    // floating damage number
     if (damage > 0) spawnDamageNumber(cx, cy - 120, damage, maxHP);
 
-    // animate HP bar
-    const duration = 480;
-    const start    = Date.now();
-    const startHP  = fromHP;
+    const duration = 480, start = Date.now(), startHP = fromHP;
     return new Promise(resolve => {
       const tick = () => {
-        const progress = Math.min((Date.now() - start) / duration, 1);
-        const ease     = 1 - Math.pow(1 - progress, 3);
-        const current  = startHP + (toHP - startHP) * ease;
-        // update display HP (ghost handled in update loop)
-        const displayHP = Math.ceil(current);
-        healthBarText?.setText(`HP: ${Math.max(0, displayHP)} / ${maxHP}`);
-        // temporarily override dragonCurrentHP for drawing
-        const savedHP = dragonCurrentHP;
-        dragonCurrentHP = current;
+        const progress = Math.min((Date.now()-start)/duration, 1);
+        const ease     = 1 - Math.pow(1-progress, 3);
+        const cur      = startHP + (toHP-startHP)*ease;
+        healthBarText?.setText(`HP: ${Math.max(0,Math.ceil(cur))} / ${maxHP}`);
+        const saved = dragonCurrentHP;
+        dragonCurrentHP = cur;
         drawHealthBar(cx, barY);
-        dragonCurrentHP = savedHP;
+        dragonCurrentHP = saved;
         if (progress < 1) requestAnimationFrame(tick);
         else {
           dragonCurrentHP = toHP;
           drawHealthBar(cx, barY);
-          healthBarText?.setText(`HP: ${Math.max(0, toHP)} / ${maxHP}`);
+          healthBarText?.setText(`HP: ${Math.max(0,toHP)} / ${maxHP}`);
           resolve();
         }
       };
@@ -499,70 +500,51 @@
   }
 
   function spawnDamageNumber(cx, baseY, damage, maxHP) {
-    const ratio    = damage / maxHP;
-    const big      = ratio > 0.1;
-    const fontSize = big ? '52px' : '34px';
-    const color    = big ? '#ff4400' : '#ffcc00';
-    const spread   = (Math.random() - 0.5) * 140;
-
-    const txt = phaserScene.add.text(cx + spread, baseY, `-${damage}`, {
-      fontSize,
-      color,
-      fontFamily: 'Cinzel, serif',
-      stroke: '#000000',
-      strokeThickness: 4,
-    }).setOrigin(0.5, 1).setDepth(10);
-
+    const big    = damage / maxHP > 0.1;
+    const spread = (Math.random()-0.5) * 140;
+    const txt = phaserScene.add.text(cx+spread, baseY, `-${damage}`, {
+      fontSize: big ? '52px' : '34px',
+      color:    big ? '#ff4400' : '#ffcc00',
+      fontFamily:'Cinzel,serif', stroke:'#000000', strokeThickness:4,
+    }).setOrigin(0.5,1).setDepth(10);
     phaserScene.tweens.add({
-      targets: txt,
-      y: baseY - (big ? 120 : 80),
-      alpha: { from: 1, to: 0 },
-      scaleX: big ? { from: 1.3, to: 1 } : 1,
-      scaleY: big ? { from: 1.3, to: 1 } : 1,
-      duration: big ? 1300 : 900,
-      ease: 'Power2',
+      targets: txt, y: baseY-(big?120:80), alpha: { from:1, to:0 },
+      scaleX: big ? { from:1.3,to:1 } : 1, scaleY: big ? { from:1.3,to:1 } : 1,
+      duration: big ? 1300 : 900, ease:'Power2',
       onComplete: () => txt.destroy(),
     });
   }
 
-  // ── Vignette CSS class swap ───────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // VIGNETTE & VICTORY
+  // ─────────────────────────────────────────────────────────────
   function updateVignette(hp, maxHP) {
-    const v     = document.getElementById('vignette');
-    const ratio = hp / maxHP;
-    v.classList.remove('low-hp', 'critical-hp');
-    if (ratio <= 0.20)      v.classList.add('critical-hp');
-    else if (ratio <= 0.40) v.classList.add('low-hp');
+    const v = document.getElementById('vignette');
+    const r = hp / maxHP;
+    v.classList.remove('low-hp','critical-hp');
+    if (r <= 0.20)      v.classList.add('critical-hp');
+    else if (r <= 0.40) v.classList.add('low-hp');
   }
 
-  // ── Victory ───────────────────────────────────────────────────
   function showVictoryScreen() {
-    // particle burst from dragon position before overlay
     if (phaserScene) {
       const cx = phaserScene.cameras.main.centerX;
       const cy = phaserScene.cameras.main.centerY - 120;
+      if (spriteMode) dragonSprite.play('death');
       phaserScene.add.particles(cx, cy, 'ember', {
-        lifespan: 1200,
-        speed: { min: 80, max: 320 },
-        scale: { start: 1.2, end: 0 },
-        alpha: { start: 1, end: 0 },
-        tint: [0xffcc00, 0xff4400, 0xffffff, 0xff0000],
-        quantity: 80,
-        blendMode: 'ADD',
-        emitting: false,
+        lifespan:1200, speed: { min:80, max:320 },
+        scale: { start:1.2, end:0 }, alpha: { start:1, end:0 },
+        tint:[0xffcc00,0xff4400,0xffffff,0xff0000],
+        quantity:80, blendMode:'ADD', emitting:false,
       }).explode(80, cx, cy);
     }
-
     setTimeout(() => {
       document.getElementById('victoryScreen').classList.add('active');
       setTimeout(() => { window.location.href = 'coinflip2.html'; }, 3500);
     }, 400);
   }
 
-  // ── Resize ────────────────────────────────────────────────────
-  window.addEventListener('resize', () => {
-    game.scale.resize(window.innerWidth, window.innerHeight);
-  });
+  window.addEventListener('resize', () => game.scale.resize(window.innerWidth, window.innerHeight));
 </script>
-
 </body>
 </html>
