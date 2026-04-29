@@ -79,6 +79,13 @@
     }
     .bb-coin.wobbling { animation:bbWobble .5s ease-out forwards; }
 
+    /* ── Cooldown sweep overlay (WoW-style clock wipe) ──────────────── */
+    .bb-coin-overlay {
+      position:absolute; inset:0; border-radius:50%;
+      background: conic-gradient(from -90deg, transparent 0deg, rgba(0,0,0,0.65) 0deg 360deg);
+      visibility:hidden; pointer-events:none; z-index:3;
+    }
+
     /* ── Stacking: content above smoke/glow ─────────────────────────── */
     header, .attack-panel, footer { position:relative; z-index:1; }
 
@@ -127,10 +134,11 @@
           </svg>
         </div>
       </div>
+      <div class="bb-coin-overlay" id="coinOverlay" aria-hidden="true"></div>
     </div>
 
     <div id="resultText" class="result-text" style="visibility:hidden;"></div>
-    <div class="cooldown-timer" id="cooldownTimer" style="visibility:hidden;">Cooldown: <span id="cooldownCount">0</span>s</div>
+    <div class="cooldown-timer" id="cooldownTimer" style="visibility:hidden;">Cooldown</div>
     <button class="btn-roll btn-attack" id="btnAttack">&#9876; Attack the Dragon</button>
   </div>
 </main>
@@ -169,7 +177,7 @@
   const coinFace     = document.getElementById('coinFace');
   const resultText   = document.getElementById('resultText');
   const cooldownTimer = document.getElementById('cooldownTimer');
-  const cooldownCount = document.getElementById('cooldownCount');
+  const coinOverlay   = document.getElementById('coinOverlay');
 
   // ── Coin face helpers ─────────────────────────────────────────────────
   function setFaceMystery() {
@@ -294,22 +302,27 @@
     });
   }
 
-  // ── Cooldown timer ────────────────────────────────────────────────────
+  // ── Cooldown sweep (WoW-style clock wipe) ────────────────────────────
   function startCooldownTimer() {
     btnAttack.disabled = true;
     cooldownTimer.style.visibility = 'visible';
-    const tick = () => {
-      const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
-      if (remaining <= 0) {
+    coinOverlay.style.visibility = 'visible';
+    const duration = cooldownUntil - Date.now();
+    const start = Date.now();
+    (function frame() {
+      const progress = Math.min((Date.now() - start) / duration, 1);
+      const deg = progress * 360;
+      coinOverlay.style.background =
+        `conic-gradient(from -90deg, transparent 0deg ${deg}deg, rgba(0,0,0,0.65) ${deg}deg 360deg)`;
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        coinOverlay.style.visibility = 'hidden';
         cooldownTimer.style.visibility = 'hidden';
         btnAttack.disabled = false;
         attackStatus.textContent = 'Ready to attack!';
-      } else {
-        cooldownCount.textContent = remaining;
-        setTimeout(tick, 100);
       }
-    };
-    tick();
+    })();
   }
 </script>
 <script src="theme-toggle.js"></script>
