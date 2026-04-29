@@ -244,7 +244,7 @@
         attackStatus.textContent = 'Miss! The dragon is unimpressed.';
       }
       resultText.style.visibility = 'visible';
-      cooldownUntil = Date.now() + 4000;
+      cooldownUntil = Date.now() + 2000;
       startCooldownTimer();
       if (Object.keys(updates).length > 0) await update(ref(_db), updates);
     } catch (err) {
@@ -302,26 +302,29 @@
   }
 
   // ── Cooldown sweep (WoW-style clock wipe) ────────────────────────────
+  // 0–500ms: face visible, no overlay; 500–2000ms: sweep clears from 12 o'clock
   function startCooldownTimer() {
     btnAttack.disabled = true;
     cooldownTimer.style.visibility = 'visible';
-    coinOverlay.style.visibility = 'visible';
-    const duration = cooldownUntil - Date.now();
-    const start = Date.now();
-    (function frame() {
-      const progress = Math.min((Date.now() - start) / duration, 1);
-      const deg = progress * 360;
-      coinOverlay.style.background =
-        `conic-gradient(from -90deg, transparent 0deg ${deg}deg, rgba(0,0,0,0.65) ${deg}deg 360deg)`;
-      if (progress < 1) {
-        requestAnimationFrame(frame);
-      } else {
-        coinOverlay.style.visibility = 'hidden';
-        cooldownTimer.style.visibility = 'hidden';
-        btnAttack.disabled = false;
-        attackStatus.textContent = 'Ready to attack!';
-      }
-    })();
+    const sweepDuration = 1500;
+    setTimeout(() => {
+      coinOverlay.style.visibility = 'visible';
+      const start = Date.now();
+      (function frame() {
+        const progress = Math.min((Date.now() - start) / sweepDuration, 1);
+        const deg = progress * 360;
+        coinOverlay.style.background =
+          `conic-gradient(from -90deg, transparent 0deg ${deg}deg, rgba(0,0,0,0.65) ${deg}deg 360deg)`;
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          coinOverlay.style.visibility = 'hidden';
+          cooldownTimer.style.visibility = 'hidden';
+          btnAttack.disabled = false;
+          attackStatus.textContent = 'Ready to attack!';
+        }
+      })();
+    }, 500);
   }
 </script>
 <script src="theme-toggle.js"></script>
