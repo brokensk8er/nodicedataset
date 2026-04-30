@@ -34,6 +34,22 @@
           "dragonMaxHP": { ".validate": "newData.isNumber()" },
           "status":      { ".validate": "newData.isString() && (newData.val() == 'active' || newData.val() == 'defeated' || newData.val() == 'waiting')" },
           "startedAt":   { ".validate": "newData.isNumber()" },
+          "name":        { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80" },
+          "background":  { ".validate": "newData.isString() && (newData.val() == 'cave' || newData.val() == 'volcano' || newData.val() == 'ice' || newData.val() == 'ruins' || newData.val() == 'abyss' || newData.val() == 'forest')" },
+          "graphic": {
+            "type":  { ".validate": "newData.isString() && (newData.val() == 'emoji' || newData.val() == 'image')" },
+            "value": { ".validate": "newData.isString() && newData.val().length > 0" },
+            "label": { ".validate": "newData.isString()" }
+          },
+          "speech": {
+            "text":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 300" },
+            "timestamp": { ".validate": "newData.isNumber()" }
+          },
+          "ability": {
+            "id":        { ".validate": "newData.isString()" },
+            "name":      { ".validate": "newData.isString()" },
+            "timestamp": { ".validate": "newData.isNumber()" }
+          },
           "activePlayers": {
             "{userId}": {
               ".write": "auth != null",

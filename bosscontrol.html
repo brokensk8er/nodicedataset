@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>No Dice — Boss Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── State screens ── */
+    .bc-state-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100dvh; padding: 2rem;
+    }
+    .bc-gate-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+      padding: 2.5rem 2rem; text-align: center; max-width: 400px; width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+    }
+    .bc-gate-icon { font-size: 3rem; margin-bottom: 1rem; line-height: 1; }
+    .bc-gate-card h1 {
+      font-family: 'Cinzel', serif; font-size: 1.35rem; font-weight: 700;
+      color: var(--ink); margin-bottom: .5rem;
+    }
+    .bc-gate-card p {
+      font-size: .875rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5;
+    }
+
+    /* ── Header ── */
+    .bc-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      background: var(--card-bg); position: sticky; top: 0; z-index: 100; gap: 12px;
+    }
+    .bc-header-left { display: flex; align-items: center; gap: 10px; }
+    .bc-title {
+      font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700;
+      letter-spacing: .06em; color: var(--gold); margin: 0;
+    }
+    .bc-live-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--pass-grn);
+      animation: livePulse 1.4s ease-in-out infinite; flex-shrink: 0;
+    }
+    .bc-header-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .bc-btn-display {
+      font-family: 'Cinzel', serif; font-size: .65rem; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--gold); text-decoration: none;
+      border: 1px solid var(--gold-dim); border-radius: 6px; padding: 5px 12px;
+      transition: background .18s, color .18s; white-space: nowrap;
+    }
+    .bc-btn-display:hover { background: var(--gold-bg); border-color: var(--gold); }
+
+    /* ── Main grid ── */
+    .bc-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%;
+    }
+
+    /* ── Sections ── */
+    .bc-section {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .bc-section-wide { grid-column: 1 / -1; }
+    .bc-section-title {
+      font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--gold-dim);
+      margin: 0 0 4px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Form controls ── */
+    .bc-field-row { display: flex; flex-direction: column; gap: 6px; }
+    .bc-input-group { display: flex; gap: 8px; align-items: stretch; }
+    .bc-input {
+      flex: 1; min-width: 0; background: var(--parchment); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; font-family: 'Lato', sans-serif;
+      font-size: .9rem; color: var(--ink); transition: border-color .18s;
+    }
+    .bc-input:focus { outline: none; border-color: var(--gold); }
+    .bc-label {
+      font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+    }
+    .bc-label-block {
+      display: block; font-family: 'Cinzel', serif; font-size: .65rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    .bc-hint { font-family: 'Lato', sans-serif; font-size: .65rem; color: var(--muted); font-weight: 300; letter-spacing: 0; text-transform: none; }
+    .bc-hint-block { font-size: .78rem; color: var(--muted); line-height: 1.5; margin: 0; }
+    .bc-hint-block code {
+      font-family: 'Courier New', monospace; font-size: .75em;
+      background: var(--border); padding: 1px 5px; border-radius: 4px; color: var(--ink);
+    }
+
+    /* ── Control buttons ── */
+    .btn-control {
+      font-family: 'Cinzel', serif; font-size: .7rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; background: var(--gold-dim);
+      color: #fff; border: none; border-radius: 8px; padding: 8px 16px;
+      cursor: pointer; transition: background .18s, transform .1s; white-space: nowrap;
+    }
+    .btn-control:hover:not(:disabled) { background: var(--gold); }
+    .btn-control:active:not(:disabled) { transform: scale(.97); }
+    .btn-control:disabled { opacity: .55; cursor: not-allowed; }
+    .bc-btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .bc-btn-reset {
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+    }
+    .bc-btn-reset:hover:not(:disabled) { background: var(--border); color: var(--ink); }
+    .bc-btn-spawn { background: var(--pass-grn); flex: 1; }
+    .bc-btn-spawn:hover:not(:disabled) { filter: brightness(1.1); }
+    .bc-btn-speak { background: var(--gold-dim); flex: 1; }
+    .bc-btn-clear { background: transparent; color: var(--fail-red); border: 1px solid var(--fail-red); }
+    .bc-btn-clear:hover:not(:disabled) { background: var(--fail-red); color: #fff; }
+
+    /* ── Status messages ── */
+    .bc-status-msg { font-size: .78rem; min-height: 1.1em; transition: color .2s; color: transparent; }
+    .bc-status-msg.ok    { color: var(--pass-grn); }
+    .bc-status-msg.error { color: var(--fail-red); }
+
+    /* ── Graphic grid ── */
+    .bc-graphic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+    .bc-graphic-card {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      background: var(--parchment); border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 8px 4px 6px; cursor: pointer; transition: border-color .18s, background .18s;
+      font-size: .6rem; font-family: 'Cinzel', serif; color: var(--muted);
+      letter-spacing: .08em; text-align: center; text-transform: uppercase;
+    }
+    .bc-graphic-card:hover  { border-color: var(--gold-dim); background: var(--gold-bg); }
+    .bc-graphic-card.active { border-color: var(--gold); background: var(--gold-bg); color: var(--gold-dim); }
+    .bc-graphic-emoji { font-size: 1.8rem; line-height: 1; }
+    .bc-graphic-card img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }
+
+    /* ── Background tiles ── */
+    .bc-bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+    .bc-bg-btn {
+      display: flex; flex-direction: column; gap: 3px; border: 2px solid transparent;
+      border-radius: 10px; padding: 12px 10px; cursor: pointer;
+      transition: border-color .18s, transform .1s; text-align: left;
+    }
+    .bc-bg-btn:hover  { transform: translateY(-1px); border-color: rgba(255,255,255,.4); }
+    .bc-bg-btn.active { border-color: var(--gold) !important; box-shadow: 0 0 0 1px var(--gold); }
+    .bc-bg-label {
+      font-family: 'Cinzel', serif; font-size: .72rem; font-weight: 600;
+      letter-spacing: .06em; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7);
+    }
+    .bc-bg-desc { font-size: .6rem; color: rgba(255,255,255,.75); text-shadow: 0 1px 3px rgba(0,0,0,.8); font-family: 'Lato', sans-serif; line-height: 1.3; }
+    .bc-bg-cave    { background: linear-gradient(135deg, #1a0028, #3d0000); }
+    .bc-bg-volcano { background: linear-gradient(135deg, #2a0a00, #8b1a00); }
+    .bc-bg-ice     { background: linear-gradient(135deg, #0a1a2e, #1a4a6e); }
+    .bc-bg-ruins   { background: linear-gradient(135deg, #1a1200, #3d3000); }
+    .bc-bg-abyss   { background: linear-gradient(135deg, #000510, #0d0020); }
+    .bc-bg-forest  { background: linear-gradient(135deg, #001a00, #0a2e0a); }
+
+    /* ── Speech textarea ── */
+    .bc-textarea {
+      width: 100%; min-height: 90px; background: var(--parchment);
+      border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+      font-family: 'Lato', sans-serif; font-size: .9rem; color: var(--ink);
+      resize: vertical; transition: border-color .18s; line-height: 1.5;
+    }
+    .bc-textarea:focus { outline: none; border-color: var(--gold); }
+    .bc-char-count { font-size: .68rem; color: var(--muted); text-align: right; margin-top: -6px; }
+
+    /* ── Ability grid ── */
+    .bc-ability-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .bc-ability-card {
+      background: var(--parchment); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .bc-ability-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .bc-ability-name {
+      font-family: 'Cinzel', serif; font-size: .78rem; font-weight: 700;
+      letter-spacing: .06em; color: var(--ink);
+    }
+    .bc-ability-mode-toggle {
+      display: flex; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; flex-shrink: 0;
+    }
+    .bc-mode-btn {
+      font-family: 'Cinzel', serif; font-size: .55rem; letter-spacing: .1em;
+      text-transform: uppercase; background: transparent; border: none;
+      padding: 4px 10px; cursor: pointer; color: var(--muted); transition: background .15s, color .15s;
+    }
+    .bc-mode-btn.active { background: var(--gold-dim); color: #fff; }
+    .bc-ability-desc { font-size: .78rem; color: var(--muted); line-height: 1.45; margin: 0; }
+    .bc-ability-actions { display: flex; gap: 8px; margin-top: 2px; }
+    .bc-btn-trigger { flex: 1; background: var(--gold-dim); }
+    .bc-btn-trigger:hover:not(:disabled) { background: var(--gold); }
+    .bc-btn-stop { background: transparent; color: var(--fail-red); border: 1px solid var(--fail-red); }
+    .bc-btn-stop:hover:not(:disabled) { background: var(--fail-red); color: #fff; }
+
+    /* ── Auto-fire config ── */
+    .bc-auto-config {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .bc-interval-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .bc-interval-input { width: 64px; flex: none; }
+    .bc-interval-unit {
+      background: var(--parchment); border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 8px; font-family: 'Lato', sans-serif; font-size: .82rem; color: var(--ink); cursor: pointer;
+    }
+    .bc-countdown { font-size: .75rem; color: var(--muted); font-family: 'Cinzel', serif; letter-spacing: .06em; }
+    .bc-countdown-val { color: var(--gold); font-weight: 600; }
+  </style>
+  <script>try{var _t=localStorage.getItem('vaultTheme')||'dark';if(_t!=='dark'&&_t!=='light'&&_t!=='nodice')_t='dark';document.documentElement.setAttribute('data-theme',_t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}</script>
+</head>
+<body class="bosscontrol-page">
+
+<!-- ── Loading / gate screens ─────────────────────────────────────────────── -->
+<div id="bc-loading" class="bc-state-screen">
+  <p>Authenticating…</p>
+</div>
+
+<div id="bc-auth-gate" class="bc-state-screen hidden">
+  <div class="bc-gate-card">
+    <div class="bc-gate-icon">🔐</div>
+    <h1>Access Restricted</h1>
+    <p>You must be signed in to access Boss Control.</p>
+    <a href="profile.html" class="btn-primary">Sign In via Profile</a>
+  </div>
+</div>
+
+<div id="bc-denied" class="bc-state-screen hidden">
+  <div class="bc-gate-card">
+    <div class="bc-gate-icon">🚫</div>
+    <h1>Showrunners Only</h1>
+    <p>This panel is restricted to admin users.</p>
+    <a href="index.html" class="btn-primary">← Back to the Vault</a>
+  </div>
+</div>
+
+<!-- ── Main control panel ──────────────────────────────────────────────────── -->
+<div id="bc-panel" class="hidden">
+
+  <header class="bc-header">
+    <div class="bc-header-left">
+      <h1 class="bc-title">⚔ Boss Control</h1>
+      <span class="bc-live-dot" title="Admin panel active"></span>
+    </div>
+    <nav class="bc-header-nav">
+      <a href="boss.html" target="_blank" class="bc-btn-display">Open Display ↗</a>
+      <button id="btn-theme" class="theme-toggle-btn" aria-label="Toggle theme"></button>
+      <a href="index.html" class="nav-link">← Vault</a>
+    </nav>
+  </header>
+
+  <main class="bc-grid">
+
+    <!-- ── Section 1: Encounter Management ────────────────────────────────── -->
+    <section class="bc-section" id="sec-encounter">
+      <h2 class="bc-section-title">⚔ Encounter</h2>
+
+      <div class="bc-field-row">
+        <label class="bc-label">Max HP <span class="bc-hint">(difficulty)</span></label>
+        <div class="bc-input-group">
+          <input type="number" id="inp-max-hp" class="bc-input" min="1" max="9999" placeholder="500" />
+          <button class="btn-control" id="btn-set-max-hp">Set Max HP</button>
+        </div>
+      </div>
+
+      <div class="bc-field-row">
+        <label class="bc-label">Current HP</label>
+        <div class="bc-input-group">
+          <input type="number" id="inp-hp" class="bc-input" min="0" max="9999" placeholder="—" />
+          <button class="btn-control" id="btn-set-hp">Set HP</button>
+        </div>
+      </div>
+
+      <div class="bc-btn-row">
+        <button class="btn-control bc-btn-reset" id="btn-reset-hp">↺ Reset to Full HP</button>
+        <button class="btn-control bc-btn-spawn" id="btn-spawn">🐣 Spawn / Respawn Boss</button>
+      </div>
+
+      <div id="enc-status-msg" class="bc-status-msg"></div>
+    </section>
+
+    <!-- ── Section 2: Boss Identity ───────────────────────────────────────── -->
+    <section class="bc-section" id="sec-identity">
+      <h2 class="bc-section-title">🎭 Identity</h2>
+
+      <div class="bc-field-row">
+        <label class="bc-label">Boss Name</label>
+        <div class="bc-input-group">
+          <input type="text" id="inp-name" class="bc-input" maxlength="80"
+            placeholder="e.g. Zyraxul the Unbound" />
+          <button class="btn-control" id="btn-save-name">Save</button>
+        </div>
+      </div>
+
+      <label class="bc-label bc-label-block">Boss Graphic</label>
+      <div class="bc-graphic-grid" id="graphic-grid"></div>
+      <div id="identity-status-msg" class="bc-status-msg"></div>
+    </section>
+
+    <!-- ── Section 3: Background / Scene ──────────────────────────────────── -->
+    <section class="bc-section" id="sec-background">
+      <h2 class="bc-section-title">🌄 Scene</h2>
+      <div class="bc-bg-grid" id="bg-grid"></div>
+    </section>
+
+    <!-- ── Section 4: Boss Speech ──────────────────────────────────────────── -->
+    <section class="bc-section" id="sec-speech">
+      <h2 class="bc-section-title">💬 Speech</h2>
+      <textarea id="inp-speech" class="bc-textarea" maxlength="300"
+        placeholder="What does the boss say? (max 300 chars)"></textarea>
+      <div class="bc-char-count"><span id="speech-chars">0</span> / 300</div>
+      <div class="bc-btn-row">
+        <button class="btn-control bc-btn-speak" id="btn-speak">🗣 Speak</button>
+        <button class="btn-control bc-btn-clear" id="btn-clear-speech">✕ Clear</button>
+      </div>
+      <div id="speech-status-msg" class="bc-status-msg"></div>
+    </section>
+
+    <!-- ── Section 5: Abilities ────────────────────────────────────────────── -->
+    <section class="bc-section bc-section-wide" id="sec-abilities">
+      <h2 class="bc-section-title">⚡ Abilities</h2>
+      <p class="bc-hint-block">Assign abilities per creature via the <code>BOSS_ABILITIES</code> array in this file.
+        Auto-fire runs while this tab is open; closing the tab stops the timer.</p>
+      <div class="bc-ability-grid" id="ability-grid"></div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module">
+  import { initializeApp, getApps }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getDatabase, ref, set, get, update, remove }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+  import { getFirestore, doc, getDoc }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { getFunctions, httpsCallable }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js';
+
+  // ── Constants ──────────────────────────────────────────────────────────────
+  const DB_PATH = 'nodice/encounters/dragon';
+
+  const FIREBASE_CONFIG = {
+    apiKey:            'AIzaSyAXcvi644izGZhK8nPGlkfV4vAc3ZWPH8w',
+    authDomain:        'nodicetools.firebaseapp.com',
+    databaseURL:       'https://nodicetools-default-rtdb.firebaseio.com',
+    projectId:         'nodicetools',
+    storageBucket:     'nodicetools.firebasestorage.app',
+    messagingSenderId: '387258889697',
+    appId:             '1:387258889697:web:5467488ab109ea67b74ea0',
+  };
+
+  // Boss graphic options — named image assets listed first, emoji fallbacks at end.
+  // To add art: push { id, label, type: 'image', src: 'imgs/bosses/xxx.png' }
+  // before the emoji block below.
+  const BOSS_GRAPHICS = [
+    // ── Named image assets (add entries here as art is created) ────────────
+    // { id: 'art-dragon', label: 'Dragon',  type: 'image', src: 'imgs/bosses/dragon.png' },
+
+    // ── Emoji fallbacks (always at end of list) ────────────────────────────
+    { id: 'emoji-dragon',  label: '🐉 Dragon',   type: 'emoji', value: '🐉' },
+    { id: 'emoji-lich',    label: '💀 Lich',      type: 'emoji', value: '💀' },
+    { id: 'emoji-zombie',  label: '🧟 Zombie',    type: 'emoji', value: '🧟' },
+    { id: 'emoji-ogre',    label: '👹 Ogre',      type: 'emoji', value: '👹' },
+    { id: 'emoji-kraken',  label: '🦑 Kraken',    type: 'emoji', value: '🦑' },
+    { id: 'emoji-spider',  label: '🕷️ Spider',    type: 'emoji', value: '🕷️' },
+    { id: 'emoji-troll',   label: '🧌 Troll',     type: 'emoji', value: '🧌' },
+    { id: 'emoji-serpent', label: '🐍 Serpent',   type: 'emoji', value: '🐍' },
+    { id: 'emoji-demon',   label: '😈 Demon',     type: 'emoji', value: '😈' },
+    { id: 'emoji-wraith',  label: '👻 Wraith',    type: 'emoji', value: '👻' },
+  ];
+
+  const BOSS_BACKGROUNDS = [
+    { id: 'cave',    label: '🕳️ Cave',           desc: 'Lava-lit cavern (default)' },
+    { id: 'volcano', label: '🌋 Volcano',         desc: 'Erupting volcanic lair' },
+    { id: 'ice',     label: '❄️ Ice Cavern',      desc: 'Frozen underground chamber' },
+    { id: 'ruins',   label: '🏛️ Ruined Temple',  desc: 'Ancient crumbling temple' },
+    { id: 'abyss',   label: '🌌 Abyss',           desc: 'Endless void and starfield' },
+    { id: 'forest',  label: '🌲 Dark Forest',     desc: 'Twisted ancient woods at night' },
+  ];
+
+  // Ability bank — define and assign per creature by editing this array.
+  // Auto-fire interval state is session-local: closing this tab stops auto-fire.
+  const BOSS_ABILITIES = [
+    { id: 'roar',   name: 'Thunderous Roar',  desc: 'A deafening roar shakes the arena and terrifies all who hear it.' },
+    { id: 'slam',   name: 'Ground Slam',       desc: 'A devastating strike sends shockwaves cracking through the ground.' },
+    { id: 'fire',   name: 'Inferno Breath',    desc: 'Searing flames sweep across the battlefield in a blazing torrent.' },
+    { id: 'shadow', name: 'Shadow Step',       desc: 'The boss vanishes into darkness and reappears in an unexpected location.' },
+    { id: 'shield', name: 'Void Shield',       desc: 'An impenetrable barrier of dark energy surrounds the boss briefly.' },
+  ];
+
+  // ── Firebase init ──────────────────────────────────────────────────────────
+  const APP_NAME = 'ndt-profile';
+  const _app  = getApps().find(a => a.name === APP_NAME) ?? initializeApp(FIREBASE_CONFIG, APP_NAME);
+  const _auth = getAuth(_app);
+  const _db   = getDatabase(_app);
+  const _fs   = getFirestore(_app);
+  const _fns  = getFunctions(_app);
+
+  // ── UI refs ────────────────────────────────────────────────────────────────
+  const elLoading  = document.getElementById('bc-loading');
+  const elAuthGate = document.getElementById('bc-auth-gate');
+  const elDenied   = document.getElementById('bc-denied');
+  const elPanel    = document.getElementById('bc-panel');
+
+  // Tracks active auto-fire intervals per ability id
+  const autoFireTimers     = {};
+  const autoFireCountdowns = {};
+
+  // ── Auth gate ──────────────────────────────────────────────────────────────
+  onAuthStateChanged(_auth, async user => {
+    elLoading.classList.add('hidden');
+
+    if (!user) {
+      elAuthGate.classList.remove('hidden');
+      return;
+    }
+
+    let isAdmin = false;
+    try {
+      const snap = await getDoc(doc(_fs, 'users', user.uid));
+      isAdmin = snap.exists() && snap.data().isAdmin === true;
+    } catch (e) {
+      console.error('Admin check failed:', e);
+    }
+
+    if (!isAdmin) {
+      elDenied.classList.remove('hidden');
+      return;
+    }
+
+    elPanel.classList.remove('hidden');
+    initPanel();
+  });
+
+  // ── Panel init ─────────────────────────────────────────────────────────────
+  function initPanel() {
+    wireEncounterControls();
+    wireIdentityControls();
+    buildGraphicGrid();
+    buildBackgroundGrid();
+    wireSpeechControls();
+    wireCharCount();
+    buildAbilityGrid();
+  }
+
+  // ── Encounter controls ─────────────────────────────────────────────────────
+  function wireEncounterControls() {
+    document.getElementById('btn-set-max-hp').addEventListener('click', async () => {
+      const val = parseInt(document.getElementById('inp-max-hp').value, 10);
+      if (!val || val < 1) return showStatus('enc-status-msg', 'Enter a valid Max HP value.', 'error');
+      try {
+        await update(ref(_db, DB_PATH), { dragonMaxHP: val, dragonHP: val });
+        showStatus('enc-status-msg', `Max HP set to ${val} — current HP reset to full.`, 'ok');
+      } catch (e) { showStatus('enc-status-msg', 'Write failed: ' + e.message, 'error'); }
+    });
+
+    document.getElementById('btn-set-hp').addEventListener('click', async () => {
+      const val = parseInt(document.getElementById('inp-hp').value, 10);
+      if (isNaN(val) || val < 0) return showStatus('enc-status-msg', 'Enter a valid HP value (0 or higher).', 'error');
+      try {
+        const updates = { dragonHP: val, status: val <= 0 ? 'defeated' : 'active' };
+        await update(ref(_db, DB_PATH), updates);
+        showStatus('enc-status-msg', `HP set to ${val}.`, 'ok');
+      } catch (e) { showStatus('enc-status-msg', 'Write failed: ' + e.message, 'error'); }
+    });
+
+    document.getElementById('btn-reset-hp').addEventListener('click', async () => {
+      try {
+        const snap = await get(ref(_db, DB_PATH + '/dragonMaxHP'));
+        const max  = snap.val() ?? 500;
+        await update(ref(_db, DB_PATH), { dragonHP: max, status: 'active' });
+        showStatus('enc-status-msg', `HP reset to ${max}.`, 'ok');
+      } catch (e) { showStatus('enc-status-msg', 'Reset failed: ' + e.message, 'error'); }
+    });
+
+    const spawnBtn = document.getElementById('btn-spawn');
+    spawnBtn.addEventListener('click', async () => {
+      spawnBtn.disabled = true;
+      spawnBtn.textContent = 'Spawning…';
+      try {
+        const initFn = httpsCallable(_fns, 'initializeEncounter');
+        await initFn({ encounterId: 'dragon' });
+        showStatus('enc-status-msg', 'Boss spawned / reset successfully.', 'ok');
+      } catch (e) {
+        // Fallback: direct write if Cloud Function unavailable
+        try {
+          const maxHP = parseInt(document.getElementById('inp-max-hp').value, 10) || 500;
+          await set(ref(_db, DB_PATH), {
+            dragonHP: maxHP, dragonMaxHP: maxHP,
+            status: 'active', startedAt: Date.now(),
+            activePlayers: {}, recentAttacks: {},
+          });
+          showStatus('enc-status-msg', 'Boss spawned (direct write).', 'ok');
+        } catch (e2) { showStatus('enc-status-msg', 'Spawn failed: ' + e2.message, 'error'); }
+      }
+      spawnBtn.disabled = false;
+      spawnBtn.textContent = '🐣 Spawn / Respawn Boss';
+    });
+  }
+
+  // ── Identity controls ──────────────────────────────────────────────────────
+  function wireIdentityControls() {
+    const nameInput = document.getElementById('inp-name');
+    const saveBtn   = document.getElementById('btn-save-name');
+
+    const saveName = async () => {
+      const name = nameInput.value.trim();
+      if (!name) return;
+      try {
+        await set(ref(_db, DB_PATH + '/name'), name);
+        showStatus('identity-status-msg', `Boss named "${name}".`, 'ok');
+      } catch (e) { showStatus('identity-status-msg', 'Save failed: ' + e.message, 'error'); }
+    };
+
+    saveBtn.addEventListener('click', saveName);
+    nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
+  }
+
+  // ── Graphic grid ───────────────────────────────────────────────────────────
+  function buildGraphicGrid() {
+    const grid = document.getElementById('graphic-grid');
+    BOSS_GRAPHICS.forEach(g => {
+      const card = document.createElement('button');
+      card.className = 'bc-graphic-card';
+      card.dataset.id = g.id;
+      card.innerHTML = g.type === 'image'
+        ? `<img src="${g.src}" alt="${g.label}" /><span>${g.label}</span>`
+        : `<span class="bc-graphic-emoji">${g.value}</span><span>${g.label}</span>`;
+
+      card.addEventListener('click', async () => {
+        grid.querySelectorAll('.bc-graphic-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+        try {
+          await set(ref(_db, DB_PATH + '/graphic'), {
+            type:  g.type,
+            value: g.type === 'image' ? g.src : g.value,
+            label: g.label,
+          });
+        } catch (e) { showStatus('identity-status-msg', 'Graphic write failed: ' + e.message, 'error'); }
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  // ── Background grid ────────────────────────────────────────────────────────
+  function buildBackgroundGrid() {
+    const grid = document.getElementById('bg-grid');
+    BOSS_BACKGROUNDS.forEach(bg => {
+      const btn = document.createElement('button');
+      btn.className = `bc-bg-btn bc-bg-${bg.id}`;
+      btn.dataset.id = bg.id;
+      btn.innerHTML = `<span class="bc-bg-label">${bg.label}</span><span class="bc-bg-desc">${bg.desc}</span>`;
+
+      btn.addEventListener('click', async () => {
+        grid.querySelectorAll('.bc-bg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        try {
+          await set(ref(_db, DB_PATH + '/background'), bg.id);
+        } catch (e) { console.error('Background write failed:', e); }
+      });
+
+      grid.appendChild(btn);
+    });
+  }
+
+  // ── Speech controls ────────────────────────────────────────────────────────
+  function wireSpeechControls() {
+    document.getElementById('btn-speak').addEventListener('click', async () => {
+      const text = document.getElementById('inp-speech').value.trim();
+      if (!text) return showStatus('speech-status-msg', 'Enter text for the boss to say.', 'error');
+      try {
+        await set(ref(_db, DB_PATH + '/speech'), { text, timestamp: Date.now() });
+        showStatus('speech-status-msg', 'Boss is speaking.', 'ok');
+      } catch (e) { showStatus('speech-status-msg', 'Write failed: ' + e.message, 'error'); }
+    });
+
+    document.getElementById('btn-clear-speech').addEventListener('click', async () => {
+      try {
+        await remove(ref(_db, DB_PATH + '/speech'));
+        showStatus('speech-status-msg', 'Speech cleared.', 'ok');
+      } catch (e) { showStatus('speech-status-msg', 'Clear failed: ' + e.message, 'error'); }
+    });
+  }
+
+  function wireCharCount() {
+    const ta = document.getElementById('inp-speech');
+    const ct = document.getElementById('speech-chars');
+    ta.addEventListener('input', () => { ct.textContent = ta.value.length; });
+  }
+
+  // ── Ability grid ───────────────────────────────────────────────────────────
+  function buildAbilityGrid() {
+    const grid = document.getElementById('ability-grid');
+
+    BOSS_ABILITIES.forEach(ab => {
+      const card = document.createElement('div');
+      card.className = 'bc-ability-card';
+      card.id = `ability-card-${ab.id}`;
+      card.innerHTML = `
+        <div class="bc-ability-header">
+          <strong class="bc-ability-name">${ab.name}</strong>
+          <div class="bc-ability-mode-toggle">
+            <button class="bc-mode-btn active" data-mode="manual" data-id="${ab.id}">Manual</button>
+            <button class="bc-mode-btn" data-mode="auto" data-id="${ab.id}">Auto</button>
+          </div>
+        </div>
+        <p class="bc-ability-desc">${ab.desc}</p>
+        <div class="bc-auto-config hidden" id="auto-config-${ab.id}">
+          <div class="bc-interval-row">
+            <label class="bc-label">Fire every</label>
+            <input type="number" class="bc-input bc-interval-input"
+              id="interval-val-${ab.id}" min="1" max="3600" value="30" />
+            <select class="bc-interval-unit" id="interval-unit-${ab.id}">
+              <option value="s">seconds</option>
+              <option value="m">minutes</option>
+            </select>
+          </div>
+          <div class="bc-countdown hidden" id="countdown-${ab.id}">
+            Next fire: <span class="bc-countdown-val"></span>
+          </div>
+        </div>
+        <div class="bc-ability-actions">
+          <button class="btn-control bc-btn-trigger" id="trigger-btn-${ab.id}">⚡ Trigger</button>
+          <button class="btn-control bc-btn-stop hidden" id="stop-btn-${ab.id}">⏹ Stop</button>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      // Mode toggle
+      card.querySelectorAll('.bc-mode-btn').forEach(modeBtn => {
+        modeBtn.addEventListener('click', () => {
+          card.querySelectorAll('.bc-mode-btn').forEach(b => b.classList.remove('active'));
+          modeBtn.classList.add('active');
+          const isAuto = modeBtn.dataset.mode === 'auto';
+          document.getElementById(`auto-config-${ab.id}`).classList.toggle('hidden', !isAuto);
+          document.getElementById(`trigger-btn-${ab.id}`).textContent = isAuto ? '▶ Start Auto' : '⚡ Trigger';
+          if (!isAuto) stopAutoFire(ab.id);
+        });
+      });
+
+      // Trigger / Start-auto
+      document.getElementById(`trigger-btn-${ab.id}`).addEventListener('click', () => {
+        const mode = card.querySelector('.bc-mode-btn.active').dataset.mode;
+        if (mode === 'manual') fireAbility(ab);
+        else startAutoFire(ab);
+      });
+
+      // Stop auto-fire
+      document.getElementById(`stop-btn-${ab.id}`).addEventListener('click', () => stopAutoFire(ab.id));
+    });
+  }
+
+  async function fireAbility(ab) {
+    try {
+      await set(ref(_db, DB_PATH + '/ability'), { id: ab.id, name: ab.name, timestamp: Date.now() });
+    } catch (e) { console.error('Ability fire failed:', e); }
+  }
+
+  function startAutoFire(ab) {
+    if (autoFireTimers[ab.id]) return; // already running
+
+    const valEl  = document.getElementById(`interval-val-${ab.id}`);
+    const unitEl = document.getElementById(`interval-unit-${ab.id}`);
+    const secs   = Math.max(1, parseInt(valEl.value, 10) || 30) * (unitEl.value === 'm' ? 60 : 1);
+
+    const triggerBtn  = document.getElementById(`trigger-btn-${ab.id}`);
+    const stopBtn     = document.getElementById(`stop-btn-${ab.id}`);
+    const countdownEl = document.getElementById(`countdown-${ab.id}`);
+    const countVal    = countdownEl.querySelector('.bc-countdown-val');
+
+    triggerBtn.classList.add('hidden');
+    stopBtn.classList.remove('hidden');
+    countdownEl.classList.remove('hidden');
+
+    let remaining = secs;
+    const fmt = s => s >= 60 ? `${Math.floor(s/60)}m ${s%60}s` : `${s}s`;
+    countVal.textContent = fmt(remaining);
+
+    autoFireCountdowns[ab.id] = setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+      countVal.textContent = fmt(remaining);
+    }, 1000);
+
+    fireAbility(ab); // fire immediately on start
+    autoFireTimers[ab.id] = setInterval(() => {
+      remaining = secs;
+      fireAbility(ab);
+    }, secs * 1000);
+  }
+
+  function stopAutoFire(id) {
+    if (autoFireTimers[id])     { clearInterval(autoFireTimers[id]);     delete autoFireTimers[id]; }
+    if (autoFireCountdowns[id]) { clearInterval(autoFireCountdowns[id]); delete autoFireCountdowns[id]; }
+    const triggerBtn  = document.getElementById(`trigger-btn-${id}`);
+    const stopBtn     = document.getElementById(`stop-btn-${id}`);
+    const countdownEl = document.getElementById(`countdown-${id}`);
+    if (triggerBtn)  triggerBtn.classList.remove('hidden');
+    if (stopBtn)     stopBtn.classList.add('hidden');
+    if (countdownEl) countdownEl.classList.add('hidden');
+  }
+
+  // ── Status helper ──────────────────────────────────────────────────────────
+  const _statusTimers = {};
+  function showStatus(elId, msg, type) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = msg;
+    el.className = `bc-status-msg ${type}`;
+    clearTimeout(_statusTimers[elId]);
+    _statusTimers[elId] = setTimeout(() => {
+      el.textContent = '';
+      el.className = 'bc-status-msg';
+    }, 4000);
+  }
+</script>
+<script src="theme-toggle.js"></script>
+</body>
+</html>
