@@ -39,8 +39,21 @@
               ".write": "auth != null",
               "lastAttackTime": { ".validate": "newData.isNumber()" },
               "onCooldown":     { ".validate": "newData.isBoolean()" },
-              "cooldownUntil":  { ".validate": "newData.isNumber()" }
+              "cooldownUntil":  { ".validate": "newData.isNumber()" },
+              "displayName":    { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" }
             }
+          },
+          "bossEvent": {
+            ".write": "auth != null",
+            ".validate": "newData.hasChildren(['type', 'id', 'cooldownUntil', 'timestamp'])",
+            "type":            { ".validate": "newData.isString() && (newData.val() == 'strike' || newData.val() == 'fireBath')" },
+            "id":              { ".validate": "newData.isString()" },
+            "target":          { ".validate": "newData.isString()" },
+            "targetName":      { ".validate": "newData.isString() && newData.val().length <= 60" },
+            "cooldownMs":      { ".validate": "newData.isNumber() && newData.val() > 0" },
+            "cooldownUntil":   { ".validate": "newData.isNumber()" },
+            "smashReductionMs":{ ".validate": "newData.isNumber() && newData.val() > 0" },
+            "timestamp":       { ".validate": "newData.isNumber()" }
           },
           "recentAttacks": {
             "{attackId}": {
