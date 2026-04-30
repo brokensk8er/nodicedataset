@@ -53,23 +53,21 @@
     }
     .bc-btn-display:hover { background: var(--gold-bg); border-color: var(--gold); }
 
-    /* ── Main grid ── */
-    .bc-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%;
+    /* ── Stacked shelf wrapper ── */
+    .bc-stack {
+      display: flex; flex-direction: column; gap: 12px;
+      max-width: 720px; margin: 0 auto; width: 100%;
+      padding: 16px 14px 32px; min-width: 0;
     }
-
-    /* ── Sections ── */
-    .bc-section {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px;
-      padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 12px;
+    .bc-stack .shelf-content {
+      padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 12px;
     }
-    .bc-section-wide { grid-column: 1 / -1; }
-    .bc-section-title {
-      font-family: 'Cinzel', serif; font-size: .75rem; font-weight: 700;
-      letter-spacing: .18em; text-transform: uppercase; color: var(--gold-dim);
-      margin: 0 0 4px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    .shelf-active-dot {
+      display: none; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--pass-grn); margin-left: 6px;
+      animation: livePulse 1.4s ease-in-out infinite; flex-shrink: 0;
     }
+    .shelf.has-active .shelf-active-dot { display: inline-block; }
 
     /* ── Form controls ── */
     .bc-field-row { display: flex; flex-direction: column; gap: 6px; }
@@ -249,83 +247,175 @@
     </nav>
   </header>
 
-  <main class="bc-grid">
+  <main class="bc-stack">
 
-    <!-- ── Section 1: Encounter Management ────────────────────────────────── -->
-    <section class="bc-section" id="sec-encounter">
-      <h2 class="bc-section-title">⚔ Encounter</h2>
+    <!-- ── Shelf 1: Encounter Management ──────────────────────────────────── -->
+    <div class="shelf" id="shelf-encounter">
+      <div class="shelf-header" onclick="toggleShelf('encounter')">
+        <div class="shelf-icon">⚔</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Encounter</div>
+          <div class="shelf-desc">HP, spawn, reset</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-encounter">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div class="bc-field-row">
+              <label class="bc-label">Max HP <span class="bc-hint">(difficulty)</span></label>
+              <div class="bc-input-group">
+                <input type="number" id="inp-max-hp" class="bc-input" min="1" max="9999" placeholder="500" />
+                <button class="btn-control" id="btn-set-max-hp">Set Max HP</button>
+              </div>
+            </div>
 
-      <div class="bc-field-row">
-        <label class="bc-label">Max HP <span class="bc-hint">(difficulty)</span></label>
-        <div class="bc-input-group">
-          <input type="number" id="inp-max-hp" class="bc-input" min="1" max="9999" placeholder="500" />
-          <button class="btn-control" id="btn-set-max-hp">Set Max HP</button>
+            <div class="bc-field-row">
+              <label class="bc-label">Current HP</label>
+              <div class="bc-input-group">
+                <input type="number" id="inp-hp" class="bc-input" min="0" max="9999" placeholder="—" />
+                <button class="btn-control" id="btn-set-hp">Set HP</button>
+              </div>
+            </div>
+
+            <div class="bc-btn-row">
+              <button class="btn-control bc-btn-reset" id="btn-reset-hp">↺ Reset to Full HP</button>
+              <button class="btn-control bc-btn-spawn" id="btn-spawn">🐣 Spawn / Respawn Boss</button>
+            </div>
+
+            <div id="enc-status-msg" class="bc-status-msg"></div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="bc-field-row">
-        <label class="bc-label">Current HP</label>
-        <div class="bc-input-group">
-          <input type="number" id="inp-hp" class="bc-input" min="0" max="9999" placeholder="—" />
-          <button class="btn-control" id="btn-set-hp">Set HP</button>
+    <!-- ── Shelf 2: Boss Identity ─────────────────────────────────────────── -->
+    <div class="shelf" id="shelf-identity">
+      <div class="shelf-header" onclick="toggleShelf('identity')">
+        <div class="shelf-icon">🎭</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Identity</div>
+          <div class="shelf-desc">Boss name & graphic</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-identity">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div class="bc-field-row">
+              <label class="bc-label">Boss Name</label>
+              <div class="bc-input-group">
+                <input type="text" id="inp-name" class="bc-input" maxlength="80"
+                  placeholder="e.g. Zyraxul the Unbound" />
+                <button class="btn-control" id="btn-save-name">Save</button>
+              </div>
+            </div>
+
+            <label class="bc-label bc-label-block">Boss Graphic</label>
+            <div class="bc-graphic-grid" id="graphic-grid"></div>
+            <div id="identity-status-msg" class="bc-status-msg"></div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="bc-btn-row">
-        <button class="btn-control bc-btn-reset" id="btn-reset-hp">↺ Reset to Full HP</button>
-        <button class="btn-control bc-btn-spawn" id="btn-spawn">🐣 Spawn / Respawn Boss</button>
+    <!-- ── Shelf 3: Background / Scene ────────────────────────────────────── -->
+    <div class="shelf" id="shelf-background">
+      <div class="shelf-header" onclick="toggleShelf('background')">
+        <div class="shelf-icon">🌄</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Scene</div>
+          <div class="shelf-desc">Backdrop selection</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
       </div>
-
-      <div id="enc-status-msg" class="bc-status-msg"></div>
-    </section>
-
-    <!-- ── Section 2: Boss Identity ───────────────────────────────────────── -->
-    <section class="bc-section" id="sec-identity">
-      <h2 class="bc-section-title">🎭 Identity</h2>
-
-      <div class="bc-field-row">
-        <label class="bc-label">Boss Name</label>
-        <div class="bc-input-group">
-          <input type="text" id="inp-name" class="bc-input" maxlength="80"
-            placeholder="e.g. Zyraxul the Unbound" />
-          <button class="btn-control" id="btn-save-name">Save</button>
+      <div class="shelf-body" id="shelf-body-background">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <div class="bc-bg-grid" id="bg-grid"></div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <label class="bc-label bc-label-block">Boss Graphic</label>
-      <div class="bc-graphic-grid" id="graphic-grid"></div>
-      <div id="identity-status-msg" class="bc-status-msg"></div>
-    </section>
-
-    <!-- ── Section 3: Background / Scene ──────────────────────────────────── -->
-    <section class="bc-section" id="sec-background">
-      <h2 class="bc-section-title">🌄 Scene</h2>
-      <div class="bc-bg-grid" id="bg-grid"></div>
-    </section>
-
-    <!-- ── Section 4: Boss Speech ──────────────────────────────────────────── -->
-    <section class="bc-section" id="sec-speech">
-      <h2 class="bc-section-title">💬 Speech</h2>
-      <textarea id="inp-speech" class="bc-textarea" maxlength="300"
-        placeholder="What does the boss say? (max 300 chars)"></textarea>
-      <div class="bc-char-count"><span id="speech-chars">0</span> / 300</div>
-      <div class="bc-btn-row">
-        <button class="btn-control bc-btn-speak" id="btn-speak">🗣 Speak</button>
-        <button class="btn-control bc-btn-clear" id="btn-clear-speech">✕ Clear</button>
+    <!-- ── Shelf 4: Boss Speech ───────────────────────────────────────────── -->
+    <div class="shelf" id="shelf-speech">
+      <div class="shelf-header" onclick="toggleShelf('speech')">
+        <div class="shelf-icon">💬</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Speech</div>
+          <div class="shelf-desc">What the boss says</div>
+        </div>
+        <div class="shelf-chevron">▼</div>
       </div>
-      <div id="speech-status-msg" class="bc-status-msg"></div>
-    </section>
+      <div class="shelf-body" id="shelf-body-speech">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <textarea id="inp-speech" class="bc-textarea" maxlength="300"
+              placeholder="What does the boss say? (max 300 chars)"></textarea>
+            <div class="bc-char-count"><span id="speech-chars">0</span> / 300</div>
+            <div class="bc-btn-row">
+              <button class="btn-control bc-btn-speak" id="btn-speak">🗣 Speak</button>
+              <button class="btn-control bc-btn-clear" id="btn-clear-speech">✕ Clear</button>
+            </div>
+            <div id="speech-status-msg" class="bc-status-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- ── Section 5: Abilities ────────────────────────────────────────────── -->
-    <section class="bc-section bc-section-wide" id="sec-abilities">
-      <h2 class="bc-section-title">⚡ Abilities</h2>
-      <p class="bc-hint-block">Assign abilities per creature via the <code>BOSS_ABILITIES</code> array in this file.
-        Auto-fire runs while this tab is open; closing the tab stops the timer.</p>
-      <div class="bc-ability-grid" id="ability-grid"></div>
-    </section>
+    <!-- ── Shelf 5: Abilities ─────────────────────────────────────────────── -->
+    <div class="shelf" id="shelf-abilities">
+      <div class="shelf-header" onclick="toggleShelf('abilities')">
+        <div class="shelf-icon">⚡</div>
+        <div class="shelf-text">
+          <div class="shelf-name">Abilities</div>
+          <div class="shelf-desc">Trigger or auto-fire actions</div>
+        </div>
+        <span class="shelf-active-dot" title="Auto-fire active"></span>
+        <div class="shelf-chevron">▼</div>
+      </div>
+      <div class="shelf-body" id="shelf-body-abilities">
+        <div class="shelf-body-inner">
+          <div class="shelf-content">
+            <p class="bc-hint-block">Assign abilities per creature via the <code>BOSS_ABILITIES</code> array in this file.
+              Auto-fire runs while this tab is open; closing the tab stops the timer.</p>
+            <div class="bc-ability-grid" id="ability-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </main>
 </div>
+
+<!-- Plain script: toggleShelf must be on window BEFORE any click happens.
+     type="module" scripts are deferred — inline onclick attrs can't reach them. -->
+<script>
+(function() {
+  var KEY = 'bosscontrol_shelf_state';
+  function load()  { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
+
+  window.toggleShelf = function(id) {
+    var el = document.getElementById('shelf-' + id);
+    if (!el) return;
+    var open = el.classList.toggle('open');
+    var state = load();
+    state[id] = open;
+    save(state);
+  };
+
+  window._restoreShelfState = function() {
+    var state = load();
+    Object.keys(state).forEach(function(id) {
+      if (!state[id]) return;
+      var el = document.getElementById('shelf-' + id);
+      if (el) el.classList.add('open');
+    });
+  };
+})();
+</script>
 
 <script type="module">
   import { initializeApp, getApps }
@@ -408,6 +498,11 @@
   // Tracks active auto-fire intervals per ability id
   const autoFireTimers     = {};
   const autoFireCountdowns = {};
+  let   _activeAutoFire    = 0;
+  function _refreshAbilitiesActiveDot() {
+    const sh = document.getElementById('shelf-abilities');
+    if (sh) sh.classList.toggle('has-active', _activeAutoFire > 0);
+  }
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
   onAuthStateChanged(_auth, async user => {
@@ -444,6 +539,7 @@
     wireSpeechControls();
     wireCharCount();
     buildAbilityGrid();
+    if (window._restoreShelfState) window._restoreShelfState();
   }
 
   // ── Encounter controls ─────────────────────────────────────────────────────
@@ -663,6 +759,9 @@
   function startAutoFire(ab) {
     if (autoFireTimers[ab.id]) return; // already running
 
+    _activeAutoFire++;
+    _refreshAbilitiesActiveDot();
+
     const valEl  = document.getElementById(`interval-val-${ab.id}`);
     const unitEl = document.getElementById(`interval-unit-${ab.id}`);
     const secs   = Math.max(1, parseInt(valEl.value, 10) || 30) * (unitEl.value === 'm' ? 60 : 1);
@@ -693,8 +792,13 @@
   }
 
   function stopAutoFire(id) {
+    const wasRunning = !!autoFireTimers[id];
     if (autoFireTimers[id])     { clearInterval(autoFireTimers[id]);     delete autoFireTimers[id]; }
     if (autoFireCountdowns[id]) { clearInterval(autoFireCountdowns[id]); delete autoFireCountdowns[id]; }
+    if (wasRunning) {
+      _activeAutoFire = Math.max(0, _activeAutoFire - 1);
+      _refreshAbilitiesActiveDot();
+    }
     const triggerBtn  = document.getElementById(`trigger-btn-${id}`);
     const stopBtn     = document.getElementById(`stop-btn-${id}`);
     const countdownEl = document.getElementById(`countdown-${id}`);
