@@ -148,6 +148,12 @@ body.poll-page {
   min-height: 100dvh;
 }
 
+body.bosscontrol-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
 body.qrcode-page {
   display: flex;
   flex-direction: column;
@@ -2103,6 +2109,8 @@ body.profile-page {
    - Two subtle gold radial glows (top-left, bottom-right)
    - An SVG fractal-noise texture overlay (paper grain)
    ================================================ */
+
+.hidden { display: none !important; }
 
 body {
   font-family: 'Lato', sans-serif;
