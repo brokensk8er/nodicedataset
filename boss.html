@@ -117,12 +117,116 @@
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0);    }
     }
+
+    /* ── Boss speech bubble ─────────────────────────────────────── */
+    .boss-speech-bubble {
+      position: absolute;
+      top: 12%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
+      background: rgba(20, 10, 0, 0.93);
+      border: 2px solid rgba(218, 165, 32, 0.7);
+      border-radius: 16px;
+      padding: 16px 28px;
+      max-width: min(500px, 80vw);
+      color: #f5e6c8;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(16px, 2.4vw, 24px);
+      text-align: center;
+      line-height: 1.45;
+      box-shadow: 0 0 40px rgba(218, 165, 32, 0.22), inset 0 0 20px rgba(0,0,0,0.5);
+      pointer-events: none;
+      animation: speech-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+    /* Bubble tail pointing down (toward dragon) */
+    .boss-speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 9px solid transparent;
+      border-top-color: rgba(218, 165, 32, 0.7);
+    }
+    .boss-speech-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 7px solid transparent;
+      border-top-color: rgba(20, 10, 0, 0.93);
+      z-index: 1;
+    }
+    @keyframes speech-in {
+      from { opacity: 0; transform: translateX(-50%) scale(0.85) translateY(8px); }
+      to   { opacity: 1; transform: translateX(-50%) scale(1)    translateY(0); }
+    }
+
+    /* ── Boss name display ──────────────────────────────────────── */
+    .boss-name-display {
+      position: absolute;
+      top: 62%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      color: #daa520;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(218, 165, 32, 0.55), 0 2px 8px rgba(0,0,0,0.9);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ── Ability flash overlay ──────────────────────────────────── */
+    .boss-ability-flash {
+      position: absolute;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      animation: ability-bg 2.5s ease-out forwards;
+    }
+    @keyframes ability-bg {
+      0%   { background: rgba(255, 100, 0, 0.28); }
+      25%  { background: rgba(255, 100, 0, 0.08); }
+      100% { background: rgba(0,   0,   0, 0); }
+    }
+    .ability-flash-name {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(36px, 7vw, 68px);
+      font-weight: 700;
+      color: #ffcc00;
+      text-shadow: 0 0 40px rgba(255, 165, 0, 0.9), 0 0 80px rgba(255, 80, 0, 0.5);
+      text-align: center;
+      padding: 0 1rem;
+      animation: ability-text 2.5s ease-out forwards;
+    }
+    @keyframes ability-text {
+      0%   { opacity: 1;   transform: scale(1.3); }
+      20%  { opacity: 1;   transform: scale(1);   }
+      70%  { opacity: 0.8; transform: scale(1);   }
+      100% { opacity: 0;   transform: scale(0.9); }
+    }
   </style>
 </head>
 <body>
 
 <div id="gameContainer"></div>
 <div id="vignette"></div>
+
+<!-- Boss control display elements (driven by bosscontrol.html via Firebase) -->
+<div id="boss-speech" class="boss-speech-bubble hidden">
+  <span id="boss-speech-text"></span>
+</div>
+<div id="boss-name-display" class="boss-name-display hidden"></div>
+<div id="ability-flash" class="boss-ability-flash hidden">
+  <div class="ability-flash-name"></div>
+</div>
 
 <div class="ui-overlay" id="uiOverlay">
   <div>Players: <span id="playerCount">0</span></div>
@@ -166,13 +270,26 @@
   // ── Scene state ───────────────────────────────────────────────
   let phaserScene;
   let dragonSprite;
+  let dragonImageSprite = null;
+  let bgMain, bgLava;
   let healthBarBg, healthBarGhost, healthBarFg, healthBarBorder;
   let healthBarText;
-  let dragonMaxHP       = 500;
-  let dragonCurrentHP   = 500;
-  let dragonGhostHP     = 500;   // lags behind for ghost bar
-  let animationQueue    = [];
-  let isAnimating       = false;
+  let dragonMaxHP         = 500;
+  let dragonCurrentHP     = 500;
+  let dragonGhostHP       = 500;   // lags behind for ghost bar
+  let animationQueue      = [];
+  let isAnimating         = false;
+  let lastAbilityTimestamp = 0;
+
+  // ── Background theme palettes ─────────────────────────────────
+  const BACKGROUND_THEMES = {
+    cave:    { top: 0x0a0015, bot: 0x1a0500, lava: 0xcc2200, lavaAlpha: 0.55 },
+    volcano: { top: 0x1a0000, bot: 0x3a0400, lava: 0xff4400, lavaAlpha: 0.70 },
+    ice:     { top: 0x000820, bot: 0x001428, lava: 0x0088cc, lavaAlpha: 0.30 },
+    ruins:   { top: 0x0e0a00, bot: 0x1a1200, lava: 0x886600, lavaAlpha: 0.40 },
+    abyss:   { top: 0x000008, bot: 0x080015, lava: 0x6600cc, lavaAlpha: 0.40 },
+    forest:  { top: 0x000800, bot: 0x001a00, lava: 0x003300, lavaAlpha: 0.30 },
+  };
 
   // ── Phaser setup ──────────────────────────────────────────────
   const config = {
@@ -203,18 +320,18 @@
 
   // ── Background: cave gradient via Graphics ────────────────────
   function buildBackground(cx, cy) {
-    const g   = phaserScene.add.graphics();
-    const w   = phaserScene.scale.width;
-    const h   = phaserScene.scale.height;
+    bgMain = phaserScene.add.graphics();
+    const w = phaserScene.scale.width;
+    const h = phaserScene.scale.height;
 
     // deep cave gradient: dark purple top → near-black mid → lava glow bottom
-    g.fillGradientStyle(0x0a0015, 0x0a0015, 0x1a0500, 0x1a0500, 1);
-    g.fillRect(0, 0, w, h);
+    bgMain.fillGradientStyle(0x0a0015, 0x0a0015, 0x1a0500, 0x1a0500, 1);
+    bgMain.fillRect(0, 0, w, h);
 
     // lava glow at the very bottom
-    const lavaGrad = phaserScene.add.graphics();
-    lavaGrad.fillGradientStyle(0x000000, 0x000000, 0xcc2200, 0xcc2200, 0, 0, 0.55, 0.55);
-    lavaGrad.fillRect(0, h * 0.72, w, h * 0.28);
+    bgLava = phaserScene.add.graphics();
+    bgLava.fillGradientStyle(0x000000, 0x000000, 0xcc2200, 0xcc2200, 0, 0, 0.55, 0.55);
+    bgLava.fillRect(0, h * 0.72, w, h * 0.28);
 
     // subtle rock silhouette stalactites at top
     const rocks = phaserScene.add.graphics();
@@ -394,8 +511,74 @@
     });
   }
 
+  // ── Boss control helpers (driven by bosscontrol.html) ────────
+
+  function setBackground(themeKey) {
+    if (!phaserScene || !bgMain || !bgLava) return;
+    const theme = BACKGROUND_THEMES[themeKey] ?? BACKGROUND_THEMES.cave;
+    const w = phaserScene.scale.width;
+    const h = phaserScene.scale.height;
+    bgMain.clear();
+    bgMain.fillGradientStyle(theme.top, theme.top, theme.bot, theme.bot, 1);
+    bgMain.fillRect(0, 0, w, h);
+    bgLava.clear();
+    bgLava.fillGradientStyle(0x000000, 0x000000, theme.lava, theme.lava,
+      0, 0, theme.lavaAlpha, theme.lavaAlpha);
+    bgLava.fillRect(0, h * 0.72, w, h * 0.28);
+  }
+
+  function setDragonGraphic(g) {
+    if (!phaserScene || !dragonSprite) return;
+    if (g.type === 'emoji') {
+      dragonSprite.setText(g.value);
+      dragonSprite.setVisible(true);
+      if (dragonImageSprite) { dragonImageSprite.destroy(); dragonImageSprite = null; }
+    } else {
+      // dynamically load image asset at runtime
+      const key = 'boss-img-' + Date.now();
+      phaserScene.load.image(key, g.value);
+      phaserScene.load.once('complete', () => {
+        if (dragonImageSprite) dragonImageSprite.destroy();
+        dragonImageSprite = phaserScene.add.image(dragonSprite.x, dragonSprite.y, key)
+          .setOrigin(0.5, 0.5).setDepth(2).setDisplaySize(200, 200);
+        dragonSprite.setVisible(false);
+      });
+      phaserScene.load.start();
+    }
+  }
+
+  function showSpeech(text) {
+    const bubble = document.getElementById('boss-speech');
+    const textEl = document.getElementById('boss-speech-text');
+    textEl.textContent = text;
+    bubble.classList.remove('hidden');
+    // Restart entrance animation on each new message
+    bubble.style.animation = 'none';
+    void bubble.offsetWidth;
+    bubble.style.animation = '';
+  }
+
+  function clearSpeech() {
+    document.getElementById('boss-speech').classList.add('hidden');
+  }
+
+  function triggerAbilityFlash(name) {
+    const overlay = document.getElementById('ability-flash');
+    const nameEl  = overlay.querySelector('.ability-flash-name');
+    nameEl.textContent = '⚡ ' + name;
+    overlay.classList.remove('hidden');
+    // Restart animations
+    overlay.style.animation = 'none';
+    nameEl.style.animation  = 'none';
+    void overlay.offsetWidth;
+    overlay.style.animation = '';
+    nameEl.style.animation  = '';
+    setTimeout(() => overlay.classList.add('hidden'), 2500);
+  }
+
   // ── Firebase listener ─────────────────────────────────────────
   function listenToDragonState() {
+    // Main encounter data (HP, players, defeat)
     onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}`), snapshot => {
       if (!snapshot.exists()) { console.warn('Encounter not found'); return; }
 
@@ -418,6 +601,43 @@
       }
 
       if (newHP <= 0 && encounter.status === 'defeated') showVictoryScreen();
+    });
+
+    // Boss name
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/name`), snap => {
+      const el = document.getElementById('boss-name-display');
+      if (snap.exists() && snap.val()) {
+        el.textContent = snap.val();
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
+
+    // Boss graphic
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/graphic`), snap => {
+      if (snap.exists()) setDragonGraphic(snap.val());
+    });
+
+    // Background / scene
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/background`), snap => {
+      if (snap.exists()) setBackground(snap.val());
+    });
+
+    // Speech bubble
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/speech`), snap => {
+      if (snap.exists() && snap.val()?.text) showSpeech(snap.val().text);
+      else clearSpeech();
+    });
+
+    // Ability activation — deduplicate by timestamp to avoid replay on reconnect
+    onValue(ref(_db, `${DB_ROOT}/${ENCOUNTER_ID}/ability`), snap => {
+      if (!snap.exists()) return;
+      const { name, timestamp } = snap.val();
+      if (timestamp && timestamp !== lastAbilityTimestamp) {
+        lastAbilityTimestamp = timestamp;
+        triggerAbilityFlash(name);
+      }
     });
   }
 
