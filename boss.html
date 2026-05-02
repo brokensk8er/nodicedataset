@@ -15,6 +15,12 @@
       font-family: 'Cinzel', serif;
       overflow: hidden;
       background: #0a0005;
+      /* pixel art background support — properties are no-ops until backgroundImage is set */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
     #gameContainer {
       width: 100vw;
@@ -268,7 +274,7 @@
   let phaserScene;
   let dragonSprite;
   let dragonImageSprite = null;
-  let bgMain, bgLava;
+  let bgMain, bgLava, bgRocks, bgStals;
   let healthBarBg, healthBarGhost, healthBarFg, healthBarBorder;
   let healthBarText;
   let dragonMaxHP         = 500;
@@ -277,6 +283,20 @@
   let animationQueue      = [];
   let isAnimating         = false;
   let lastAbilityTimestamp = 0;
+
+  // ── Pixel art backgrounds ──────────────────────────────────────
+  // To add a new background:
+  //   1. Drop a PNG into the backgrounds/ folder
+  //   2. Add an entry here and in BOSS_BACKGROUNDS in bosscontrol.html
+  // scale: 'cover' fills the screen (may crop); 'contain' letterboxes (shows full image)
+  const PIXEL_BACKGROUNDS = {
+    // 'ff6-narshe':  { src: 'backgrounds/ff6-narshe.png',   scale: 'cover' },
+    // 'ff6-opera':   { src: 'backgrounds/ff6-opera.png',    scale: 'cover' },
+    // 'ff4-baron':   { src: 'backgrounds/ff4-baron.png',    scale: 'cover' },
+    // 'ct-zeal':     { src: 'backgrounds/ct-zeal.png',      scale: 'cover' },
+    // 'ct-magus':    { src: 'backgrounds/ct-magus.png',     scale: 'cover' },
+    // 'loz-dungeon': { src: 'backgrounds/loz-dungeon.png',  scale: 'cover' },
+  };
 
   // ── Background theme palettes ─────────────────────────────────
   const BACKGROUND_THEMES = {
@@ -331,8 +351,8 @@
     bgLava.fillRect(0, h * 0.72, w, h * 0.28);
 
     // subtle rock silhouette stalactites at top
-    const rocks = phaserScene.add.graphics();
-    rocks.fillStyle(0x050008, 1);
+    bgRocks = phaserScene.add.graphics();
+    bgRocks.fillStyle(0x050008, 1);
     const stalactites = [
       [0, 0, 80, 0, 40, 90],
       [60, 0, 160, 0, 110, 120],
@@ -342,12 +362,12 @@
       [w - 30, 0, w + 10, 0, w - 10, 60],
     ];
     stalactites.forEach(([x1, y1, x2, y2, tx, ty]) => {
-      rocks.fillTriangle(x1, y1, x2, y2, tx, ty);
+      bgRocks.fillTriangle(x1, y1, x2, y2, tx, ty);
     });
 
     // stalagmites at bottom
-    const stals = phaserScene.add.graphics();
-    stals.fillStyle(0x050008, 1);
+    bgStals = phaserScene.add.graphics();
+    bgStals.fillStyle(0x050008, 1);
     const stalagmites = [
       [0, h, 70, h, 35, h - 80],
       [55, h, 130, h, 92, h - 110],
@@ -355,7 +375,7 @@
       [w - 60, h, w, h, w - 30, h - 70],
     ];
     stalagmites.forEach(([x1, y1, x2, y2, tx, ty]) => {
-      stals.fillTriangle(x1, y1, x2, y2, tx, ty);
+      bgStals.fillTriangle(x1, y1, x2, y2, tx, ty);
     });
   }
 
@@ -512,6 +532,27 @@
 
   function setBackground(themeKey) {
     if (!phaserScene || !bgMain || !bgLava) return;
+
+    // ── Pixel art background ──────────────────────────────────────
+    if (PIXEL_BACKGROUNDS[themeKey]) {
+      const pb = PIXEL_BACKGROUNDS[themeKey];
+      document.body.style.backgroundImage = `url('${pb.src}')`;
+      document.body.style.backgroundSize  = pb.scale ?? 'cover';
+      bgMain.setVisible(false);
+      bgLava.setVisible(false);
+      bgRocks?.setVisible(false);
+      bgStals?.setVisible(false);
+      return;
+    }
+
+    // ── Gradient background ───────────────────────────────────────
+    document.body.style.backgroundImage = '';
+    document.body.style.backgroundSize  = '';
+    bgMain.setVisible(true);
+    bgLava.setVisible(true);
+    bgRocks?.setVisible(true);
+    bgStals?.setVisible(true);
+
     const theme = BACKGROUND_THEMES[themeKey] ?? BACKGROUND_THEMES.cave;
     const w = phaserScene.scale.width;
     const h = phaserScene.scale.height;

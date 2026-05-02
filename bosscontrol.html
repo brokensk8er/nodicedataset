@@ -153,6 +153,8 @@
     .bc-bg-ruins   { background: linear-gradient(135deg, #1a1200, #3d3000); }
     .bc-bg-abyss   { background: linear-gradient(135deg, #000510, #0d0020); }
     .bc-bg-forest  { background: linear-gradient(135deg, #001a00, #0a2e0a); }
+    .bc-bg-pixel   { background: #111; background-size: cover; background-position: center;
+                     image-rendering: pixelated; image-rendering: crisp-edges; }
 
     /* ── Speech textarea ── */
     .bc-textarea {
@@ -463,12 +465,23 @@
   ];
 
   const BOSS_BACKGROUNDS = [
-    { id: 'cave',    label: '🕳️ Cave',           desc: 'Lava-lit cavern (default)' },
-    { id: 'volcano', label: '🌋 Volcano',         desc: 'Erupting volcanic lair' },
-    { id: 'ice',     label: '❄️ Ice Cavern',      desc: 'Frozen underground chamber' },
-    { id: 'ruins',   label: '🏛️ Ruined Temple',  desc: 'Ancient crumbling temple' },
-    { id: 'abyss',   label: '🌌 Abyss',           desc: 'Endless void and starfield' },
-    { id: 'forest',  label: '🌲 Dark Forest',     desc: 'Twisted ancient woods at night' },
+    // ── Procedural gradient themes ─────────────────────────────────────────────
+    { id: 'cave',    type: 'gradient', label: '🕳️ Cave',          desc: 'Lava-lit cavern (default)' },
+    { id: 'volcano', type: 'gradient', label: '🌋 Volcano',        desc: 'Erupting volcanic lair' },
+    { id: 'ice',     type: 'gradient', label: '❄️ Ice Cavern',     desc: 'Frozen underground chamber' },
+    { id: 'ruins',   type: 'gradient', label: '🏛️ Ruined Temple', desc: 'Ancient crumbling temple' },
+    { id: 'abyss',   type: 'gradient', label: '🌌 Abyss',          desc: 'Endless void and starfield' },
+    { id: 'forest',  type: 'gradient', label: '🌲 Dark Forest',    desc: 'Twisted ancient woods at night' },
+
+    // ── Pixel art backgrounds ──────────────────────────────────────────────────
+    // To add: drop a PNG into backgrounds/, uncomment (or add) an entry here,
+    // and add a matching entry in PIXEL_BACKGROUNDS in boss.html.
+    // { id: 'ff6-narshe',  type: 'pixel', label: 'Narshe',       desc: 'Final Fantasy VI',        src: 'backgrounds/ff6-narshe.png'  },
+    // { id: 'ff6-opera',   type: 'pixel', label: 'Opera House',  desc: 'Final Fantasy VI',        src: 'backgrounds/ff6-opera.png'   },
+    // { id: 'ff4-baron',   type: 'pixel', label: 'Baron Castle', desc: 'Final Fantasy IV',        src: 'backgrounds/ff4-baron.png'   },
+    // { id: 'ct-zeal',     type: 'pixel', label: 'Zeal Palace',  desc: 'Chrono Trigger',          src: 'backgrounds/ct-zeal.png'     },
+    // { id: 'ct-magus',    type: 'pixel', label: 'Magus Lair',   desc: 'Chrono Trigger',          src: 'backgrounds/ct-magus.png'    },
+    // { id: 'loz-dungeon', type: 'pixel', label: 'Dungeon',      desc: 'Legend of Zelda',         src: 'backgrounds/loz-dungeon.png' },
   ];
 
   // Ability bank — define and assign per creature by editing this array.
@@ -647,7 +660,12 @@
     const grid = document.getElementById('bg-grid');
     BOSS_BACKGROUNDS.forEach(bg => {
       const btn = document.createElement('button');
-      btn.className = `bc-bg-btn bc-bg-${bg.id}`;
+      if (bg.type === 'pixel') {
+        btn.className = 'bc-bg-btn bc-bg-pixel';
+        btn.style.backgroundImage = `url('${bg.src}')`;
+      } else {
+        btn.className = `bc-bg-btn bc-bg-${bg.id}`;
+      }
       btn.dataset.id = bg.id;
       btn.innerHTML = `<span class="bc-bg-label">${bg.label}</span><span class="bc-bg-desc">${bg.desc}</span>`;
 
